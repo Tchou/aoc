@@ -1,0 +1,16 @@
+(* -*- tuareg -*- *)
+let names =
+  let cwd = Sys.getcwd () in
+  let elems = Sys.readdir cwd in
+  elems
+  |> Array.to_list
+  |> List.filter (Sys.is_directory)
+
+let () = Format.asprintf {|
+(library
+ (name solutions)
+ (library_flags -linkall)
+ (ocamlopt_flags (-inline 100))
+ (libraries unix utils %a))
+  |} Format.(pp_print_list ~pp_sep:pp_print_space pp_print_string) names
+  |> Jbuild_plugin.V1.send

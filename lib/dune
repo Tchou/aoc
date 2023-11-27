@@ -1,0 +1,4 @@
+(library
+ (name utils)
+ (ocamlopt_flags (-inline 100))
+ (libraries unix))
