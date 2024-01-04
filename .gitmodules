@@ -1,0 +1,3 @@
+[submodule "aoc_private"]
+	path = aoc_private
+	url = git@github.com:Tchou/aoc_private.git
