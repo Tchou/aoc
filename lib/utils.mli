@@ -217,13 +217,45 @@ module Time : sig
 end
 
 (** Math functions. *)
-module Math : sig
-  val gcd : int -> int -> int
+module type Num = sig
+  type t
+  val to_string : t -> string
+  val zero : t
+  val succ : t -> t
+  val neg : t -> t
+  val add : t -> t -> t
+  val sub : t -> t -> t
+  val mul : t -> t -> t
+  val rem : t -> t -> t
+  val div : t -> t -> t
+  val compare : t -> t -> int
+end
+module type MATH = sig
+  type t
+  val gcd : t -> t  -> t 
   (** [gcd a b] computes the greatest common divisor of [a] and [b]. *)
 
-  val lcm : int -> int -> int
+  val egcd : t  -> t  -> t  * t  * t 
+  (** [egcd a b] returns [(x, y , gcd(a, b))] where [x] and [y] are
+      coefficients of Bézout's identity : ax+by = gcd(a, b)
+  *)
+
+  val lcm : t  -> t  -> t 
   (** [lcm a b] computes the lowest common multiple of [a] and [b]. *)
+
+  val solve_crt : (t  * t ) list -> t  * t 
+  (**
+     [solve_crt [(a1, n1); ... ; (ak, nk)]] solves the system of equations:
+     x ≡ a1  (mod n1)
+     ...
+     x ≡ ak  (mod nk)
+     The resulst is a pair [(a, n)] such that x = [a] + k[n].
+     @raise Failure if the input list is empty
+     @raise Invalid_argument if some of the [ni] are not co-prime
+  *)
 end
+module MathGen (N : Num) : MATH with type t = N.t
+module Math : MATH with type t = int
 
 (** Implementation of a graph structure, aka poorman's OCamlGraph. *)
 module type GRAPH = sig
