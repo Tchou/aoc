@@ -28,7 +28,24 @@ struct
     loop 0
 
 end
+module Hashtbl =
+struct
+  include Hashtbl
+  let update tbl key f =
+    match f (find_opt tbl key) with
+      Some v -> replace tbl key v
+    | None -> remove tbl key
 
+
+  module Make (H : HashedType) = struct
+    include Make(H)
+    let update tbl key f =
+      match f (find_opt tbl key) with
+        Some v -> replace tbl key v
+      | None -> remove tbl key
+  end
+
+end
 module Syntax =
 struct
 

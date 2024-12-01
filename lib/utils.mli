@@ -15,13 +15,28 @@ sig
       but does not allocate intermediary strings.
   *)
 end
+module Hashtbl :
+sig
+  include module type of Hashtbl
+  module Make (H : HashedType) : sig
+    include Hashtbl.S with type key = H.t
+    val update : 'a t -> key -> ('a option -> 'a option) -> unit
+  end
+  val update : ('a,'b) t -> 'a -> ('b option -> 'b option) -> unit
 
+end
 module Syntax :
 sig
   val (<<) : 'a -> 'a * 'a -> bool
   val (<=<) : 'a -> 'a * 'a -> bool
   val (<<=) : 'a -> 'a * 'a -> bool
   val (<=<=) : 'a -> 'a * 'a -> bool
+  (** Interval comparison:
+      - [x << (a, b)] is [x < a && x < b]
+      - [x <=< (a, b)] is [x <= a && x < b]
+      - [x <<= (a, b)] is [x < a && x <= b]
+      - [x <=<= (a, b)] is [x <= a && x <= b]
+  *)
 
   val ( .$[] ) : Bytes.t -> int -> char
   (** [b.$[i]] is [Bytes.get b i]. *)

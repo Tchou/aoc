@@ -1,0 +1,14 @@
+(* -*- tuareg -*- *)
+let name = Filename.basename (Sys.getcwd ())
+let () = Printf.sprintf {|
+(library
+ (name %s)
+ (library_flags -linkall)
+ (ocamlopt_flags (-inline 100))
+ (libraries unix utils))
+
+ (rule 
+   (target name.ml)
+   (action (write-file %%{target} "let mk s = Utils.Solution.register_prefix \"%s\"; \"%s\", s ")) 
+  )
+  |} name name name |> Jbuild_plugin.V1.send

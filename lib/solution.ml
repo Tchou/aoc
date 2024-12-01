@@ -19,7 +19,10 @@ let register_mod ?variant (module X : S) =
   register (String.concat " " ([prefix; name; "1" ] @ variant)) X.solve_part1;
   register (String.concat " " ([prefix; name; "2" ] @ variant)) X.solve_part2
 
-let default_prefix = "aoc2023"
+let default_prefix =
+  let open Unix in
+  let tm = gmtime (gettimeofday ()) in
+  "aoc" ^ (string_of_int (1900 + tm.tm_year))
 
 let exec s =
   match get s with
