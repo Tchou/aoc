@@ -17,18 +17,18 @@ struct
         List.fold_left2 (fun acc i1 i2 ->
             acc + (abs (i1 - i2)))
           0
-          (List.sort compare l1) 
+          (List.sort compare l1)
           (List.sort compare l2))
 
   let solve_part2 () =
     mk_sol (fun l1 l2 ->
-        let count = Hashtbl.create 16 in
         let open Syntax in
+        let count = ~%[] in
         List.iter (fun i2 ->
             Hashtbl.update count i2
               (fun c -> Some (1 + (c or 0)))) l2;
         List.fold_left
-          (Agg.Left.sum (fun i -> i * ((Hashtbl.find_opt count i) or 0))) 0 l1
+          (Agg.Left.sum (fun i -> i * (count.%?{i} or 0))) 0 l1
       )
 end
 
