@@ -97,10 +97,11 @@ struct
     List.fold_left (fun acc (l1, l2) ->
         let i1 = l_to_int l1 in
         let i2 = l_to_int l2 in
-        Printf.printf "mul(%d,%d)\n" i1 i2;
         acc + (i1 * i2)
       ) 0 l
 
+  let compute l =
+    List.fold_left (Agg.Left.sum (fun (i1, i2) -> l_to_int i1 * l_to_int i2 )) 0 l
 
   let simplify_text txt =
     let s = String.to_seq txt in

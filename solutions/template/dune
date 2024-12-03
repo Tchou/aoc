@@ -1,5 +1,11 @@
 (* -*- tuareg -*- *)
 let name = Filename.basename (Sys.getcwd ())
+let mllex = Sys.readdir (Sys.getcwd ())
+  |> Array.to_list
+  |> List.filter_map (Filename.chop_suffix_opt ~suffix:".mll")
+  |> String.concat " "
+let mllex = if mllex = "" then "" else
+   "(ocamllex " ^ mllex ^ ")"
 let () = Printf.sprintf {|
 (library
  (name %s)
@@ -7,8 +13,10 @@ let () = Printf.sprintf {|
  (ocamlopt_flags (-inline 100))
  (libraries unix utils zarith))
 
+%s
+
  (rule
    (target name.ml)
    (action (write-file %%{target} "let mk s = Utils.Solution.register_prefix \"%s\"; \"%s\", s "))
   )
-  |} name name name |> Jbuild_plugin.V1.send
+  |} name mllex name name |> Jbuild_plugin.V1.send
