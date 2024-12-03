@@ -3,7 +3,7 @@ let digit = ['0'-'9']['0'-'9']?['0'-'9']?
 
 rule mul_reader acc = parse
   | "mul(" (digit as d1) ',' (digit as d2) ')' {
-        mul_reader ((int_of_string d1, int_of_string d2)::acc) lexbuf }
+        mul_reader ((int_of_string d1 * int_of_string d2) + acc) lexbuf }
   | eof { acc }
   | _  { mul_reader acc lexbuf }
 
@@ -22,11 +22,8 @@ struct
 
   let read_input () =
     let b = Buffer.create 16 in
-    Input.fold_chars (fun acc c -> Buffer.add_char acc c; acc) b
-    |> Buffer.contents
-
-  let compute =
-    List.fold_left (Agg.Left.sum (fun (i1, i2) -> i1 * i2 )) 0
+    Input.fold_chars (fun () -> Buffer.add_char b) ();
+    Buffer.contents b
 
   let solve part2 =
   let s = read_input () in
@@ -36,8 +33,7 @@ struct
           Lexing.from_string s
           else lb
   in
-  let l = mul_reader [] lb in
-  let n = compute l in
+  let n = mul_reader 0 lb in
   Ansi.(printf "%a%d%a\n" fg green n clear color)
 
   let solve_part1 () = solve false
