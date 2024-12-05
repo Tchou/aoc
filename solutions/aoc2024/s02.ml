@@ -22,7 +22,7 @@ struct
   let is_safe l = match l with
       [] | [ _ ] -> true
     | i1 :: i2 :: _ ->
-      i1 <> i2 &&  well_ordered (i1 - i2) l
+      i1 <> i2 && well_ordered (i1 - i2) l
 
   let is_mostly_safe l =
     let rec loop l acc =
@@ -32,12 +32,11 @@ struct
         if is_safe (List.rev_append acc ll) then true
         else loop ll (e::acc)
     in
-    is_safe l && loop l []
+    is_safe l || loop l []
 
   let solve f =
     let l = read_input () in
-    let n = List.fold_left (fun acc l ->
-        if f l then 1+acc else acc) 0 l
+    let n = List.fold_left (Agg.Left.sum (fun l -> int_of_bool (f l) )) 0 l
     in
     Ansi.(printf "%a%d%a\n" fg green n clear color)
 

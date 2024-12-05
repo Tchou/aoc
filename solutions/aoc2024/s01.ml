@@ -24,11 +24,10 @@ struct
     mk_sol (fun l1 l2 ->
         let open Syntax in
         let count = ~%[] in
-        List.iter (fun i2 ->
-            Hashtbl.update count i2
-              (fun c -> Some (1 + (c or 0)))) l2;
-        List.fold_left
-          (Agg.Left.sum (fun i -> i * (count.%?{i} or 0))) 0 l1
+        l2 |> List.iter (fun i2 ->
+            count.%{i2}<- 1+ (count.%?{i2} or 0));
+        l1 |> List.fold_left
+          (Agg.Left.sum (fun i -> i * (count.%?{i} or 0))) 0
       )
 end
 

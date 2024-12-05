@@ -1,3 +1,6 @@
+val int_of_bool : bool -> int
+(** [int_of_bool b] is [1] if [b] is [true] and [0] if [b] is [false]*)
+
 module String :
 sig
   include module type of String
@@ -60,7 +63,7 @@ sig
   (** [h %- k] is [Hashtbl.remove h k]. *)
 
   val ( ~% ) : ('a* 'b) list -> ('a, 'b) Hashtbl.t
-  (** [ ~% l] is creates a fresh Hashtbl.t from the bindings listed in [l]. *)
+  (** [ ~% l] creates a fresh Hashtbl.t from the bindings listed in [l]. *)
 
   val ( or ) : 'a option -> 'a -> 'a
   (** [ a or b ] is [v] if [a] is [Some v] and [b] if [a] is [None]. *)

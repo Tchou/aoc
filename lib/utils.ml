@@ -1,3 +1,5 @@
+let int_of_bool = function false -> 0 | true -> 1
+
 module String =
 struct
   include Stdlib.String
