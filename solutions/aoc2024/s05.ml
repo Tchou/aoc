@@ -26,25 +26,15 @@ struct
     in
     loop update
 
-  let bubble_sort order update = (* Bubble sort ! *)
-    let swaped = ref false in
-    let rec swap l =
-      match l with
-        [] | [ _ ] -> l, false
-      | u1 :: (u2 :: ll) ->
-        if order %? (u1, u2) then
-          let l, s = swap (u2::ll) in u1::l, s
-        else
-          u2::u1::ll, true
-    in
-    let rec loop l acc =
-      let l, swaped = swap l in
-      if swaped then loop l (acc+1)
-      else l, acc
-    in
-    match loop update 1 with
-      _, 1 -> None
-    | l, _ -> Some l
+  let sort order update =
+    match is_sorted order update with
+      Some _ -> None
+    | None ->
+      let compare x y =
+        if x = y then 0
+        else if order %? (x, y) then -1 else 1
+      in
+      Some (List.sort compare update)
 
   let sum order sort updates =
     List.fold_left (Agg.Left.sum (fun l ->
@@ -58,7 +48,7 @@ struct
     Ansi.(printf "%a%d%a\n" fg green n clear color)
 
   let solve_part1 () = solve is_sorted
-  let solve_part2 () = solve bubble_sort
+  let solve_part2 () = solve sort
 end
 
 let () = Solution.register_mod (module S)
