@@ -60,18 +60,18 @@ struct
     in
     loop 0 (-1) x y
 
-  let is_cycle stone start grid non_cycle_cache =
+  let is_cycle stone start grid =
     let stone_x, stone_y = stone in
     let x, y = start in
     let visited = ~%[] in
     let rec loop i j x y =
       let key = x, y, i, j in
-      if visited %? key then true
+      if visited %? key then true, visited
       else begin
         visited.%{key} <- ();
         let xi = x + i in
         let yj = y + j in
-        if not (valid grid xi yj) then false
+        if not (valid grid xi yj) then false, visited
         else
           let i, j, x, y =
             if (xi = stone_x && yj = stone_y) || grid.(yj).[xi] = '#' then
@@ -86,12 +86,21 @@ struct
   let count_cycles start grid =
     let h = Array.length grid in
     let w = String.length grid.(0) in
-    let non_cycle_cache = ~%[] in
+    let clean_path = ~%[] in
+    let dirs = [ (1, 0); (-1, 0); (0, 1);(0, -1)] in
     let count = ref 0 in
     for y = 0 to h - 1 do
       for x = 0 to w - 1 do
-        if grid.(y).[x] = '.' && is_cycle (x, y) start grid non_cycle_cache then
-          incr count
+        if grid.(y).[x] = '.' && (
+            Hashtbl.length clean_path = 0 ||
+            List.exists (fun (i, j) -> clean_path %? (x, y, i, j)) dirs)
+        then
+          let b, path = is_cycle (x, y) start grid in
+          if b then incr count
+          else if Hashtbl.length clean_path = 0 &&
+                  not (List.exists (fun (i, j) -> clean_path %? (x, y, i, j)) dirs)
+          then
+            Hashtbl.iter (fun key () -> clean_path.%{key} <- ()) path
       done;
     done;
     !count
