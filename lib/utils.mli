@@ -201,11 +201,11 @@ sig
 end
 module Agg : sig
   module type T = sig
-    type ('a, 'b) t
-    val min : ('a, 'b) t
-    val max : ('a, 'b) t
-    val sum : (int, 'b) t
-    val prod : (int, 'b) t
+    type ('acc, 'elem) t
+    val min : ('acc, 'elem) t
+    val max : ('acc, 'elem) t
+    val sum : (int, 'elem) t
+    val prod : (int, 'elem) t
   end
   module Left : T with type ('a, 'b) t = ('b -> 'a) -> 'a -> 'b -> 'a
   module Right : T with type ('a, 'b) t = ('b -> 'a) -> 'b -> 'a -> 'a
@@ -217,6 +217,27 @@ module Time : sig
   (** [time f arg] computes [f args] and returns a pair
       of its result and its execution time, in miliseconds.
   *)
+end
+
+(** Combinatorics *)
+module Comb : sig
+  val perm : 'a list -> 'a list Seq.t
+  (** [perm l] returns the sequence of all permutations of [l]. *)
+
+  val powerset : 'a list -> 'a list Seq.t
+  (** [powerset l] returns the sequence of all sublists of [l]. *)
+
+  val pairs : ?sym:bool -> ?refl:bool -> 'a list -> ('a * 'a) Seq.t
+  (** [pairs ~sym ~refl l] returns the Cartesian product of [l]
+      with itself. Let [x] and [y] be elements of [l]:
+      - if [sym] is [true] (default) then both [x,y] and [y,x] are in the result
+      - if [refl] is [true] (default) then [x, x] is in the result
+        Note that [x, x] may still occur if [x] appears several times in [l]
+  *)
+
+  val product : 'a list -> 'b list -> ('a * 'b) Seq.t
+  (** [product l1 l2] return the sequences of pairs in the
+      Cartesian product of [l1] and [l2]. *)
 end
 
 (** Math functions. *)
@@ -233,20 +254,21 @@ module type Num = sig
   val div : t -> t -> t
   val compare : t -> t -> int
 end
+
 module type MATH = sig
   type t
-  val gcd : t -> t  -> t 
+  val gcd : t -> t  -> t
   (** [gcd a b] computes the greatest common divisor of [a] and [b]. *)
 
-  val egcd : t  -> t  -> t  * t  * t 
+  val egcd : t  -> t  -> t  * t  * t
   (** [egcd a b] returns [(x, y , gcd(a, b))] where [x] and [y] are
       coefficients of Bézout's identity : ax+by = gcd(a, b)
   *)
 
-  val lcm : t  -> t  -> t 
+  val lcm : t  -> t  -> t
   (** [lcm a b] computes the lowest common multiple of [a] and [b]. *)
 
-  val solve_crt : (t  * t ) list -> t  * t 
+  val solve_crt : (t  * t ) list -> t  * t
   (**
      [solve_crt [(a1, n1); ... ; (ak, nk)]] solves the system of equations:
      x ≡ a1  (mod n1)
@@ -256,6 +278,9 @@ module type MATH = sig
      @raise Failure if the input list is empty
      @raise Invalid_argument if some of the [ni] are not co-prime
   *)
+
+  val pow : t -> int -> t
+  (** [pow a b] returns the [b]th power of [a]. *)
 end
 module MathGen (N : Num) : MATH with type t = N.t
 module Math : MATH with type t = int

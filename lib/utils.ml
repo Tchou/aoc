@@ -105,6 +105,7 @@ module type MATH = sig
   val egcd : t  -> t  -> t  * t  * t
   val lcm : t  -> t  -> t
   val solve_crt : (t  * t ) list -> t  * t
+  val pow : t -> int -> t
 
 end
 module MathGen (N : Num) : MATH with type t = N.t = struct
@@ -149,6 +150,15 @@ module MathGen (N : Num) : MATH with type t = N.t = struct
       let k2 = N.(mul a2 (mul m1 n1)) in
       let a12 = N.add k1 k2 in
       solve_crt ((a12, n12) :: ll)
+
+  let pow a b =
+    let rec loop r x e =
+      if e = 0 then r
+      else if e land 1 = 1 then
+        loop (N.mul r x) (N.mul x  x) (e lsr 1)
+      else loop r (N.mul x  x) (e lsr 1)
+    in
+    loop one a b
 end
 
 module Math = MathGen(Int)
@@ -292,20 +302,20 @@ module Ansi = struct
 end
 module Agg = struct
   module type T = sig
-    type ('a, 'b) t
-    val min : ('a, 'b) t
-    val max : ('a, 'b) t
-    val sum : (int, 'b) t
-    val prod : (int, 'b) t
+    type ('acc, 'elem) t
+    val min : ('acc, 'elem) t
+    val max : ('acc, 'elem) t
+    val sum : (int, 'elem) t
+    val prod : (int, 'elem) t
   end
   module Left =
   struct
     type ('a, 'b) t = ('b -> 'a) -> 'a -> 'b -> 'a
     let agg op f acc x = op acc (f x)
-    let min acc = agg min acc
-    let max acc = agg max acc
-    let sum acc = agg (+) acc
-    let prod acc = agg ( * ) acc
+    let min f = agg min f
+    let max f = agg max f
+    let sum f = agg (+) f
+    let prod f = agg ( * ) f
   end
   module Right =
   struct
@@ -330,6 +340,54 @@ struct
 
   let min_list f l = agg_list min f l
   let max_list f l = agg_list max f l
+end
+module Comb =
+struct
+  let rec insert e l =
+    match l with
+      [] -> Seq.cons [e] Seq.empty
+    | x :: ll ->
+      Seq.cons (e::l) (Seq.map (fun ll -> x :: ll) (fun () -> insert e ll ()))
+
+
+  let rec perm l =
+    match l with
+      [] -> Seq.cons [] Seq.empty
+    | e :: ll ->
+      Seq.flat_map (insert e) (perm ll)
+
+  let rec powerset l =
+    match l with
+      [] -> Seq.cons [] Seq.empty
+    | x :: ll ->
+      let s = powerset ll in
+      Seq.append s (Seq.map (fun l -> x :: l) s)
+
+
+  let pairs ?(sym=true) ?(refl=true) l =
+    let rec loop1 l1 acc =
+      match l1 with
+        [] -> Seq.empty
+      | x1 :: ll1 ->
+        let rec loop2 l2 =
+          match l2 with
+            [] -> Seq.empty
+          | x2 :: ll2 ->
+            Seq.cons (x1, x2) (loop2 ll2)
+        in
+        let s1 = match sym, refl with
+            true, true -> loop2 l
+          | true, false -> loop2 (List.rev_append acc ll1)
+          | false, true -> loop2 l1
+          | false, false -> loop2 ll1
+        in
+        Seq.append s1 (loop1 ll1 (x1::acc))
+    in
+    loop1 l []
+
+  let product col1 col2 =
+    Seq.product (List.to_seq col1) (List.to_seq col2)
+
 end
 
 module type GRAPH = sig
