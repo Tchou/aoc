@@ -23,13 +23,12 @@ struct
       done;
     done;
     let unique_pos = ~%[] in
-    Hashtbl.iter (fun _ l ->
-        let coords = Array.of_list l in
-        for i = 0 to Array.length coords - 1 do
-          let x1, y1 = coords.(i) in
-          for j = i+1 to Array.length coords - 1 do
+    map
+    |> Hashtbl.iter (fun _ coords ->
+        coords
+        |> Comb.pairs ~sym:false ~refl:false
+        |> Seq.iter (fun ((x1, y1),(x2, y2)) ->
             for r = rmin to rmax do
-              let x2, y2 = coords.(j) in
               let dx = x2 - x1 in
               let dy = y2 - y1 in
               let p1 = (x1 - r * dx, y1 - r * dy) in
@@ -37,9 +36,7 @@ struct
               if valid p1 then unique_pos.%{p1} <- ();
               if valid p2 then unique_pos.%{p2} <- ();
             done
-          done
-        done
-      ) map;
+          ));
     Hashtbl.length unique_pos
   let solve resonnance =
     let grid = read_input () in
