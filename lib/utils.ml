@@ -287,8 +287,8 @@ module Ansi = struct
   let magenta = 35
   let cyan = 36
   let white = 37
-
-  let screen = "2J"
+  let cursor = "1;1H"
+  let screen  = "2J"
   let line = "2K"
   let color = "0m"
   let clear fmt s = if is_a_tty fmt then Format.fprintf fmt "\x1b[%s" s
@@ -402,16 +402,30 @@ module GraphAlgo (Graph : GRAPH) = struct
   open Syntax
 
   module Pqueue = struct
-    include Set.Make (struct
-        type t = int * Graph.v
+    type t = E | T of int * (int * Graph.v) * t * t
+    let rank = function E -> 0 | T (r,_,_,_) -> r
+    let make x a b =
+      let ra = rank a and rb = rank b in
+      if ra < rb then T (ra + 1, x, b, a) else T (rb + 1, x, a, b)
 
-        let compare (p1, v1) (p2, v2) =
-          if p1 == p2 then compare v1 v2
-          else if p1 < p2 then -1 else 1
-      end)
-    let remove_min s =
-      let e = min_elt s in
-      e, remove e s
+    let empty = E
+    let cmp (p1, v1) (p2, v2) =
+      if p1 == p2 then v1 <= v2
+      else p1 < p2
+    let is_empty = function E -> true | T _ -> false
+    let rec merge h1 h2 =
+      match h1,h2 with
+      | E, h | h, E -> h
+      | T (_,x,a1,b1), T (_,y,a2,b2) ->
+        if cmp x y then make x a1 (merge b1 h2) else make y a2 (merge h1 b2)
+
+    let add x h = merge (T (1, x, E, E)) h
+    let singleton x = T(1,x, E,E)
+    let min = function E -> failwith "Pqueue.empty" | T (_,x,_,_) -> x
+
+    let remove_min = function
+      | E -> failwith "Pqueue.remove_min"
+      | T (_,x,a,b) -> x, merge a b
   end
 
   let path_length dist t last =
@@ -474,9 +488,8 @@ module GraphAlgo (Graph : GRAPH) = struct
     let prev = ~%[] in
     let dist = ~%[] in
     let global_dist = ~%[] in
-    let get_dist v = dist.%?{v} or max_int in
+    let get_dist v = try dist.%{v} with Not_found -> max_int in
     let add_dist d1 d2 = if d1 == max_int || d2 == max_int then max_int else d1+d2 in
-    let queue = ref Pqueue.empty in
     let () =
       dist.%{start} <- 0
     in
@@ -548,3 +561,4 @@ struct
 end
 
 module Solution = Solution
+module Grid = Grid

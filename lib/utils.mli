@@ -171,6 +171,7 @@ module Ansi : sig
   val line : dev
   val color : dev
   val screen : dev
+  val cursor : dev
 
   val bg : Format.formatter -> color -> unit
   val fg : Format.formatter -> color -> unit
@@ -311,8 +312,11 @@ module GraphAlgo (Graph : GRAPH) : sig
       from [src] to all other vertices of [targets]. The result is given
       as a table [tbl] from vertices [v] to pairs [d, path] where
       [d] is the distance from [src] to [v] and [path] is the
-      set sequence of vertices of length [d] to follow to
+      set sequence of vertices of cost [d] to follow to
       reach [v] from [src].
+      If given, [h] is a heuristic function (as in the A* algorithm)
+      If [first] is true (default to false) the algorithm stops at the
+      first found target.
   *)
 
   val floyd_warshall : Graph.t -> (Graph.v * Graph.v, int) Hashtbl.t
@@ -351,3 +355,5 @@ module Interval : sig
 
 end
 module Solution : module type of Solution
+
+module Grid : module type of Grid

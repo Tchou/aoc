@@ -3,25 +3,16 @@ open Syntax
 module S =
 struct
   let name = Name.mk "s08"
-  let read_input () =
-    Input.fold_lines (fun acc line -> line :: acc) []
-    |> List.rev
-    |> Array.of_list
+  module G = Grid.StringGrid
 
   let count_antinodes resonnance grid =
-    let h = Array.length grid in
-    let w = String.length grid.(0) in
-    let rmin,rmax = if resonnance then 0, max h w else 1,1 in
-    let valid (x, y) =
-      x >= 0 && y >= 0 && x < w && y < w
-    in
+    let h = G.height grid in
+    let w = G.width grid in
+    let rmin, rmax = if resonnance then 0, max h w else 1, 1 in
     let map = ~%[] in
-    for j = 0 to h - 1 do
-      for i = 0 to w - 1 do
-        let c = grid.(j).[i] in
-        if c <> '.' then map.%{c} <- (i,j)::(map.%?{c} or [])
-      done;
-    done;
+    G.iter (fun pos c ->
+        if c <> '.' then map.%{c} <- pos::(map.%?{c} or [])
+      ) grid;
     let unique_pos = ~%[] in
     map
     |> Hashtbl.iter (fun _ coords ->
@@ -33,16 +24,15 @@ struct
               let dy = y2 - y1 in
               let p1 = (x1 - r * dx, y1 - r * dy) in
               let p2 = (x2 + r * dx, y2 + r * dy) in
-              if valid p1 then unique_pos.%{p1} <- ();
-              if valid p2 then unique_pos.%{p2} <- ();
+              if G.inside grid p1 then unique_pos.%{p1} <- ();
+              if G.inside grid p2 then unique_pos.%{p2} <- ();
             done
           ));
     Hashtbl.length unique_pos
   let solve resonnance =
-    let grid = read_input () in
+    let grid = G.read() in
     let n = count_antinodes resonnance grid in
     Ansi.(printf "%a%d%a\n" fg green n clear color)
-
 
   let solve_part1 () = solve false
   let solve_part2 () = solve true

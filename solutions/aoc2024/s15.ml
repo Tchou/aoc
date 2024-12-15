@@ -3,95 +3,73 @@ open Syntax
 module S =
 struct
   let name = Name.mk "s15"
-
-  let sym_dirs = [ '>',(1,0); '<',(-1, 0); 'v',(0, 1); '^',(0, -1)]
-  let dirs = List.map snd sym_dirs
-  let (+!) (a, b) (c, d) = (a+c, b+d)
-  let (-!) (a, b) (c, d) = (a-c, b-d)
-
-  let valid grid x y =
-    x >= 0 && y >= 0 &&
-    let h = Array.length grid in
-    y < h &&
-    let w = Bytes.length grid.(0) in
-    x < w
-
+  module G = Grid.BytesGrid
+  let sym_dirs = Grid.[ '>',east; '<',west; 'v',south; '^',north]
+  let pretty_dirs = Grid.[ north,"▲"; east, "▶"; west , "◀"; south, "▼"  ]
   let read_input () =
-    let y0 = ref (-1) in
-    let x0 = ref (-1) in
-    let grid =
-      InputUntil.fold_lines (fun acc s ->
-          if s = "" then (false,acc) else begin
-            if (!x0 < 0 ) then begin
-              incr y0;
-              x0 := (String.index_opt s '@') or (-1);
-            end;
-            true, (Bytes.of_string s)::acc
-          end) []
-      |> List.rev
-      |> Array.of_list
-    in
+    let grid = G.read_until (function "" -> true | _ -> false) in
+    let start = G.find (function '@' -> true | _ -> false) grid in
     let moves =
       Input.fold_lines (fun acc s ->
           String.fold_left (fun a c -> (List.assoc c sym_dirs)::a) acc s
         ) []
       |> List.rev
     in
-    grid, (!x0, !y0), moves
+    grid, start, moves
 
-  let move1 grid ((x, y) as p) ((i, j) as d) =
-    let rec loop ((x, y) as r) =
-      match grid.(y).$[x] with
+  let move1 grid p d =
+    let open Grid in
+    let rec loop r =
+      match grid.G.!(r) with
         '#' -> raise Exit
       | 'O' | '@' |']'| '['->
-        let xi, yj = r +! d in
-        loop (xi, yj);
-        grid.(yj).$[xi] <- grid.(y).$[x]
+        let nr = r +! d in
+        loop nr;
+        grid.G.!(nr) <- grid.G.!(r)
       | '.' -> ()
       | _ -> assert false
     in
-    try loop p; grid.(y).$[x] <- '.'; p +! d
+    try loop p; grid.G.!(p) <- '.'; p +! d
     with Exit -> p
 
-  let pp_grid fmt grid =
-    Array.iter (fun b ->
+  let pp_grid robot fmt grid =
+    G.iter_lines (fun b ->
         Bytes.iter (fun c ->
             let open Ansi in
-            let f, color =
+            let s, f, color =
               match c with
-                '.' -> fg, white
-              | '#' -> fg, white
-              | 'O' | ']' | '[' -> bfg, yellow
-              | '@' -> bbg, cyan
+                '.' -> "·", bfg, black
+              | '#' -> "🮖", fg, red
+              | 'O' -> "■", bfg, yellow
+              | '[' -> "🟨", fg, white
+              | ']' -> "", fg, white
+              | '@' -> robot, bfg, cyan
               | _ -> assert false
-            in printf "%a%c%a" f color c clear Ansi.color
+            in printf "%a%s" f color s
           ) b;
         Ansi.(printf "%a\n%!" clear color)) grid
   let animate = ref false
-  let empty_screen () = for _ = 0 to 100 do Ansi.printf "\n%!" done
+  let fill_screen () = for _ = 0 to 100 do Ansi.printf "\n%!" done
+
   let simulate move grid p0 moves =
-    if !animate then Ansi.(empty_screen ();
-                           printf "%a\n%!START:\n%a\n--\n%!" clear screen pp_grid grid;
-                           Unix.sleepf 0.25);
+    let open Ansi in
+    if !animate then fill_screen ();
     List.fold_left (fun p d ->
         let p' = move grid p d in
-        if !animate then Ansi.(empty_screen ();
-                               printf "%a\n%!MOVE (%d, %d):\n%a\n--\n%!" clear screen (fst d) (snd d) pp_grid grid;
-                               Unix.sleepf 0.25);
+        if !animate then begin
+          printf "%a%!MOVE %s:\n%a\n%!" clear cursor (List.assoc d pretty_dirs) (pp_grid (List.assoc d pretty_dirs)) grid;
+          Unix.sleepf 0.125
+        end;
         p'
       ) p0 moves
 
   let score grid =
     let total = ref 0 in
-    for y = 0 to Array.length grid - 1 do
-      for x = 0 to Bytes.length grid.(y) - 1 do
-        let c = grid.(y).$[x] in
+    G.iter (fun (x, y) c ->
         if c = 'O' || c = '[' then
           total := !total + 100 * y + x
-      done
-    done;
+      ) grid;
     !total
-
   let solve_part1 () =
     let grid, start, moves = read_input () in
     let _ = simulate move1 grid start moves in
@@ -100,8 +78,7 @@ struct
 
 
   let zoom grid =
-    grid
-    |> Array.map (fun b ->
+    grid |> G.map_lines (fun b ->
         b
         |> Bytes.to_seq
         |> List.of_seq
@@ -130,10 +107,11 @@ struct
 
   let vmove grid ((x, y) as p) d =
     assert (fst d = 0);
+    let open Grid in
     let rec loop ((x, y) as r) = (* collec the box to be moved, x,y is the left coordinate of a box*)
       (* look at destination *)
       let xd, yd = r +! d in
-      match grid.(yd).$[xd],grid.(yd).$[xd + 1] with
+      match grid.G.!(xd, yd),grid.G.!(xd + 1, yd) with
       | '#', _ | _, '#' -> (* we are blocked *) raise Exit
       | ('[' as c1 , ']')
       | (']' as c1 , '.')
@@ -147,8 +125,8 @@ struct
       | _ -> [(x,y),(xd,yd)]
     in
     let xb, yb = p +! d in
-    match grid.(yb).$[xb] with
-      '.' -> grid.(yb).$[xb] <- '@'; grid.(y).$[x] <- '.'; (xb, yb)
+    match grid.G.!(xb, yb) with
+      '.' -> grid.G.!(xb, yb) <- '@'; grid.G.!(x, y) <- '.'; (xb, yb)
     |'#' -> x, y
     | '[' | ']' as c -> begin
         try
@@ -156,21 +134,15 @@ struct
           let comp = if snd d < 0 then comp_top else comp_down in
           let to_move = List.sort_uniq comp to_move in
           List.iter (fun ((x, y), (xd, yd)) ->
-              grid.(yd).$[xd] <- '[';
-              grid.(yd).$[xd+1] <- ']';
-              grid.(y).$[x] <- '.';
-              grid.(y).$[x+1] <- '.';
+              grid.G.!(xd, yd) <- '[';
+              grid.G.!(xd+1, yd) <- ']';
+              grid.G.!(x, y) <- '.';
+              grid.G.!(x+1, y) <- '.';
             )  to_move;
-          if c = '[' then begin
-            grid.(yb).$[xb] <- '@';
-            grid.(yb).$[xb+1] <- '.';
-          end else begin
-            grid.(yb).$[xb] <- '@';
-            grid.(yb).$[xb-1] <- '.';
-          end;
-          grid.(y).$[x]<- '.';
+          grid.G.!(xb, yb) <- '@';
+          grid.G.!(xb + (if c = '[' then 1 else -1), yb) <- '.';
+          grid.G.!(x, y) <- '.';
           (xb, yb)
-
         with Exit -> (x, y)
       end
     | _ -> assert false
@@ -184,7 +156,6 @@ struct
     let grid, (x0, y0), moves = read_input () in
     let grid = zoom grid in
     let _ = simulate move2 grid (x0*2, y0) moves in
-    let () = Ansi.(printf "%a\n%!" pp_grid grid) in
     let n = score grid in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 

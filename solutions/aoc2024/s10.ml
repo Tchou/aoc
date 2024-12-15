@@ -3,28 +3,18 @@ open Syntax
 module S =
 struct
   let name = Name.mk "s10"
-  let read_input () =
-    Input.fold_lines (fun acc s -> s::acc) []
-    |> List.rev
-    |> Array.of_list
-
-  let dirs = [ (0,1); (1,0); (0,-1); (-1, 0)]
-  let (+!) (a, b) (c, d) = (a+c, b+d)
+  module G = Grid.StringGrid
 
   let succc c = Char.chr (1 + Char.code c)
 
-  let valid w h (x,y) = x >= 0 && x < w && y >= 0 && y < h
-
   let iter_paths_from f grid p =
-    let w = String.length grid.(0) in
-    let h = Array.length grid in
     let rec loop p c =
       if c = '9' then f p else
-        dirs
+        Grid.dir4
         |> List.iter (fun d ->
-            let (xn, yn) as np = p +! d in
+            let np = Grid.(p +! d) in
             let nc = succc c in
-            if valid w h np && grid.(yn).[xn] = nc then
+            if G.inside grid np && grid.G.!(np) = nc then
               loop np nc)
     in loop p '0'
 
@@ -38,19 +28,12 @@ struct
             incr count), (fun () -> Hashtbl.clear seen)
       else (fun _ -> incr count), ignore
     in
-    let w = String.length grid.(0) in
-    let h = Array.length grid in
-    for y = 0 to h - 1 do
-      for x = 0 to w - 1 do
-        if grid.(y).[x] = '0' then
-          iter_paths_from f grid (x, y);
-        reset ()
-      done;
-    done;
+    grid
+    |> G.iter (fun pos c -> if c = '0' then iter_paths_from f grid pos; reset ());
     !count
 
   let solve uniq =
-    let grid = read_input () in
+    let grid = G.read () in
     let n = count_paths uniq grid in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 

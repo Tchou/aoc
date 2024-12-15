@@ -93,7 +93,7 @@ let () = Solution.register_mod (module S)
 let () =
   let module SD =
   struct
-    include S let solve_part2 () = solve_part2_gen true 
+    include S let solve_part2 () = solve_part2_gen true
   end
   in
   Solution.register_mod ~variant:"display" (module SD)
