@@ -1,6 +1,5 @@
 open Utils
-open Syntax
-module S =
+module Make (V : sig val animate : float val random : bool val skip : int end) =
 struct
   let name = Name.mk "s15"
   module G = Grid.BytesGrid
@@ -48,18 +47,20 @@ struct
             in printf "%a%s" f color s
           ) b;
         Ansi.(printf "%a\n%!" clear color)) grid
-  let animate = ref false
   let fill_screen () = for _ = 0 to 100 do Ansi.printf "\n%!" done
 
+  let do_animate = Float.is_finite V.animate
+  let count = ref 0
   let simulate move grid p0 moves =
     let open Ansi in
-    if !animate then fill_screen ();
-    List.fold_left (fun p d ->
+    if do_animate then fill_screen ();
+    Seq.fold_left (fun p d ->
         let p' = move grid p d in
-        if !animate then begin
+        if do_animate && !count mod (V.skip+1) = 0 then begin
           printf "%a%!MOVE %s:\n%a\n%!" clear cursor (List.assoc d pretty_dirs) (pp_grid (List.assoc d pretty_dirs)) grid;
-          Unix.sleepf 0.125
+          if V.animate >= 0.0 then Unix.sleepf V.animate
         end;
+        incr count;
         p'
       ) p0 moves
 
@@ -70,9 +71,14 @@ struct
           total := !total + 100 * y + x
       ) grid;
     !total
+
+  let random_dir () = Some (List.nth Grid.dir4 (Random.int 4))
+
   let solve_part1 () =
     let grid, start, moves = read_input () in
-    let _ = simulate move1 grid start moves in
+    let _ = simulate move1 grid start
+        (if V.random then Seq.of_dispenser random_dir else List.to_seq moves)
+    in
     let n = score grid in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
@@ -155,19 +161,19 @@ struct
   let solve_part2 () =
     let grid, (x0, y0), moves = read_input () in
     let grid = zoom grid in
-    let _ = simulate move2 grid (x0*2, y0) moves in
+    let _ = simulate move2 grid (x0*2, y0)
+        (if V.random then Seq.of_dispenser random_dir else List.to_seq moves)
+    in
     let n = score grid in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
 end
+module S = Make (struct let animate = Float.nan let skip = 0 let random = false end)
+module SA = Make (struct let animate = 0.1 let skip = 0 let random = false end)
+module SR = Make (struct let animate = 0.1 let skip = 0 let random = true end)
+module SRS = Make (struct let animate = -0.5 let skip = 5000 let random = true end)
 
 let () = Solution.register_mod (module S)
-module SA = struct
-  let name = S.name
-  let solve_part1 () = S.animate := true;
-    S.solve_part1 ()
-  let solve_part2 () = S.animate := true;
-    S.solve_part2 ()
-end
-let () = Solution.register_mod  (module S)
 let () = Solution.register_mod ~variant:"animate" (module SA)
+let () = Solution.register_mod ~variant:"animate_random" (module SR)
+let () = Solution.register_mod ~variant:"animate_random_skip" (module SRS)
