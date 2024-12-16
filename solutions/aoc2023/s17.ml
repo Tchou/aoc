@@ -104,7 +104,7 @@ struct
     in
     let len,p =
       Hashtbl.fold (fun _  (c, p) (acc,accp) ->
-          if c < acc then (c, p) else (acc,accp)
+          if c < acc then (c, (List.flatten p)) else (acc,accp)
         ) final_map (max_int,[])
     in
     if A.show then begin

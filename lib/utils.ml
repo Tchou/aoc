@@ -430,7 +430,9 @@ module GraphAlgo (Graph : GRAPH) = struct
   module Pqueue =
   struct
     type t = { mutable size : int; mutable data : (int * Graph.v) array }
-
+    (* Taken (with minor modifications) from:
+       https://usr.lmf.cnrs.fr/~jcf/ftp/ocaml/ds/binary_heap.ml.html
+    *)
     let create n =
       if n <= 0 then invalid_arg "create";
       { size = -n; data = [||] }
@@ -539,6 +541,7 @@ module GraphAlgo (Graph : GRAPH) = struct
          done);
     rdist
 
+  (*
   let rebuild_path t last =
     let rec loop acc_p v =
       match t.%{v} with
@@ -549,6 +552,61 @@ module GraphAlgo (Graph : GRAPH) = struct
 
 
   let dijkstra ?(h=(fun (_:Graph.v) -> 0)) ?(first=false) g start targets =
+    let finish_map = ~%(List.map (fun v -> (v, (max_int, []))) targets) in
+    (*  let todo = ref (Hashtbl.length finish_map) in *)
+    let prev = ~%[] in
+    let dist = ~%[] in
+    let get_dist v = try dist.%{v} with Not_found -> max_int in
+     let add_dist d1 d2 =
+      let d = d1+d2 in
+      if d < 0 then max_int else d
+     in
+     let queue = Pqueue.create 16 in
+     let () =
+      dist.%{start} <- 0;
+      Pqueue.add queue (0, start);
+     in
+
+     let rec loop todo =
+      if Pqueue.is_empty queue then finish_map
+      else
+        let _, u = Pqueue.remove_min queue in
+        if finish_map %? u && prev %? u then begin
+          let l = rebuild_path prev u in
+          finish_map.%{u} <- dist.%{u}, l;
+          let todo = todo - 1 in
+          if first || todo = 0 then finish_map
+          else loop_aux todo u
+        end
+        else loop_aux todo u
+     and loop_aux todo u =
+      Graph.iter_succ g u (fun (v, d) ->
+          let v_dist = get_dist v in
+          let alt = add_dist (get_dist u) d in
+          if alt < v_dist then begin
+            prev.%{v} <- u;
+            dist.%{v} <- alt;
+            Pqueue.add queue (alt + h v, v);
+          end);
+      loop todo
+     in
+     loop (Hashtbl.length finish_map)
+  *)
+  let rebuild_path2 t last =
+    let rec loop acc_p v =
+      match t.%{v} with
+      | lv ->
+        let n_acc = List.fold_left
+            (fun acc v -> List.fold_left (fun acc l -> (v::l)::acc) acc acc_p) [] lv
+        in
+        List.fold_left (fun acc v -> List.rev_append (loop n_acc v) acc) [] lv
+      | exception Not_found -> acc_p
+    in
+    loop [ [last] ] last
+
+
+
+  let dijkstra ?(h=(fun (_:Graph.v) -> 0)) ?(first=false) ?(all_path=false) g start targets =
     let finish_map = ~%(List.map (fun v -> (v, (max_int, []))) targets) in
     (*  let todo = ref (Hashtbl.length finish_map) in *)
     let prev = ~%[] in
@@ -569,7 +627,7 @@ module GraphAlgo (Graph : GRAPH) = struct
       else
         let _, u = Pqueue.remove_min queue in
         if finish_map %? u && prev %? u then begin
-          let l = rebuild_path prev u in
+          let l = rebuild_path2 prev u in
           finish_map.%{u} <- dist.%{u}, l;
           let todo = todo - 1 in
           if first || todo = 0 then finish_map
@@ -580,14 +638,21 @@ module GraphAlgo (Graph : GRAPH) = struct
       Graph.iter_succ g u (fun (v, d) ->
           let v_dist = get_dist v in
           let alt = add_dist (get_dist u) d in
-          if alt < v_dist then begin
-            prev.%{v} <- u;
+          if all_path && alt = v_dist then begin
+            let l = (prev.%?{v} or []) in
+            prev.%{v} <- if List.mem u l then l else u::l ;
+            dist.%{v} <- alt;
+            Pqueue.add queue (alt + h v, v);
+          end else if alt < v_dist then begin
+            prev.%{v} <- [u];
             dist.%{v} <- alt;
             Pqueue.add queue (alt + h v, v);
           end);
       loop todo
     in
     loop (Hashtbl.length finish_map)
+
+
 end
 
 (* from 2021 day 22... *)

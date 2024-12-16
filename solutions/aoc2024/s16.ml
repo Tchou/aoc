@@ -23,13 +23,22 @@ struct
   end
   module Alg = GraphAlgo(Gra)
 
-  let score grid start exit =
+  let score part2 grid start exit =
     let el = ref [] in
     G.iter4 (fun _ c d -> if c = '.' then el := (exit, Grid.opposite d) :: !el ) grid exit;
-    let map = Alg.dijkstra grid (start, Grid.east) !el in
-    Hashtbl.fold (fun _ (dist, _) acc -> min dist acc) map max_int
+    let all_path = part2 in
+    let map = Alg.dijkstra grid ~all_path (start, Grid.east) !el in
+    let all_positions = ~%[] in
+    if part2 then
+      map
+      |> Hashtbl.iter (fun _ (_, paths) ->
+          paths
+          |> List.iter (fun path ->
+              path |> List.iter (fun (v, _) -> all_positions.%{v} <- ())
+            ));
+    Hashtbl.fold (fun _ (dist, _) acc -> min dist acc) map max_int, Hashtbl.length all_positions
 
-  let explore grid start exit target =
+  (* let explore grid start exit target =
     let cache = ~%[] in
     let visited = ~%[] in
     let rec loop ((v, d) as p) dist path =
@@ -46,7 +55,7 @@ struct
     in
     loop (start, Grid.east) 0 [start];
     Hashtbl.length cache
-
+ *)
 
   let read_input () =
     let grid = G.read () in
@@ -55,16 +64,12 @@ struct
     grid, start, exit
   let solve_part1 () =
     let grid, start, exit = read_input () in
-    let n = score grid start exit in
+    let n,_ = score false grid start exit in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
-
-
   let solve_part2 () =
-
     let grid, start, exit = read_input () in
-    let dist = score grid start exit in
-    let n = explore grid start exit dist in
+    let _, n = score true grid start exit in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
 end

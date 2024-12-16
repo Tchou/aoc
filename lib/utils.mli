@@ -305,18 +305,20 @@ end
 
 module GraphAlgo (Graph : GRAPH) : sig
 
-  val dijkstra : ?h:(Graph.v -> int) -> ?first:bool -> Graph.t ->
-    Graph.v -> Graph.v list -> (Graph.v, int * Graph.v list) Hashtbl.t
+  val dijkstra : ?h:(Graph.v -> int) -> ?first:bool -> ?all_path:bool -> Graph.t ->
+    Graph.v -> Graph.v list -> (Graph.v, int * Graph.v list list) Hashtbl.t
 
   (** [dijsktra g src targets] computes the shortest path
       from [src] to all other vertices of [targets]. The result is given
-      as a table [tbl] from vertices [v] to pairs [d, path] where
-      [d] is the distance from [src] to [v] and [path] is the
-      set sequence of vertices of cost [d] to follow to
+      as a table [tbl] from vertices [v] to pairs [d, path_list ] where
+      [d] is the distance from [src] to [v] and [path_list] is the
+      list of sequence of vertices of cost [d] to follow to
       reach [v] from [src].
       If given, [h] is a heuristic function (as in the A* algorithm)
       If [first] is true (default to false) the algorithm stops at the
       first found target.
+      If [all_path] is true, (default to false) the algorithm tracks all the
+      equivalently good path to each exit (otherwise, [path_list] is a singleton)
   *)
 
   val floyd_warshall : Graph.t -> (Graph.v * Graph.v, int) Hashtbl.t
