@@ -33,18 +33,16 @@ struct
     let cache = ~%[] in
     let visited = ~%[] in
     let rec loop ((v, d) as p) dist path =
-      if v = exit then  List.iter (fun x -> cache.%{x}<-()) path
-      else
-        let dv = visited.%?{p} or max_int in
-        if dist <= dv then  begin
-          Gra.iter_succ
-            grid p
-            (fun (((v2, d2) as p2), n) ->
-               if dist + n <= target then
-                 loop (v2, d2) (dist + n) (v2::path);
-            );
-          visited.%{p} <- dist
-        end
+      if dist <= target then
+        if v = exit then List.iter (fun x -> cache.%{x}<-()) path
+        else
+          let dv = visited.%?{p} or max_int in
+          if dist <= dv then  begin
+            Gra.iter_succ
+              grid p
+              (fun (((v2, _) as p2), n) -> loop p2 (dist + n) (v2::path));
+            visited.%{p} <- dist
+          end
     in
     loop (start, Grid.east) 0 [start];
     Hashtbl.length cache
