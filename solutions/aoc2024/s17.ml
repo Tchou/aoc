@@ -89,8 +89,8 @@ struct
      Then we proceed downward accumulating the bits.
   *)
   let find_quine code state =
-    let len = String.length code in
-    let res = ref [] in
+    (* Won't work if the code does not shifts the input by 3 bits *)
+    assert (code.[0] = '2' && code.[1] = '4');
     let exception Found of int in
     let rec loop i acc =
       if i < 0 then raise (Found acc) else
