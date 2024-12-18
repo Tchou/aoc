@@ -9,6 +9,9 @@ sig
   type t
   (** A line *)
 
+  val init : int -> (int -> elt) -> t
+  (* Initialise a line *)
+
   val get : t -> int -> elt
   (** Returns the ith element of a line *)
 
@@ -19,7 +22,7 @@ sig
   (** Convert an (input) string into a line *)
 
   val map : (elt -> elt) -> t -> t
-
+  (** Apply f to each element, returning a new line *)
 end
 
 (** Types of read-write lines of a grid *)
@@ -80,6 +83,9 @@ sig
 
   type t
   (** Grid *)
+
+  val init : int -> (int -> line) -> t
+  (** Initializes a grid *)
 
   val width : t -> int
   val height : t -> int

@@ -1,10 +1,13 @@
 module type LINE = sig
   type elt
   type t
+  val init : int -> (int -> elt) -> t
+
   val get : t -> int -> elt
   val length : t -> int
   val of_string : string -> t
   val map : (elt -> elt) -> t -> t
+
 end
 
 module type RWLINE = sig
@@ -43,6 +46,7 @@ module type GRID = sig
   type elt
   type line
   type t
+  val init : int -> (int -> line) -> t
   val width : t -> int
   val height : t -> int
   val inside : t -> position -> bool
@@ -57,6 +61,7 @@ module type GRID = sig
   val read : ?input:in_channel -> unit -> t
   val find_from : (elt -> bool) -> t -> position -> position
   val find : (elt -> bool) -> t -> position
+
 end
 module type RWGRID = sig
   include GRID
@@ -141,6 +146,8 @@ module Make(L : LINE) = struct
     with Found p -> p
 
   let find f grid = find_from f grid (0, 0)
+
+  let init h = Array.init h
 end
 module MakeRW (L : RWLINE) = struct
   include Make (L)
