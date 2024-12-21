@@ -3,49 +3,50 @@ open Syntax
 module S =
 struct
   let name = Name.mk "s21"
-  (*
+  (**
 
-+---+---+---+
-| 7 | 8 | 9 |               +---+---+ +---+---+---+               | ^ | A | | 4
-| 5 | 6 |           +---+---+---+ +---+---+---+           | < | v | > | | 1 | 2
-| 3 |           +---+---+---+
-+---+---+---+
-    | 0 | A |
-    +---+---+
+                   +---+---+---+
+                   | 7 | 8 | 9 |               +---+---+
+                   +---+---+---+               | ^ | A |
+                   | 4 | 5 | 6 |           +---+---+---+
+                   +---+---+---+           | < | v | > |
+                   | 1 | 2 | 3 |           +---+---+---+
+                   +---+---+---+
+                       | 0 | A |
+                       +---+---+
 
-  level 3: <vA<AA>>^AvAA<^A>A        <v<A>>^AvA^A
-  <vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A level 2: v<<A>>^A                  <A>A
-  vA<^AA>A<vAAA>^A level 1: <A                        ^A   >^^AvvvA level 0: A0
-  2    9      A
+     level 3: <vA<AA>>^AvAA<^A>A        <v<A>>^AvA^A      <vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+     level 2: v<<A>>^A                  <A>A              vA<^AA>A<vAAA>^A
+     level 1: <A                        ^A *              >^^AvvvA
+     level 0: A0                         2                9      A
 
-A good strategy is to go down recursively and then iterate rather than computing
-the whole level before going down. One observation is that, when going down,
-e.g. from level 1, with "^A" to expand it to "<A>A" we always start with the
-robot arm on the 'A' key (since it's either in the initial position or it came
-back to press 'A' to validate the previous input) This allows us to just split
-the first input into sequences of pairs of symbols: from A to 0, from 0 to 2,
-from 2 to 9, from 9 to A. For each one, we transform, recursively the
-destination symbol, knowing that the previous button puched was the source
-symbol.
+     A good strategy is to go down recursively and then iterate rather than
+     computing the whole level before going down. One observation is that, when
+     going down, e.g. from level 1, with "^A" (marked * above) to expand it to
+     "<A>A" we always start with the robot arm on the 'A' key (since it's either
+     in the initial position or it came back to press 'A' to validate the
+     previous input) This allows us to just split the first input into sequences
+     of pairs of symbols: from A to 0, from 0 to 2, from 2 to 9, from 9 to A.
+     For each one, we transform, recursively the destination symbol, knowing
+     that the previous button puched was the source symbol.
 
-One caveat (found while testing the last code of the example) is that even
-though all the sequences that don't go above a hole have the same length (the
-Manatthan distance form src to dst), some of them generate shorter sequences at
-the following level. Rather than trying to guess the general rule (if there is
-one) we can just test while backtracking all the permutations of the initial
-move sequence
+     One caveat (found while testing the last code of the example) is that even
+     though all the sequences that don't go above a hole have the same length
+     (the Manatthan distance form src to dst), some of them generate shorter
+     sequences at the following level. Rather than trying to guess the general
+     rule (if there is one) we can just test while backtracking all the
+     permutations of the initial move sequence.
 
+     This solves part 1 pretty quickly (< 3 ms).
 
-This solves part 1 pretty quickly (< 3 ms).
+     For part 2, we add some memoization. But we also want to avoid representing the
+     *huge* sequence of moves that is computed as a string or a list of chars.
+     Instead we use a minimal implementation of ropes (with no rebalancing, which
+     does not hurt too much since at worse, the depth is 26). Ropes + memoization
+     allow us to cache the intermediary result and produce huge sequences of moves
+     where the common parts are shared in memory.
 
-For part 2, we add some memoization. But we also want to avoid representing the
-*huge* sequence of moves that is computed as a string or a list of chars.
-Instead we use a minimal implementation of ropes (with no reballancing, which
-does not hurt too much since at worse, the depth is 26). Ropes + memoization
-allow us to cache the intermediary result and produce huge sequences of moves
-where the common parts are shared in memory.
-
-This solves part 2 pretty quickly also (< 10 ms)
+     This solves part 2 pretty quickly also (< 10 ms)
   *)
 
   (* Coordinates on the numeric keypad *)
@@ -140,7 +141,7 @@ This solves part 2 pretty quickly also (< 10 ms)
 
     let of_list l = Leaf (List.length l, l)
 
-    (* The function below are only usefull for displaying the ropes *)
+    (* The functions below are only usefull for displaying the ropes *)
     let sub_list l i len =
       let rec loop l i len =
         if i = 0 then loop_keep l len
@@ -187,7 +188,7 @@ This solves part 2 pretty quickly also (< 10 ms)
       match lmap with
         []  -> seq
       | conf :: llmap ->
-        loop_apply level conf llmap Rope.( 'A' @: seq)
+        loop_apply level conf llmap Rope.('A' @: seq)
     and loop_apply level ((idx, hole, coords) as conf) lmap seq =
       match Rope.view seq with
         None -> Rope.empty
@@ -195,9 +196,7 @@ This solves part 2 pretty quickly also (< 10 ms)
         match Rope.view lseq with
           None -> Rope.empty
         | Some (dst, _) ->
-          let key = (level, hole, src, dst) in (* the hole value uniquely identify if we are
-                                                  on the first keypad
-                                               *)
+          let key = level, src, dst in
           let res = try memo.%{key} with
               Not_found ->
               let perm = (* Generate all permutations *)
