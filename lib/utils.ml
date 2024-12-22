@@ -268,14 +268,20 @@ module Ansi = struct
   let eprintf = Format.eprintf
   let fprintf = Format.fprintf
 
+  module FTable = Hashtbl.Make(struct type t = Format.formatter let hash = Hashtbl.hash let equal = (==) end)
+  let for_tty_table = FTable.create 16
+  let set_for_tty fmt = FTable.replace for_tty_table fmt ()
+  let unset_for_tty fmt = FTable.remove for_tty_table fmt
   let is_a_tty fmt =
     let open Format in
-    let ofmt = if fmt == std_formatter then Some Unix.stdout
-      else if fmt == err_formatter then Some Unix.stderr
-      else None
-    in match ofmt with
-      None -> false
-    | Some fd -> Unix.isatty fd
+    if FTable.mem for_tty_table fmt then true
+    else
+      let ofmt = if fmt == std_formatter then Some Unix.stdout
+        else if fmt == err_formatter then Some Unix.stderr
+        else None
+      in match ofmt with
+        None -> false
+      | Some fd -> Unix.isatty fd
 
   type color = int
   type dev = string
@@ -291,8 +297,8 @@ module Ansi = struct
   let screen  = "2J"
   let line = "2K"
   let color = "0m"
-  let clear fmt s = if is_a_tty fmt then Format.fprintf fmt "\x1b[%s" s
-  let pr fmt d = if is_a_tty fmt then Format.fprintf fmt "\x1b[%dm" d
+  let clear fmt s = (*if is_a_tty fmt then*) Format.fprintf fmt "\x1b[%s" s
+  let pr fmt d = (*if is_a_tty fmt then *)Format.fprintf fmt "\x1b[%dm" d
   let fg fmt d = pr fmt d
   let bg fmt d = pr fmt (d + 10)
   let bfg fmt d = pr fmt (d + 60)

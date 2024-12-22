@@ -273,7 +273,7 @@ let () = Solution.register_mod ~variant:"verbose" (module SV)
 
 module Animate =
 struct
-  type keypad = { keys : string array; mutable pos : Grid.position; title : string; input : char Queue.t  }
+  type keypad = { keys : string array; mutable pos : Grid.position; title : string }
 
   let num_pad () = {
     keys = [|
@@ -284,7 +284,6 @@ struct
     |];
     pos = (2, 3);
     title = "Robot 1 (depressurized)";
-    input = Queue.create ()
   }
   let dir_pad title = {
     keys = [|
@@ -293,52 +292,98 @@ struct
     |];
     pos = (2, 0);
     title;
-    input = Queue.create ()
   }
-  let display keypads code punch_level progress =
-    Ansi.(printf "%a%a\n\n   CODE: " clear screen clear cursor);
+
+  let str_len s =
+    let rec loop i s acc =
+      if i >= String.length s then acc
+      else let d = String.get_utf_8_uchar s i in
+        let b = Uchar.utf_decode_length d in
+        if b = 1 && Uchar.utf_decode_uchar d = (Uchar.of_char '\x1b') then
+          skip (i+1) s acc
+        else loop (i+b) s (acc+1)
+    and skip i s acc  =
+      if i >= String.length s then acc
+      else match s.[i] with
+        'm'|'K'|'J'|'H' -> loop (i+1) s acc
+           | _ -> skip (i+1) s acc
+    in
+    loop 0 s 0
+  let display ?(colbreaks=([],0)) keypads code punch_level progress count total =
+    let buf = Buffer.create 16 in
+    let fmt = Format.formatter_of_buffer buf in
+    let () = Ansi.set_for_tty fmt in
+    let col_width = snd colbreaks in
+    let colbreaks = ref (List.sort_uniq compare (max_int::(fst colbreaks))) in
+    let cols = ref [] in
+    Ansi.(fprintf fmt "%a%a   CODE: " clear screen clear cursor);
     String.iteri (fun i c -> if i < progress then
-                     Ansi.(printf "%a%a%c%a" bg green fg black c clear color)
-                   else Ansi.(printf "%c" c)) code;
-    Ansi.printf "\n";
+                     Ansi.(fprintf fmt "%a%a%c%a" bg green fg black c clear color)
+                   else Ansi.(fprintf fmt "%c" c)) code;
+    Ansi.fprintf fmt " (%d/%d)\n" count total;
     let len = Array.length keypads in
     Array.iteri (fun i pad ->
         let pad_h = Array.length pad.keys in
-        Ansi.printf "    -- %s --\n" pad.title;
+        Ansi.fprintf fmt "-- %s --\n" pad.title;
         Array.iteri (fun y s ->
             let border = if pad_h = 4 (* num_pad *) then
                 if y = 3 then "└───┼───┼───┤" else if y = 0 then "┌───┬───┬───┐" else "├───┼───┼───┤"
               else (* dir pad *)
               if y = 0 then   "    ┌───┬───┐" else if y = 1 then  "┌───┼───┼───┤" else "├───┼───┼───┤"
             in
-            Ansi.printf "          %s\n" border;
-            Ansi.printf "          ";
+            Ansi.fprintf fmt "%s\n" border;
             String.iteri (fun x c ->
-              let b = if c = ' ' then " " else "│" in
+                let b = if c = ' ' then " " else "│" in
                 if (x, y) = pad.pos then
-                  Ansi.(printf "%s%a %c %a" b bg (if i = punch_level - 1 || i = len - 1 then red else blue) c clear color)
-                else Ansi.(printf "%s %c " b c)
+                  Ansi.(fprintf fmt "%s%a %c %a" b bg (if i = punch_level - 1 || i = len - 1 then red else blue) c clear color)
+                else Ansi.(fprintf fmt "%s %c " b c)
               ) s;
-            Ansi.printf "│\n";
+            Ansi.fprintf fmt "│\n";
           ) pad.keys;
         let border = if pad_h = 4 then "    └───┴───┘" else (* dir_pad *) "└───┴───┴───┘" in
-        Ansi.printf "          %s" border;
-        Ansi.printf "\n\n%!"
-      ) keypads
+        Ansi.fprintf fmt "%s" border;
+        Ansi.fprintf fmt "\n\n%!";
+        if i = List.hd !colbreaks then begin
+          Format.pp_print_flush fmt ();
+          colbreaks := List.tl !colbreaks;
+          cols := (Buffer.contents buf) :: !cols;
+          Buffer.clear buf;
+          Ansi.fprintf fmt "\n";
+        end;
+      ) keypads;
+    Format.pp_print_flush fmt ();
+    cols := (Buffer.contents buf) :: !cols;
+    let cols = List.rev_map (fun s -> String.split_on_char '\n' s) !cols |> Array.of_list in
+    let continue = ref true in
+    while !continue do
+      continue := false;
+      let line = ref "" in
+      for i = 0 to Array.length cols - 1 do
+
+        match cols.(i) with
+          [] -> line := !line ^ String.make col_width ' '
+        | s :: ll ->
+          line:= !line ^ s;
+          let len = str_len s in
+          if len < col_width then line:= !line ^ (String.make (col_width - len) ' ');
+          cols.(i) <- ll;
+          continue := true;
+      done;
+      Ansi.printf "%s\n" !line;
+      line:="";
+    done;
+    Ansi.printf "%!"
+
+
 
   let sym_of_coord c =
     List.assoc c [(1,0),'^'; (2,0),'A'; (0,1),'<'; (1,1),'v'; (2,1),'>' ]
 
-  let render code seq =
-    let keypads = [|
-      num_pad ();
-      dir_pad "Robot 2 (radiations)";
-      dir_pad "Robot 3 (-40 degrees)";
-      dir_pad "You !"
-    |]
-    in
+  let render ?colbreaks ?sleep keypads code seq =
     let last = Array.length keypads - 1 in
     let progress = ref 0 in
+    let count = ref 0 in
+    let len = S.Rope.length seq in
     let rec move level  =
       if level > 0 then begin
         let c = sym_of_coord keypads.(level).pos  in
@@ -352,13 +397,13 @@ struct
         in
         keypads.(level-1).pos <- (x, y);
         if c = 'A' && level = 1 then incr progress;
-        display keypads code (if c = 'A' then level else -1) !progress;
-        Unix.sleepf 0.1;
+        display ?colbreaks keypads code (if c = 'A' then level else -1) !progress !count len;
+        let () = match sleep with None -> () | Some f -> Unix.sleepf f in
         if c = 'A' then move (level - 1)
       end
     in
     (* perform a move at the current level *)
-    S.Rope.iter_char (fun c -> keypads.(last).pos <- S.dir_coords.(S.dir_idx c); move last) seq
+    S.Rope.iter_char (fun c -> incr count; keypads.(last).pos <- S.dir_coords.(S.dir_idx c); move last) seq
 
 
   let name = S.name
@@ -371,8 +416,15 @@ struct
       dir_pad "You !"
     |]
     in
-    S.solve ~animate:render false S.lmap_part1
-  let solve_part2 () = S.solve false S.lmap_part2
+    S.solve ~animate:(render ~sleep:0.5 keypads) false S.lmap_part1
+  let solve_part2 () = 
+    let keypads = ref [ dir_pad "You !"] in
+    for i = 25 downto 2 do
+      keypads := (dir_pad ("Robot " ^ string_of_int i)) :: !keypads
+    done;
+    keypads := { (num_pad ()) with title = "Robot 1" } :: !keypads;
+    let keypads = Array.of_list !keypads in
+    S.solve ~animate:(render ~colbreaks:([3;8;13;18;23],20) keypads) false S.lmap_part2
 
 end
 let () = Solution.register_mod ~variant:"animate" (module Animate)

@@ -185,6 +185,9 @@ module Ansi : sig
   val sprintf : ('a, Format.formatter, unit, string) format4 -> 'a
   val fprintf : Format.formatter -> ('a, Format.formatter, unit) format -> 'a
 
+  val set_for_tty : Format.formatter -> unit
+  val unset_for_tty : Format.formatter -> unit
+
 end
 
 (** Some comparison functions, built on top of Stdlib.compare. *)
