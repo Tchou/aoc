@@ -223,9 +223,10 @@ struct
     Input.fold_lines (fun acc s -> s :: acc) []
     |> List.rev
 
-  let score verbose lmap l =
+  let score ?animate verbose lmap l =
     List.fold_left (Agg.Left.sum (fun s ->
         let r = enumerate lmap (String.explode s) in
+        let () = match animate with None -> () | Some f -> f s r in
         let n = Rope.length r in
         let () =
           if verbose then
@@ -251,9 +252,9 @@ struct
       dir_conf; dir_conf; dir_conf; dir_conf; dir_conf;
     ]
 
-  let solve verbose lmap =
+  let solve ?animate verbose lmap =
     let l = read_input () in
-    let n = score verbose lmap l in
+    let n = score ?animate verbose lmap l in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
   let solve_part1 () = solve false lmap_part1
@@ -269,3 +270,109 @@ struct
   let solve_part2 () = S.solve true S.lmap_part2
 end
 let () = Solution.register_mod ~variant:"verbose" (module SV)
+
+module Animate =
+struct
+  type keypad = { keys : string array; mutable pos : Grid.position; title : string; input : char Queue.t  }
+
+  let num_pad () = {
+    keys = [|
+      "789";
+      "456";
+      "123";
+      " 0A"
+    |];
+    pos = (2, 3);
+    title = "Robot 1 (depressurized)";
+    input = Queue.create ()
+  }
+  let dir_pad title = {
+    keys = [|
+      " ^A" ;
+      "<v>";
+    |];
+    pos = (2, 0);
+    title;
+    input = Queue.create ()
+  }
+  let display keypads code punch_level progress =
+    Ansi.(printf "%a%a\n\n   CODE: " clear screen clear cursor);
+    String.iteri (fun i c -> if i < progress then
+                     Ansi.(printf "%a%a%c%a" bg green fg black c clear color)
+                   else Ansi.(printf "%c" c)) code;
+    Ansi.printf "\n";
+    let len = Array.length keypads in
+    Array.iteri (fun i pad ->
+        let pad_h = Array.length pad.keys in
+        Ansi.printf "    -- %s --\n" pad.title;
+        Array.iteri (fun y s ->
+            let border = if pad_h = 4 (* num_pad *) then
+                if y = 3 then "└───┼───┼───┤" else if y = 0 then "┌───┬───┬───┐" else "├───┼───┼───┤"
+              else (* dir pad *)
+              if y = 0 then   "    ┌───┬───┐" else if y = 1 then  "┌───┼───┼───┤" else "├───┼───┼───┤"
+            in
+            Ansi.printf "          %s\n" border;
+            Ansi.printf "          ";
+            String.iteri (fun x c ->
+              let b = if c = ' ' then " " else "│" in
+                if (x, y) = pad.pos then
+                  Ansi.(printf "%s%a %c %a" b bg (if i = punch_level - 1 || i = len - 1 then red else blue) c clear color)
+                else Ansi.(printf "%s %c " b c)
+              ) s;
+            Ansi.printf "│\n";
+          ) pad.keys;
+        let border = if pad_h = 4 then "    └───┴───┘" else (* dir_pad *) "└───┴───┴───┘" in
+        Ansi.printf "          %s" border;
+        Ansi.printf "\n\n%!"
+      ) keypads
+
+  let sym_of_coord c =
+    List.assoc c [(1,0),'^'; (2,0),'A'; (0,1),'<'; (1,1),'v'; (2,1),'>' ]
+
+  let render code seq =
+    let keypads = [|
+      num_pad ();
+      dir_pad "Robot 2 (radiations)";
+      dir_pad "Robot 3 (-40 degrees)";
+      dir_pad "You !"
+    |]
+    in
+    let last = Array.length keypads - 1 in
+    let progress = ref 0 in
+    let rec move level  =
+      if level > 0 then begin
+        let c = sym_of_coord keypads.(level).pos  in
+        let d = if c = 'A' then (0,0) else List.assoc c S.dirs in
+        let x, y = Grid.(keypads.(level-1).pos +! d) in
+        let () = if level != 1 && (x < 0 || y < 0 || x > 2 || y > 1) then (Format.printf "PROBLEM: moving %d, %d by %d, %d, char is %c gives %d %d\n%!" 
+                                                                             (fst keypads.(level-1).pos)
+                                                                             (snd keypads.(level-1).pos)
+                                                                             (fst d) (snd d) c x y;
+                                                                           assert false)
+        in
+        keypads.(level-1).pos <- (x, y);
+        if c = 'A' && level = 1 then incr progress;
+        display keypads code (if c = 'A' then level else -1) !progress;
+        Unix.sleepf 0.1;
+        if c = 'A' then move (level - 1)
+      end
+    in
+    (* perform a move at the current level *)
+    S.Rope.iter_char (fun c -> keypads.(last).pos <- S.dir_coords.(S.dir_idx c); move last) seq
+
+
+  let name = S.name
+
+  let solve_part1 () =
+    let keypads = [|
+      num_pad ();
+      dir_pad "Robot 2 (radiations)";
+      dir_pad "Robot 3 (-40 degrees)";
+      dir_pad "You !"
+    |]
+    in
+    S.solve ~animate:render false S.lmap_part1
+  let solve_part2 () = S.solve false S.lmap_part2
+
+end
+let () = Solution.register_mod ~variant:"animate" (module Animate)
