@@ -13,7 +13,13 @@ struct
   let explode_array s =
     Array.init (String.length s) (fun i -> s.[i])
 
-  let explode s = Array.to_list (explode_array s)
+  let explode s =
+    let[@tail_mod_cons] rec loop i =
+      if i >= String.length s then []
+      else s.[i] :: loop (i+1)
+    in
+    loop 0
+
   let implode l = String.concat "" (List.map (String.make 1) l)
   let implode_array a = implode (Array.to_list a)
 
