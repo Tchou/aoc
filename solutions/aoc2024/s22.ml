@@ -30,13 +30,6 @@ struct
     let n = score l in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
-  let pack d c b a =
-    let p1 = a + 9 in
-    let p2 = (b + 9) lsl 5 in
-    let p3 = (c + 9) lsl 10 in
-    let p4 = (d + 9) lsl 15 in
-    p1 lor p2 lor p3 lor p4
-
   (* semi brute-force works well.
 
      - keep a global hash table whose keys are 4-number sequences and values the
@@ -51,8 +44,13 @@ struct
      - pack the four values of a key as as single 20 bit integer. We don't ever need
        to unpack it so we only manage integers instead of allocating tuples.
      - Instead of using hash tables, use arrays of size 2^20 words, about 8 MB each.
+
+     Further optimization :
+     - actually multiplications / and divisions by constants are quite fast, and allow
+     one to store the data in a smaller array
+     - we fit both the seen and value in the same array since the max value seems to fit on 16 bits
   *)
-  let tabulate global seen limit acc_max init =
+  let tabulate cache limit acc_max init =
     let prev4 = init mod 10 in
     let prev3 = (next init) mod 10 in
     let prev2 = (iterate 2 init) mod 10 in
@@ -61,17 +59,19 @@ struct
     let a = prev3 - prev4 in
     let b = prev2 - prev3 in
     let c = prev1 - prev2 in
-    let key = pack 0 a b c in
+    let key = ((a+9)*19) + ((b+9)*361) + ((c+9)*6859) in
     let rec loop k cur prev1 key acc_max =
       if k = 3 then acc_max else begin
         let m10 = cur mod 10 in
         let d = m10 - prev1 in
-        let key = ((key lsl 5) lor (d+9)) land 1048575 in
-        let n_acc_max = if seen.(key) = init then acc_max else begin
-            let v = m10 + global.(key) in
-            global.(key) <- v;
-            seen.(key) <- init;
-            if v > acc_max then v else acc_max
+        let key = (d + 9) * 6859 + (key / 19) in
+        let v = Array.unsafe_get cache key in
+        let v_seen = v lsr 16 in
+        let n_acc_max = if v_seen = init then acc_max else begin
+            let v_val = m10 + (v land 0xffff) in
+            let nv = init * 65536 + v_val in
+            Array.unsafe_set cache key nv;
+            Int.max v_val acc_max
           end
         in
         loop (k-1) (next cur) m10 key n_acc_max
@@ -79,9 +79,8 @@ struct
     in loop limit cur prev1 key acc_max
 
   let find_max numbers =
-    let global = Array.make (1 lsl 20) 0 in
-    let seen = Array.copy global in
-    List.fold_left (tabulate global seen 2000) 0 numbers
+    let cache = Array.make 130321 0 in
+    List.fold_left (tabulate cache 2000) 0 numbers
 
   let solve_part2 () =
     let numbers = read_input () in
