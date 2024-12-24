@@ -242,6 +242,9 @@ module Comb : sig
   val product : 'a list -> 'b list -> ('a * 'b) Seq.t
   (** [product l1 l2] return the sequences of pairs in the
       Cartesian product of [l1] and [l2]. *)
+
+  val choose : int -> 'a list -> ('a list) Seq.t
+  (** [choose n l] returns the sequences of all choices of n elements of l.*)
 end
 
 (** Math functions. *)
@@ -305,6 +308,16 @@ module type GRAPH = sig
       distance from [v].*)
 
 end
+module Pqueue(X : sig type t val compare : t -> t -> int end) : sig
+
+  type t
+  val create : int -> t
+  val is_empty : t -> bool
+  val length : t -> int
+  val add : t -> X.t -> unit
+  val minimum : t -> X.t
+  val remove_min : t -> X.t
+end
 
 module GraphAlgo (Graph : GRAPH) : sig
 
@@ -325,7 +338,7 @@ module GraphAlgo (Graph : GRAPH) : sig
   *)
 
   val floyd_warshall : Graph.t -> (Graph.v * Graph.v, int) Hashtbl.t
-  (** [floyd_warshall g] returns the shorted distance between any
+  (** [floyd_warshall g] returns the shortest distance between any
       two vertices of [g].
   *)
 

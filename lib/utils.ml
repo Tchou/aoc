@@ -400,6 +400,28 @@ struct
   let product col1 col2 =
     Seq.product (List.to_seq col1) (List.to_seq col2)
 
+
+  let choose k l =
+    let rec loop k len l =
+      if k = 0
+      then Seq.cons [] Seq.empty
+      else
+      if len < k
+      then Seq.empty
+      else if k = len
+      then Seq.cons l (Seq.empty)
+      else
+        match l with
+          h :: t ->
+          let starting_with_h =
+            (Seq.map (fun sublist -> h :: sublist) (loop (pred k) (len - 1 ) t))
+          in
+          let not_starting_with_h = loop k (len - 1) t in
+          Seq.append starting_with_h not_starting_with_h
+        | [] -> assert false
+    in
+    loop k (List.length l) l
+
 end
 
 module type GRAPH = sig
@@ -410,103 +432,84 @@ module type GRAPH = sig
   val iter_succ : t -> v -> (v * int -> unit) -> unit
 end
 
-module GraphAlgo (Graph : GRAPH) = struct
-  open Syntax
+module Pqueue (X : sig type t val compare : t -> t -> int end) =
+struct
+  type t = { mutable size : int; mutable data : X.t array }
+  (* Taken (with minor modifications) from:
+     https://usr.lmf.cnrs.fr/~jcf/ftp/ocaml/ds/binary_heap.ml.html
+  *)
+  let create n =
+    if n <= 0 then invalid_arg "create";
+    { size = -n; data = [||] }
 
-  module Pqueue_ = struct
-    type t = E | T of int * (int * Graph.v) * t * t
-    let rank = function E -> 0 | T (r,_,_,_) -> r
-    let make x a b =
-      let ra = rank a and rb = rank b in
-      if ra < rb then T (ra + 1, x, b, a) else T (rb + 1, x, a, b)
-
-    let empty = E
-    let cmp (p1, v1) (p2, v2) =
-      if p1 == p2 then v1 <= v2
-      else p1 < p2
-    let is_empty = function E -> true | T _ -> false
-    let rec merge h1 h2 =
-      match h1,h2 with
-      | E, h | h, E -> h
-      | T (_,((p1, v1) as x),a1,b1), T (_,((p2, v2) as y),a2,b2) ->
-        if p1 < p2 || (p1 == p2 && v1 < v2) then make x a1 (merge b1 h2) else make y a2 (merge h1 b2)
-
-    let add x h = merge (T (1, x, E, E)) h
-    let singleton x = T(1,x, E,E)
-    let min = function E -> failwith "Pqueue.empty" | T (_,x,_,_) -> x
-
-    let remove_min = function
-      | E -> failwith "Pqueue.remove_min"
-      | T (_,x,a,b) -> x, merge a b
-  end
-  module Pqueue =
-  struct
-    type t = { mutable size : int; mutable data : (int * Graph.v) array }
-    (* Taken (with minor modifications) from:
-       https://usr.lmf.cnrs.fr/~jcf/ftp/ocaml/ds/binary_heap.ml.html
-    *)
-    let create n =
-      if n <= 0 then invalid_arg "create";
-      { size = -n; data = [||] }
-
-    let is_empty h = h.size <= 0
-    let resize h =
-      let n = h.size in
-      let n' = n lsl 1 in
-      let d = h.data in
-      let d' = Array.make n' d.(0) in
-      Array.blit d 1 d' 1 (n-1);
-      h.data <- d'
-    let add h x =
-      (* first addition: we allocate the array *)
-      if h.size < 0 then begin
-        h.data <- Array.make (- h.size) x; h.size <- 0
-      end;
-      let n = h.size in
-      (* resizing if needed *)
-      if n == Array.length h.data then resize h;
-      let d = h.data in
-      (* moving [x] up in the heap *)
-      let rec moveup i =
-        let fi = (i - 1) / 2 in
-        if i > 0 && fst d.(fi) > fst x then begin
-          d.(i) <- d.(fi);
-          moveup fi
+  let is_empty h = h.size <= 0
+  let length h = if h.size < 0 then 0 else h.size
+  let resize h =
+    let n = h.size in
+    let n' = n lsl 1 in
+    let d = h.data in
+    let d' = Array.make n' d.(0) in
+    Array.blit d 1 d' 1 (n-1);
+    h.data <- d'
+  let add h x =
+    (* first addition: we allocate the array *)
+    if h.size < 0 then begin
+      h.data <- Array.make (- h.size) x; h.size <- 0
+    end;
+    let n = h.size in
+    (* resizing if needed *)
+    if n == Array.length h.data then resize h;
+    let d = h.data in
+    (* moving [x] up in the heap *)
+    let rec moveup i =
+      let fi = (i - 1) / 2 in
+      if i > 0 && X.compare d.(fi) x > 0 then begin
+        d.(i) <- d.(fi);
+        moveup fi
+      end else
+        d.(i) <- x
+    in
+    moveup n;
+    h.size <- n + 1
+  let minimum h =
+    if h.size <= 0 then failwith "Pqueue.minimum";
+    h.data.(0)
+  let remove h =
+    if h.size <= 0 then failwith "Pqueue.remove";
+    let n = h.size - 1 in
+    h.size <- n;
+    let d = h.data in
+    let x = d.(n) in
+    (* moving [x] down in the heap *)
+    let rec movedown i =
+      let j = 2 * i + 1 in
+      if j < n then
+        let j =
+          let j' = j + 1 in
+          if j' < n &&  X.compare d.(j') d.(j) < 0 then j' else j
+        in
+        if X.compare d.(j) x  < 0 then begin
+          d.(i) <- d.(j);
+          movedown j
         end else
           d.(i) <- x
-      in
-      moveup n;
-      h.size <- n + 1
-    let minimum h =
-      if h.size <= 0 then failwith "Pqueue.minimum";
-      h.data.(0)
-    let remove h =
-      if h.size <= 0 then failwith "Pqueue.remove";
-      let n = h.size - 1 in
-      h.size <- n;
-      let d = h.data in
-      let x = d.(n) in
-      (* moving [x] down in the heap *)
-      let rec movedown i =
-        let j = 2 * i + 1 in
-        if j < n then
-          let j =
-            let j' = j + 1 in
-            if j' < n &&  fst d.(j') < fst d.(j) then j' else j
-          in
-          if fst d.(j) < fst x then begin
-            d.(i) <- d.(j);
-            movedown j
-          end else
-            d.(i) <- x
-        else
-          d.(i) <- x
-      in
-      movedown 0
+      else
+        d.(i) <- x
+    in
+    movedown 0
 
-    let remove_min h = let m = minimum h in remove h; m
+  let remove_min h = let m = minimum h in remove h; m
 
+end
+module GraphAlgo (Graph : GRAPH) = struct
+  open Syntax
+  module X = struct
+    type t = (int * Graph.v)
+    let compare (i, _) (j, _) = Int.compare i j
   end
+
+  module Pq = Pqueue(X)
+
   let add_dist d1 d2 =
     match d1, d2 with
       None, None -> None
@@ -553,57 +556,6 @@ module GraphAlgo (Graph : GRAPH) = struct
          done);
     rdist
 
-  (*
-  let rebuild_path t last =
-    let rec loop acc_p v =
-      match t.%{v} with
-      | v2 -> loop (v2 :: acc_p) v2
-      | exception Not_found -> acc_p
-    in
-    loop [ last ] last
-
-
-  let dijkstra ?(h=(fun (_:Graph.v) -> 0)) ?(first=false) g start targets =
-    let finish_map = ~%(List.map (fun v -> (v, (max_int, []))) targets) in
-    (*  let todo = ref (Hashtbl.length finish_map) in *)
-    let prev = ~%[] in
-    let dist = ~%[] in
-    let get_dist v = try dist.%{v} with Not_found -> max_int in
-     let add_dist d1 d2 =
-      let d = d1+d2 in
-      if d < 0 then max_int else d
-     in
-     let queue = Pqueue.create 16 in
-     let () =
-      dist.%{start} <- 0;
-      Pqueue.add queue (0, start);
-     in
-
-     let rec loop todo =
-      if Pqueue.is_empty queue then finish_map
-      else
-        let _, u = Pqueue.remove_min queue in
-        if finish_map %? u && prev %? u then begin
-          let l = rebuild_path prev u in
-          finish_map.%{u} <- dist.%{u}, l;
-          let todo = todo - 1 in
-          if first || todo = 0 then finish_map
-          else loop_aux todo u
-        end
-        else loop_aux todo u
-     and loop_aux todo u =
-      Graph.iter_succ g u (fun (v, d) ->
-          let v_dist = get_dist v in
-          let alt = add_dist (get_dist u) d in
-          if alt < v_dist then begin
-            prev.%{v} <- u;
-            dist.%{v} <- alt;
-            Pqueue.add queue (alt + h v, v);
-          end);
-      loop todo
-     in
-     loop (Hashtbl.length finish_map)
-  *)
   let rebuild_path2 t last =
     let rec loop acc_p v =
       match t.%{v} with
@@ -628,16 +580,16 @@ module GraphAlgo (Graph : GRAPH) = struct
       let d = d1+d2 in
       if d < 0 then max_int else d
     in
-    let queue = Pqueue.create 16 in
+    let queue = Pq.create 16 in
     let () =
       dist.%{start} <- 0;
-      Pqueue.add queue (0, start);
+      Pq.add queue (0, start);
     in
 
     let rec loop todo =
-      if Pqueue.is_empty queue then finish_map
+      if Pq.is_empty queue then finish_map
       else
-        let _, u = Pqueue.remove_min queue in
+        let _, u = Pq.remove_min queue in
         if finish_map %? u && prev %? u then begin
           let l = rebuild_path2 prev u in
           finish_map.%{u} <- dist.%{u}, l;
@@ -654,11 +606,11 @@ module GraphAlgo (Graph : GRAPH) = struct
             let l = (prev.%?{v} or []) in
             prev.%{v} <- if List.mem u l then l else u::l ;
             dist.%{v} <- alt;
-            Pqueue.add queue (alt + h v, v);
+            Pq.add queue (alt + h v, v);
           end else if alt < v_dist then begin
             prev.%{v} <- [u];
             dist.%{v} <- alt;
-            Pqueue.add queue (alt + h v, v);
+            Pq.add queue (alt + h v, v);
           end);
       loop todo
     in
