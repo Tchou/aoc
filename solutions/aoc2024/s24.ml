@@ -21,7 +21,6 @@ struct
   let read_input () =
     let wires = ref StrMap.empty in
     let gates = ref StrMap.empty in
-    let todo = ref [] in
     InputUntil.fold_lines (fun acc l ->
         if l = "" then false, ()
         else
@@ -29,10 +28,8 @@ struct
       ) ();
     Input.fold_scan "%[a-z0-9] %[A-Z] %[a-z0-9] -> %[a-z0-9]"
       (fun acc r1 g r2 r ->
-         gates := StrMap.add r (r1, parse_gate g, r2) !gates;
-         if r.[0] = 'z' then todo:=r::!todo
-      ) ();
-    !wires, !gates, !todo
+         gates := StrMap.add r (r1, parse_gate g, r2) !gates) ();
+    !wires, !gates
 
   let eval_op o v1 v2 _ =
     match o with
@@ -40,8 +37,7 @@ struct
     | AND -> (v1 land v2) land 1
     | XOR -> (v1 lxor v2) land 1
 
-
-  let eval eval_op wires gates todo =
+  let eval eval_op wires gates =
     let rec loop todo acc =
       match todo with
         [] -> acc
@@ -55,6 +51,7 @@ struct
           let v = eval_op op v1 v2 r in
           loop ttodo StrMap.(add r v acc)
     in
+    let todo = StrMap.fold (fun w _ acc -> if w.[0] = 'z' then w::acc else acc) gates [] in
     loop todo wires
 
   let compute f init todo wires =
@@ -62,11 +59,13 @@ struct
     |> List.fold_left (f wires) init
 
   let solve_part1 () =
-    let wires, gates, todo = read_input () in
-    let wires = eval eval_op wires gates todo in
-    let n = compute (fun wires acc z ->
-        assert (z.[0] = 'z'); 2*acc + StrMap.find z wires)
-        0 todo wires
+    let wires, gates = read_input () in
+    let wires = eval eval_op wires gates in
+    let n =
+      StrMap.fold (fun w n acc ->
+          if w.[0] <> 'z' then acc else
+            let i = String.sub w 1 2 |> int_of_string in
+            acc + (n lsl i)) wires 0
     in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
@@ -75,78 +74,38 @@ struct
     type expr =
         Wire of wire
       | Binop of t * gate * t
-    and t = { id : int; node : expr; name : string}
-    module Key =
-    struct
-      type nonrec t = t
-      let equal e1 e2 =
-        match e1.node, e2.node with
-          Wire s1, Wire s2 -> s1 = s2
-        | Binop (k11, op1, k12), Binop(k21, op2, k22) ->
-          op1 == op2 && k11 == k21 && k12 == k22
-        | _ -> false
-      let hash e =
-        match e.node with
-          Wire s -> Hashtbl.hash s
-        | Binop (k1, op, k2) ->
-          k1.id + 17 * Hashtbl.hash op + 257 * k2.id
-    end
-    module H = Hashtbl.Make(Key)
-
-    let memo = H.create 16
-    let id = ref 0
-    let cons e name =
-      let n = { id = !id; node = e; name} in
-      try H.find memo n with
-        Not_found ->
-        incr id;
-        H.replace memo n n; n
+    and t = { expr : expr; wire : string}
+    let cons expr wire = {expr; wire}
     let wire s = cons (Wire s) s
-
-    let memo_letter = H.create 16
-
     let rec letter e =
-      try H.find memo_letter e with
-        Not_found ->
-        match e.node with
-          Wire s -> s
-        | Binop(e1, _, e2) ->
-          let s1 = letter e1 in
-          let s2 = letter e2 in
-          let s = if s1 >= s2 then s1 else s2 in
-          H.replace memo_letter e s;
-          s
-
+      match e.expr with
+        Wire s -> s
+      | Binop(e1, _, e2) ->
+        let s1 = letter e1 in
+        let s2 = letter e2 in
+        let s = if s1 >= s2 then s1 else s2 in
+        s
     let binop e1 op e2 name =
       let s1 = letter e1 in
       let s2 = letter e2 in
       if s1 >= s2 then cons (Binop(e1, op, e2)) name
       else cons (Binop (e2, op, e1)) name
-    let equal e1 e2 = e1 == e2
-    let hash e = e.id
   end
-
   let rec pp fmt e =
     let open Format in
-    match e.Expr.node with
+    match e.Expr.expr with
       Wire s -> fprintf fmt "%s" s
     | Binop  (e1, op, e2) -> fprintf fmt "(%a %a %a)" pp e1 pp_op op pp e2
 
-  let sym_eval wires gates todo =
+  let sym_eval wires gates =
     let sym_eval_op op r1 r2  n =
       Expr.binop r1 op r2 n
     in
-    eval sym_eval_op wires gates todo
+    eval sym_eval_op wires gates
 
   let sym_wires wires =
     let sym_wires = ~%[] in
     StrMap.fold (fun r _ acc -> StrMap.add r Expr.(wire r) acc) wires StrMap.empty
-
-  module StrSet = Set.Make(String)
-
-  let display todo wires =
-    compute (fun wires () z ->
-        Format.printf "%s = %a\n%!" z pp wires.%{z}) () todo wires
 
   (* bit zN is well-formed if:
      z05 = ((y05 XOR x05) XOR (((y04 XOR x04) AND (((y03 XOR x03) AND (((y02 XOR x02) AND (((y01 XOR x01) AND (y00 AND x00)) OR (y01 AND x01))) OR (y02 AND x02))) OR (y03 AND x03))) OR (y04 AND x04)))
@@ -165,10 +124,10 @@ struct
                        yN    xN    zN-1{XOR<-AND}      AND
                                                       /   \
                                                    yN-1   xN-1
-     So a zN should be a XOR
-     a left of zN should be a XOR
-     a right of zN should be a OR
-     a right of a right of zN should be an AND
+     (rule 1) So a zN should be a XOR
+     (rule 2) a left of zN should be a XOR
+     (rule 3) a right of zN should be a OR
+     (rule 4) a right of a right of zN should be an AND
      except for the final z45, the final carry,which should only be an OR, without the left part
      We also know that (for our input) rules from z00 to z05 are ok so we don't test for those
      (just to avoid writing custom rules for z00 and z01).
@@ -178,77 +137,64 @@ struct
      To just find only the right rules, we must record them and not check them when they appear again.
 
      This covers the 4x2 rules that are swapped. No need to do anything else, just sort and print.
+     Instead of returning a boolean, we return an Error t with the message, for debugging purpose.
   *)
 
-  let update w r = r := w :: !r
+  let update w r =
+    Format.kasprintf (fun msg -> r := w :: !r; Error msg)
 
-  let check_z1 wires z w t bad_rules =
-    Hashtbl.add t w ();
-    let num = String.sub z 1 2 in
-    let e = StrMap.find w wires in
-    match e.Expr.node with
-      Binop (e1, op, e2) ->
-      if op <> XOR then Format.(update w bad_rules; asprintf "Rule %s Left of z should be XOR but is %a" w pp_op op) else
-      if e2.name <> "x" ^ num || e1.name <> "y" ^ num then
-        (update w bad_rules; "Left of z is not between x and y")
-      else ""
-    | Wire _ -> "Should not be a wire"
+  let check_z1 Expr.{expr;wire} t bad_rules =
+    Hashtbl.add t wire ();
+    match expr with
+      Binop (e1, (AND|OR as op), e2) -> (* rule 2 *)
+      update wire bad_rules "Rule %s Left of z should be XOR but is %a" wire pp_op op
+    | _ -> Ok ()
 
-  let check_and wires w t bad_rules =
-    Hashtbl.add t w ();
-    let e = StrMap.find w wires in
-    match e.Expr.node with
-      Binop (_, op, _) ->
-      if op <> AND then Format.(update w bad_rules; asprintf "Rule %s should be AND but is %a" w pp_op op)
-      else ""
-    | Wire _ -> "Should not be a wire"
+  let check_and Expr.{expr; wire} t bad_rules =
+    Hashtbl.add t wire ();
+    match expr with
+      Binop (_, (OR|XOR as op), _) -> (* rule 4 *)
+      update wire bad_rules "Rule %s should be AND but is %a" wire pp_op op
+    | _ -> Ok()
 
-  let check_z2 wires w t bad_rules =
-    Hashtbl.add t w ();
-    let e = StrMap.find w wires in
-    match e.Expr.node with
-      Binop (e1, op, e2) ->
-      if op <> OR then Format.(update w bad_rules; asprintf "Rule %s right of z should be OR but is %a" w pp_op op)
-      else let s = check_and wires e1.Expr.name t bad_rules in
-        if s = "" then check_and wires e2.Expr.name t bad_rules
-        else s
-    | Wire _ -> "Right of z should not be a wire"
+  let check_z2 Expr.{expr;wire} t bad_rules =
+    Hashtbl.add t wire ();
+    match expr with
+      Binop (e1, (AND|XOR as op), e2) -> (* rule 3 *)
+      update wire bad_rules "Rule %s right of z should be OR but is %a" wire pp_op op
+    | Binop (e1, OR, e2) ->
+      Result.bind (check_and e1 t bad_rules) (fun () -> check_and e2 t bad_rules)
+    | _ -> Ok ()
 
-  let check_z wires w t bad_rules =
-    Hashtbl.add t w ();
-    if w <= "z05" then ""
-    else
-      let e = StrMap.find w wires in
-      match e.Expr.node with
-        Binop (e1, op, e2) ->
-        if w = "z45" then check_z2 wires w t bad_rules
-        else if op = XOR then
-          let s = check_z1 wires w e1.Expr.name t bad_rules in
-          if s = "" then check_z2 wires e2.Expr.name t bad_rules
-          else s
-        else Format.(update w bad_rules; asprintf "Rule %s should be XOR but is %a" w pp_op op)
-      | Wire _ -> "Z rule should not be a single wire"
-
+  let check_z (Expr.{expr;wire}as e) t bad_rules =
+    Hashtbl.add t wire ();
+    if wire <= "z01" then Ok ()
+    else if wire = "z45" then check_z2 e t bad_rules
+    else match expr with
+        Binop (e1, XOR, e2) ->
+        Result.bind (check_z1 e1 t bad_rules) (fun () -> check_z2 e2 t bad_rules)
+      | Binop (_, op, _) -> update wire bad_rules "Rule %s should be XOR but is %a" wire pp_op op
+      | _ -> Ok ()
 
   let rule_checker ?(debug=false) wires gates =
-    let z_rules =
-      StrMap.fold (fun w _ acc -> if w.[0] = 'z' then w::acc else acc) gates []
-      |> List.sort compare
-    in
     let sw = sym_wires wires in
-    let sw = sym_eval sw gates z_rules in
-    let t = ~%[] in
+    let full_formulae = sym_eval sw gates in
+    let memo = ~%[] in
     let bad_rules = ref [] in
-    List.iter (fun w ->
-        if not (t %? w) then
-          let s = check_z sw w t bad_rules in
-          if s <> "" && debug then Format.printf "Rule %s is invalid: %s \n%!" w s
-      ) z_rules;
+    (* Because sw is a map, it will iterate the rules by increasing name,
+       so z00, before z01, … the other rules can be skipped, they will be
+       checked recursively  *)
+    StrMap.iter (fun w e ->
+        if not (memo %? w) && w.[0] = 'z' then
+          match check_z e memo bad_rules with
+            Error msg when debug -> Format.printf "Rule %s is invalid: %s \n%!" w msg
+          | _ -> ()
+      ) full_formulae;
     assert (List.length !bad_rules = 8);
     List.sort compare !bad_rules |> String.concat ","
 
   let solve_part2 () =
-    let wires, gates, todo = read_input () in
+    let wires, gates = read_input () in
     let s = rule_checker wires gates in
     Ansi.(printf "%a%s%a\n%!" fg green s clear color)
 end
