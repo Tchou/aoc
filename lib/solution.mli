@@ -7,8 +7,6 @@ module type S = sig
   val solve_part2 : unit -> unit
 end
 
-val is_prefix : string -> bool
-val register_prefix : string -> unit
 val register_mod : ?variant:string -> (module S) -> unit
 
 val run : string array -> unit

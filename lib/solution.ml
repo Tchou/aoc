@@ -1,17 +1,13 @@
 let table = Hashtbl.create 16
-let prefixes = Hashtbl.create 16
 let register (n : string) (solve : unit -> unit) = Hashtbl.replace table n solve
 let get (n : string) = Hashtbl.find_opt table n
 let list () = table |> Hashtbl.to_seq_keys |> List.of_seq |> List.sort compare
 
 module type S = sig
-  val name : string*string
+  val name : string * string
   val solve_part1 : unit -> unit
   val solve_part2 : unit -> unit
 end
-
-let register_prefix s = Hashtbl.replace prefixes s ()
-let is_prefix s = Hashtbl.mem prefixes s
 
 let register_mod ?variant (module X : S) =
   let variant = Option.to_list variant in
