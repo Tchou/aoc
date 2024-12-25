@@ -76,15 +76,19 @@ end
 (** Input related functions. *)
 module Input :
 sig
+  val set_input : in_channel -> unit
+  (** [set_input ic] sets the default input channel for all the input reading functions.
+      Defaults to [stdin]. *)
+
   val fold_lines : ?input:in_channel -> ('a -> string -> 'a) -> 'a -> 'a
   (** [fold_lines ~input f acc] folds over the lines of [input] if specified
-      or [stdin] by default.
+      or to the default input channel (see [set_input])..
   *)
 
   val fold_substrings : ?input:in_channel -> int ->
     ('a -> string list -> 'a) -> 'a -> 'a
   (** [fold_substrings ~input n f acc] folds over the lines of [input] if specified
-      or [stdin] by default. The line is split into a list [[s1; ...; sk ]] where
+      or to the default input channel (see [set_input]). The line is split into a list [[s1; ..; sk ]] where
       the [si] have length [n] except for [sk] which may be shorter.
   *)
 
@@ -92,37 +96,37 @@ sig
     ('a, Scanf.Scanning.scanbuf, 'b, 'c -> 'd, 'a -> 'e, 'e) format6 ->
     ('d -> 'c) -> 'd -> 'd
   (** [fold_scan ~input fmt f acc] folds over the lines of [input] if specified
-      or [stdin] by default. Each line is parsed according to [fmt] and the
+      or to the default input channel (see [set_input]). Each line is parsed according to [fmt] and the
       results is passed to [f].
   *)
 
   val fold_fields : ?input:in_channel -> char -> ('a -> string list -> 'a) -> 'a -> 'a
   (** [fold_fields c f acc] folds over the [c] separated lines of [input]
-      if specified or [stdin] by default.
+      if specified or to the default input channel (see [set_input]).
   *)
 
   val fold_chars : ?input:in_channel -> ('a -> char -> 'a) -> 'a -> 'a
   (** [fold_chars f acc] folds over the characters of [input] if
-      specified or [stdin] by default.
+      specified or to the default input channel (see [set_input]).
   *)
 
   val fold_uchars : ?input:in_channel -> ('a -> Uchar.t -> 'a) -> 'a -> 'a
   (** [fold_chars f acc] folds over the unicode scalar values of [input], if
-      specified or [stdin] by default. The input is assumed to bu UTF-8 encoded.
+      specified or to the default input channel (see [set_input]). The input is assumed to bu UTF-8 encoded.
   *)
 end
 module InputUntil :
 sig
   val fold_lines : ?input:in_channel -> ('a -> string -> bool*'a) -> 'a -> 'a
   (** [fold_lines ~input f acc] folds over the lines of [input] if specified
-      or [stdin] by default. [f] must returns [true] to continue processing the
+      or to the default input channel (see [set_input]). [f] must returns [true] to continue processing the
       input and [false] to stop.
   *)
 
   val fold_substrings : ?input:in_channel -> int ->
     ('a -> string list -> bool*'a) -> 'a -> 'a
   (** [fold_substrings ~input n f acc] folds over the lines of [input] if specified
-      or [stdin] by default. The line is split into a list [[s1; ...; sk ]] where
+      or to the default input channel (see [set_input]). The line is split into a list [[s1; ..; sk ]] where
       the [si] have length [n] except for [sk] which may be shorter.
   *)
 
@@ -130,14 +134,14 @@ sig
     ('a, Scanf.Scanning.scanbuf, 'b, 'c -> bool * 'd, 'a -> 'e, 'e) format6 ->
     ('d -> 'c) -> 'd -> 'd
   (** [fold_scan ~input fmt f acc] folds over the lines of [input] if specified
-      or [stdin] by default. Each line is parsed according to [fmt] and the
+      or to the default input channel (see [set_input]). Each line is parsed according to [fmt] and the
       results is passed to [f]. [f] must returns [true] to continue processing the
       input and [false] to stop.
   *)
 
   val fold_fields : ?input:in_channel -> char -> ('a -> string list -> bool*'a) -> 'a -> 'a
   (** [fold_fields c f acc] folds over the [c] separated lines of [input] if
-        specified or [stdin] by default. [f] must returns [true] to continue
+        specified or to the default input channel (see [set_input]). [f] must returns [true] to continue
         processing the input and [false] to stop.
   *)
 
@@ -149,7 +153,7 @@ sig
 
   val fold_uchars : ?input:in_channel -> ('a -> Uchar.t -> bool*'a) -> 'a -> 'a
   (** [fold_chars f acc] folds over the unicode scalar values of [input], if
-      specified or [stdin] by default. The input is assumed to bu UTF-8 encoded.
+      specified or to the default input channel (see [set_input]). The input is assumed to bu UTF-8 encoded.
       [f] must returns [true] to continue processing the input and [false] to stop.
   *)
 end

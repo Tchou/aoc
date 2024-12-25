@@ -176,10 +176,12 @@ module Time = struct
     let t1 = Unix.gettimeofday () in
     res, 1000. *. (t1 -. t0)
 end
-
+let input = ref stdin
+let get_input = function None -> !input | Some i -> i
 module InputUntil = struct
 
-  let rec fold_lines ?(input=stdin) f acc =
+  let rec fold_lines ?input f acc =
+    let input = get_input input in
     match input_line input with
     | s ->
       let continue, acc = f acc s in
@@ -203,20 +205,21 @@ module InputUntil = struct
     done;
     !fields
 
-  let fold_substrings ?(input=stdin) n f acc =
+  let fold_substrings ?input n f acc =
     if n <= 0 then invalid_arg "fold_substrings";
-    fold_lines ~input (fun acc s ->
+    fold_lines ?input (fun acc s ->
         f acc (split_string s n)
       ) acc
 
-  let fold_scan ?(input=stdin) fmt f acc =
-    fold_lines ~input (fun acc s ->
+  let fold_scan ?input fmt f acc =
+    fold_lines ?input (fun acc s ->
         Scanf.sscanf s fmt (f acc)) acc
 
-  let fold_fields ?(input=stdin) sep f acc =
-    fold_lines ~input (fun acc l -> f acc (String.split_on_char sep l)) acc
+  let fold_fields ?input sep f acc =
+    fold_lines ?input (fun acc l -> f acc (String.split_on_char sep l)) acc
 
-  let rec fold_chars ?(input=stdin) f acc =
+  let rec fold_chars ?input f acc =
+    let input = get_input input in
     match input_char input with
     | c ->
       let continue, acc = f acc c in
@@ -234,7 +237,8 @@ module InputUntil = struct
     else if b < 240 then 3
     else 4
 
-  let fold_uchars ?(input=stdin) f acc =
+  let fold_uchars ?input f acc =
+    let input = get_input input in
     let buffer = Bytes.create 4 in
     let get_uchar input =
       let c = input_char input in
@@ -257,15 +261,16 @@ module InputUntil = struct
 end
 module Input =
 struct
-  let fold_lines ?(input=stdin) f = InputUntil.fold_lines ~input (fun a e -> true, f a e)
-  let fold_scan ?(input=stdin) fmt f acc =
-    fold_lines ~input (fun acc s -> Scanf.sscanf s fmt (f acc)) acc
+  let set_input ic = input := ic
+  let fold_lines ?input f = InputUntil.fold_lines ?input (fun a e -> true, f a e)
+  let fold_scan ?input fmt f acc =
+    fold_lines ?input (fun acc s -> Scanf.sscanf s fmt (f acc)) acc
 
-  let fold_substrings ?(input=stdin) n f acc =
-    InputUntil.fold_substrings ~input n (fun acc l -> true, f acc l) acc
-  let fold_fields ?(input=stdin) c f = InputUntil.fold_fields ~input c (fun a e -> true, f a e)
-  let fold_chars ?(input=stdin) f = InputUntil.fold_chars ~input (fun a e -> true, f a e)
-  let fold_uchars ?(input=stdin) f = InputUntil.fold_uchars ~input (fun a e -> true, f a e)
+  let fold_substrings ?input n f acc =
+    InputUntil.fold_substrings ?input n (fun acc l -> true, f acc l) acc
+  let fold_fields ?input c f = InputUntil.fold_fields ?input c (fun a e -> true, f a e)
+  let fold_chars ?input f = InputUntil.fold_chars ?input (fun a e -> true, f a e)
+  let fold_uchars ?input f = InputUntil.fold_uchars ?input (fun a e -> true, f a e)
 
 end
 module Ansi = struct
