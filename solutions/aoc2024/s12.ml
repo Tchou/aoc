@@ -5,7 +5,7 @@ struct
   let name = Name.mk "s12"
   module G = Grid.StringGrid
 
-  let hdirs = Grid.[east; west ]
+  let hdirs = Grid.[east; west]
   let vdirs = Grid.[south; north]
 
   let in_plot p1 l =
@@ -34,9 +34,6 @@ struct
       XXX         1XX    1X2
         X           X      X
         X           2      X
-
-
-
   *)
   let ext_corners = Grid.[ west,north; north, east; east, south; south, west ]
   let int_corners = List.map (fun (p1, p2) -> (p1, p2), Grid.(p1+! p2)) ext_corners
@@ -66,15 +63,30 @@ struct
         ci + ce
       )) 0
 
+  (*
+  Do a simple DFS for each (non-visited) point in the grid to find each plot containing
+  that point.
+  *)
 
-  let map_plots grid =
+  let map_plots2 grid =
+    let module GB = Grid.BytesGrid in
     let map = ~%[] in
-    grid
-    |> G.iter (fun p c ->
-        let candidates = map.%?{c} or [] in
-        let all_in, others = List.partition (in_plot p) candidates in
-        map.%{c} <- (p::(List.concat all_in))::others
-      );
+    let visited = GB.init G.(height grid) (fun _ -> Bytes.make G.(width grid) '\x00') in
+    let rec dfs c stack acc =
+      match stack with
+        [] -> acc
+      | p :: sstack ->
+        if visited.GB.!(p) = '\x01' then dfs c sstack acc else
+          begin
+            visited.GB.!(p) <- '\x01';
+            let nstack = ref sstack in
+            G.iter4 (fun p' c' _ -> if c' = c then nstack := p'::!nstack) grid p;
+            dfs c !nstack (p::acc)
+          end
+    in
+    G.iter
+      (fun p c -> if visited.GB.!(p) = '\x00' then map.%{c} <- (dfs c [p] []) :: (map.%?{c} or []))
+      grid;
     map
 
   let count_plots perim grid map =
@@ -87,13 +99,11 @@ struct
 
   let solve perim =
     let grid = G.read () in
-    let map = map_plots grid in
+    let map = map_plots2 grid in
     let n = count_plots perim grid map in
     Ansi.(printf "%a%d%a\n" fg green n clear color)
-  let solve_part1 () =
-    solve perimeter
-  let solve_part2 () =
-    solve sides
+  let solve_part1 () = solve perimeter
+  let solve_part2 () = solve sides
 
 end
 

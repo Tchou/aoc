@@ -27,23 +27,32 @@ struct
     Hashtbl.clear visited;
     loop pos Grid.north [] 0
 
-  let visited = ~%[]
-  let has_cycle pos_s pos dir grid =
-    let rec loop d p  =
-      let key = p, d in
-      if visited %? key then true
-      else begin
-        visited.%{key} <- ();
-        let p' = Grid.(p +! d) in
+  let tdir = Array.of_list Grid.dir4
+  let idx_dir = function
+      (0,-1) -> 0
+    | (1, 0) -> 1
+    | (0, 1) -> 2
+    | (-1, 0) -> 3
+    | _ -> assert false
+  let () = List.iter (fun p -> assert (p = tdir.(idx_dir p))) Grid.dir4
+
+  let has_cycle visited pos_s pos idir grid =
+    let rec loop id p  =
+      let x, y = p in
+      (visited.(y).(x) lsr id) land 1 = 1 || begin
+        visited.(y).(x) <- visited.(y).(x) lor (1 lsl id);
+        let p' = Grid.(p +! tdir.(id)) in
         if not (G.inside grid p') then false
         else if p' = pos_s || grid.G.!(p') = '#' then
-          loop Grid.(right90 d) p
+          loop ((id + 1) land 0b11) p
         else
-          loop d p'
+          loop id p'
       end
     in
-    Hashtbl.clear visited;
-    loop dir pos
+    for i = 0 to Array.length visited - 1 do
+      Array.fill visited.(i) 0 (Array.length visited.(i)) 0;
+    done;
+    loop idir pos
 
   let count_cycles pos grid =
     (* find the normal path *)
@@ -54,8 +63,9 @@ struct
        step before hitting the new stone.
     *)
     let count = ref 0 in
+    let visited = Array.init (G.height grid) (fun _ -> Array.make (G.width grid) 0) in
     List.iter (fun (pos_s, dir) ->
-        if has_cycle pos_s Grid.(pos_s +! (opposite dir)) dir grid then incr count;
+        if has_cycle visited pos_s Grid.(pos_s +! (opposite dir)) (idx_dir dir) grid then incr count;
       ) (List.tl (List.rev path));
     !count
 
