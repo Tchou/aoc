@@ -70,7 +70,6 @@ struct
     in
     Ansi.(printf "%a%d%a\n%!" fg green n clear color)
 
-
   module Expr =
   struct
     type expr =
@@ -152,7 +151,7 @@ struct
   (* bit zN is well-formed if:
      z05 = ((y05 XOR x05) XOR (((y04 XOR x04) AND (((y03 XOR x03) AND (((y02 XOR x02) AND (((y01 XOR x01) AND (y00 AND x00)) OR (y01 AND x01))) OR (y02 AND x02))) OR (y03 AND x03))) OR (y04 AND x04)))
      z04 = ((y04 XOR x04) XOR (((y03 XOR x03) AND (((y02 XOR x02) AND (((y01 XOR x01) AND (y00 AND x00)) OR (y01 AND x01))) OR (y02 AND x02))) OR (y03 AND x03)))
-     z03 = ((y03 XOR x03) AND (((y02 XOR x02) AND (((y01 XOR x01) AND (y00 AND x00)) OR (y01 AND x01))) OR (y02 AND x02)))
+     z03 = ((y03 XOR x03) XOR (((y02 XOR x02) AND (((y01 XOR x01) AND (y00 AND x00)) OR (y01 AND x01))) OR (y02 AND x02)))
      z02 = ((y02 XOR x02) XOR (((y01 XOR x01) AND (y00 AND x00)) OR (y01 AND x01)))
      z01 = ((y01 XOR x01) XOR (y00 AND x00))
      z00 = (y00 XOR x00)
