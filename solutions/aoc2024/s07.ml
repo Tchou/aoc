@@ -8,26 +8,28 @@ struct
         (n, s |> String.split_on_char ' ' |> List.map int_of_string)::acc
       ) []
 
-  let pow10 n = (* faster than log + float/int conversions *)
+  let pow10 n acc = (* faster than log + float/int conversions for small numbers*)
     let rec loop n acc =
       if n = 0 then acc else
-        loop (n/10) (acc*10)
+        loop ((n * 0x1999999A) lsr 32) ((acc lsl 3) + (acc lsl 1))
     in
-    loop n 1
+    loop n acc
 
-  let concat n1 n2 = (n1 * (pow10 n2)) + n2
+  let concat n1 n2 = (pow10 n2 n1) + n2
 
   let can_be_combined part2 total l =
-    let rec loop l =
-      match l with
-        [] -> false
-      | [ v ] -> v == total
-      | v1 :: v2 :: ll ->
-        loop ((v1+v2)::ll) ||
-        loop ((v1*v2)::ll) ||
-        (part2 && loop (concat v1 v2 :: ll))
+    let rec loop l acc =
+      if acc > total then false else
+        match l with
+          [] -> acc == total
+        | v :: ll ->
+          loop ll (acc+v) ||
+          loop ll (acc*v) ||
+          (part2 && loop ll (concat acc v))
     in
-    loop l
+    match l with
+      [] -> assert false
+    | v ::  ll -> loop ll v
 
   let total_calibration_result part2 =
     List.fold_left (Agg.Left.sum (fun (total, l) ->
