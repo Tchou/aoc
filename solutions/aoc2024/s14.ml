@@ -6,7 +6,7 @@ struct
 
   type t = { p : int * int; v : int * int }
 
-  let move w h n ({p=x,y; v=vx,vy }as r) =
+  let move w h n ({p=x,y; v=vx,vy } as r) =
     let px = n * vx + x in
     let py = n * vy + y in
     let px = px mod w in
@@ -47,16 +47,18 @@ struct
       Ansi.printf "\n%!";
     done
 
+  let memo = Array.make (101*103) false
   let is_symmetric len w l =
-    let h = ~%[] in
     let count = ref 0 in
+    Array.fill memo 0 (101*103) false;
     try
-      List.iter (fun r -> h.%{r.p} <- 1 + (h.%?{r.p} or 0)) l;
-      h
-      |> Hashtbl.iter  (fun (x,y) c ->
-          if h %? (w - x - 1, y) then incr count;
-          if !count > len then raise Exit
-        );
+      List.iter (fun {p=(x,y) as p;_} ->
+          let y101 = y * 101 in
+          if Array.unsafe_get memo ((w-x-1) +  y101) then
+            if !count >= len then raise Exit
+            else incr count;
+          if not (Array.unsafe_get memo (x +  y101)) then
+            Array.unsafe_set memo (x + y101) true) l;
       false
     with Exit -> true
 
@@ -64,7 +66,7 @@ struct
     (* approximation, looking for 1/5th of the robots disposed in a symmetric fashion *)
     let rec loop l n =
       let l = simulate w h 1 l in
-      if is_symmetric (num_robots/5) w l then n,l
+      if is_symmetric (num_robots/10) w l then n,l
       else
         loop  l (n+1)
     in
