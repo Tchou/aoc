@@ -39,7 +39,7 @@ struct
   let solve_part1 () =
     let graph = read_input () in
     let n = count_triangles (find_triangles graph) in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   (* Bron–Kerbosch algorithm, can't be used for part 1 since the triangles are not maximal cliques *)
 
@@ -70,7 +70,7 @@ struct
     let graph = read_input () in
     let clique = find_max_clique graph in
     let s = clique |> StrSet.elements |> String.concat "," in
-    Ansi.(printf "%a%s%a\n%!" fg green s clear color)
+    Solution.printf "%s" s
 end
 
 let () = Solution.register_mod (module S)

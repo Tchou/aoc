@@ -69,7 +69,7 @@ module Sol = struct
   let solve_part1 () =
     let cubes = load_cubes () in
     let n = count_faces ~%[] cubes in
-    Format.printf "%d@\n" n
+    Solution.printf "%d" n
 
   let solve_part2 () =
     let cubes = load_cubes () in
@@ -89,7 +89,7 @@ module Sol = struct
       done
     done;
     let n = count_faces trapped cubes in
-    Format.printf "%d@\n" n
+    Solution.printf "%d" n
 end
 
 let () = Solution.register_mod (module Sol)

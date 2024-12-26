@@ -128,7 +128,7 @@ module Chamber = struct
     done;
     if bottom = 0 then printf "    +-------+@\n%!"
     else printf "@\n%!";
-    printf 
+    printf
       "@\nROUND: %d, GAS: %c, GIDX:%d, RIDX:%d, x=%d, y=%d@\n%!" i g g_idx r_idx
       xr yr;
     Unix.sleepf 0.125
@@ -213,16 +213,16 @@ let mk_sol animate =
       let gas = load_level () in
       let chamber = Chamber.make () in
       let n = Chamber.simulate ~animate chamber gas 2022 in
-      Format.printf "%d@\n" n
+      Solution.printf "%d" n
 
     let solve_part2 () = if animate then () else
         let gas = load_level () in
         let chamber = Chamber.make () in
         let n = Chamber.simulate_large chamber gas 1000000000000 in
-        Format.printf "%d@\n" n
-  end 
+        Solution.printf "%d" n
+  end
   in
   let variant = if animate then Some "animate" else None in
-  Solution.register_mod ?variant (module Sol) 
+  Solution.register_mod ?variant (module Sol)
 
 let () = mk_sol false; mk_sol true

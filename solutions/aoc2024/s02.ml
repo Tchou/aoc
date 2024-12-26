@@ -38,7 +38,7 @@ struct
     let l = read_input () in
     let n = List.fold_left (Agg.Left.sum (fun l -> int_of_bool (f l) )) 0 l
     in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve is_safe
   let solve_part2 () = solve is_mostly_safe

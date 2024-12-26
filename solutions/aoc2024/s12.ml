@@ -101,7 +101,7 @@ struct
     let grid = G.read () in
     let map = map_plots2 grid in
     let n = count_plots perim grid map in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
   let solve_part1 () = solve perimeter
   let solve_part2 () = solve sides
 

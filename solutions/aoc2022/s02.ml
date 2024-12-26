@@ -16,14 +16,14 @@ let score_move op my = ((4 - (op - my)) mod 3 * 3) + 1 + my
 let decide1 old_score op_move my_move = old_score + score_move op_move my_move
 
 let solve decide =
-  let total =
+  let n =
     Input.fold_fields ' '
       (fun total -> function
-        | [ op; my ] -> decide total (of_letter op) (of_letter my)
-        | _ -> total)
+         | [ op; my ] -> decide total (of_letter op) (of_letter my)
+         | _ -> total)
       0
   in
-  Printf.printf "%d\n" total
+  Solution.printf "%d" n
 
 let decide2 old_score op_move result =
   let my_move = (op_move + result + 2) mod 3 in

@@ -145,7 +145,7 @@ struct
   let solve_part1 () =
     let blocks = load_input () in
     let can_be_removed = collect_info blocks in
-    Ansi.printf "%d\n" (List.length can_be_removed) 
+    Solution.printf "%d" (List.length can_be_removed) 
 
 
   let count_movable blocks =
@@ -169,7 +169,7 @@ struct
   let solve_part2 () =
     let blocks = load_input () in
     count_movable blocks
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

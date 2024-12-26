@@ -28,7 +28,7 @@ struct
   let solve_part1 () =
     let l = read_input () in
     let n = score l in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   (* semi brute-force works well.
 
@@ -84,8 +84,8 @@ struct
 
   let solve_part2 () =
     let numbers = read_input () in
-    let total = find_max numbers in
-    Ansi.(printf "%a%d%a\n%!" fg green total clear color)
+    let n = find_max numbers in
+    Solution.printf "%d" n
 end
 
 let () = Solution.register_mod (module S)

@@ -4,7 +4,7 @@ let solve n () =
   let rec loop count i =
     if count == n then i
     else
-      match input_char stdin with
+      match Input.read_char () with
       | 'a' .. 'z' as c ->
           let c_idx = Char.code c - Char.code 'a' in
           let last_c = cache.(c_idx) in
@@ -14,7 +14,7 @@ let solve n () =
       | _ -> i
       | exception End_of_file -> i
   in
-  Printf.printf "%d\n" (loop 0 0)
+  Solution.printf "%d" (loop 0 0)
 
 module Sol = struct
   let name = Name.mk "s06"

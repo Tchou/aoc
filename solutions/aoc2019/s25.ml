@@ -4,6 +4,7 @@ struct
   let name = Name.mk "s25"
 
   let commands = [
+    (* Found by exploring manually *)
     "west";
     "take semiconductor";
     "west";
@@ -55,14 +56,12 @@ struct
     String.iter (fun c -> Queue.push (Char.code c) state.stdin) command;
     Queue.push 10 state.stdin
 
-
   let nethack code =
     let exception Found of Intcode.state in
     let state = Intcode.make_state code in
     let rec auto_play com state k =
       match com, Intcode.eval state with
         order::ccom, `need_input ->
-        (*Format.printf "%a" display state*)
         Queue.clear state.stdout;
         enter order state;
         auto_play ccom state k
@@ -89,16 +88,7 @@ struct
   let solve_part1 () =
     let code = Intcode.read () in
     let message = nethack code in
-    Ansi.(printf "%a%s%a\n%!" fg green message clear color)
-
-
-(*
-
-
-
-
-*)
-
+    Solution.printf "%s" message
 
 
   let solve_part2 () = ()

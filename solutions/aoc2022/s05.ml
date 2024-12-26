@@ -12,7 +12,7 @@ let load_level () =
     if la = 0 then a := Array.make (l / 4) [] else assert (la = l / 4)
   in
   let rec loop () =
-    match read_line () with
+    match Input.read_line () with
     | "" -> Array.map List.rev !a
     | s when String.mem '[' s ->
         ensure s;
@@ -82,7 +82,7 @@ let solve ?(animate = false) do_n_move () =
            a
        | _ -> a)
   |> Array.map (function c :: _ -> String.make 1 c | _ -> "")
-  |> Array.to_list |> String.concat "" |> Format.printf "%s\n%!"
+  |> Array.to_list |> String.concat "" |> Solution.printf "%s"
 
 let split_n l n =
   let rec loop n l acc =

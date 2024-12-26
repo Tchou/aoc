@@ -17,7 +17,7 @@ struct
         List.fold_left (fun acc s -> acc + hash_string s)
 
       ) 0 in
-    Ansi.printf "%d\n" acc
+    Solution.printf "%d" acc
 
   let[@tail_mod_cons] rec remove lab box =
     match box with
@@ -74,7 +74,7 @@ struct
           List.iter (fun i -> run boxes i) l) ()
     in
     score boxes
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 end
 

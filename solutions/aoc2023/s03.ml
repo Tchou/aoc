@@ -65,7 +65,7 @@ struct
           else acc
         ) 0 num_list
     in
-    Printf.printf "%d\n" sum
+    Solution.printf "%d" sum
 
   let solve_part2 () =
     let num_list, symbols = load_input () in
@@ -84,7 +84,7 @@ struct
                [g1; g2] -> g1 * g2
              | _ -> 0)) 0
     in
-    Printf.printf "%d\n" sum
+    Solution.printf "%d" sum
 end
 
 let () = Solution.register_mod (module S)

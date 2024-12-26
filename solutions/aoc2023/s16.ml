@@ -100,7 +100,7 @@ struct
   let solve_part1 () =
     load_input ()
     |> run (0,0) Right
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
     let grid = load_input () in
@@ -115,7 +115,7 @@ struct
       n := max !n (run (0, c) Down grid);
       n := max !n (run (alen-1, c) Up grid);
     done;
-    Ansi.printf "%d\n" !n
+    Solution.printf "%d" !n
 end
 
 let () = Solution.register_mod (module S)

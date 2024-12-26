@@ -35,7 +35,7 @@ struct
       if acc = 0 then first, last
       else
         let acc' = acc - tab.(first - 1) in
-        if acc' >= 0 then loop last (first-1) acc' 
+        if acc' >= 0 then loop last (first-1) acc'
         else
           loop (last-1) (first) (acc+tab.(last))
     in
@@ -58,12 +58,12 @@ struct
     load_input ()
     |> find_number 25
     |> snd
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () =
     let tab = load_input () in
     let i, v = find_number 25 tab in
     find_subset_before tab i v
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

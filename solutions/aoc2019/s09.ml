@@ -13,8 +13,7 @@ struct
             |> List.of_seq
             |> String.concat ","
     in
-    Ansi.(printf "%a%s%a\n" fg green s clear color)
-
+    Solution.printf "%s" s
     let solve_part1 () = solve 1
   let solve_part2 () = solve 2
 end

@@ -6,7 +6,7 @@ struct
 
   let full_line g =
     Array.exists (Array.for_all (fun i -> i < 0)) g
-  
+
   let full_column g =
     try
       for i = 0 to 4 do
@@ -20,11 +20,11 @@ struct
         Array.fold_left (fun acc i -> if i > 0 then acc+i else acc) acc l) 0 g
   let solve stop =
     let numbers =
-      read_line ()
+      Input.read_line ()
       |> String.split_on_char ','
       |> List.map int_of_string
     in
-    let _ = read_line () in
+    let _ = Input.read_line () in
     let grids, _ =
       Input.fold_fields ' ' (fun (grids, tmp) ->
           function [] | [ "" ] ->
@@ -56,8 +56,8 @@ struct
                 false;
               end
               else true)
-        ); Printf.printf "%d\n" !res
-    with Exit ->Printf.printf "%d\n" !res
+        ); Solution.printf "%d" !res
+    with Exit -> Solution.printf "%d" !res
 
 
   let solve_part1 () = solve (fun () -> raise Exit)

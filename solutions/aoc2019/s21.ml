@@ -12,25 +12,11 @@ struct
         let n = Queue.pop queue in
         if n > 255 then loop (n::acc)
         else begin
-          Format.printf "%c%!" (Char.chr n);
+          (*Format.printf "%c%!" (Char.chr n);  Uncomment to display the prompt *)
           loop acc
         end
     in loop [] |> List.rev
 
-  (* Brute force ! 
-
-      1010 ->  D&~C&B&~A
-  *)
-
-  (*  let compile letters n =
-      let open Format in
-      let rec loop i n acc =
-        if i >= String.length letters then 
-          acc |> List.rev |> String.concat ""
-        else
-          let acc =
-          if n land 1 = 0 then sprintf "OR %c J\n" letters.[i]
-          else *)
   let advance code txt =
     let state = Intcode.make_state code in
     let c = Intcode.eval state in
@@ -50,7 +36,7 @@ WALK\n"
   let solve txt =
     let code = Intcode.read () in
     let n = advance code txt |> List.hd in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve walk
 

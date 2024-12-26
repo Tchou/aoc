@@ -198,9 +198,8 @@ struct
   let solve part1 =
     load_input part1
     |> search_dfs
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part1 () = solve true
   let solve_part2 () = solve false
 end
-let () = Sys.catch_break true
 let () = Solution.register_mod (module S)

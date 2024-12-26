@@ -164,7 +164,7 @@ struct
     let n = List.fold_left (Agg.Left.sum (fun s ->
         int_of_bool (match_rule rules sizes s ))) 0 words
     in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve false
 

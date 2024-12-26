@@ -19,8 +19,7 @@ struct
     let code = Intcode.read () in
     let state = Intcode.make_state code in
     let n = scan code in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
-
+    Solution.printf "%d" n
 
   let dove_tail_search square_size code =
     let test x y =
@@ -78,7 +77,7 @@ struct
   let solve_part2 () =
     let code = Intcode.read () in
     let n = dove_tail_search 99 code in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 end
 
 let () = Solution.register_mod (module S)

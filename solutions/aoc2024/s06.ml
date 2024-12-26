@@ -72,11 +72,11 @@ struct
   let solve_part1 () =
     let start, grid = read_input () in
     let _, n = explore start grid in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
   let solve_part2 () =
     let start, grid = read_input () in
     let n = count_cycles start grid in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

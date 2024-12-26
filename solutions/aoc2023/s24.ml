@@ -65,7 +65,7 @@ struct
           i01.y >= inf && i01.y <= sup
         in
         if ok then incr count;
-        Ansi.printf "(p0=%a, v0=%a) (p1=%a, v1=%a) => t0=%f, s1=%f at %a (%b)\n"
+        if false then Ansi.printf "(p0=%a, v0=%a) (p1=%a, v1=%a) => t0=%f, s1=%f at %a (%b)\n"
           pp p0 pp v0 pp p1 pp v1
           t0 s1 pp i01 ok;
       done;
@@ -75,7 +75,7 @@ struct
   let solve_part1 () =
     load_input ()
     |> comp (float 200000000000000) (float 400000000000000)
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d\n"
 
   (* Equation of our rock:
      x = xr t + vxr
@@ -184,7 +184,7 @@ struct
   let solve_part2 () =
     load_input ()
     |> solve
-    |> Ansi.printf "%.0f\n"
+    |> Solution.printf "%.0f"
 end
 
 let () = Solution.register_mod (module S)

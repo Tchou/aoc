@@ -7,7 +7,7 @@ struct
   let _W = 25
 
   let read_input () =
-    let line = read_line () in
+    let line = Input.read_line () in
     let num_layers = String.length line / (_W * _H) in
     let i = ref 0 in
     let layers = Array.make num_layers [| |] in
@@ -36,7 +36,7 @@ struct
                 ) acc line
             ) (0,0,0) layer
         in
-        if n0 < !num0 then begin 
+        if n0 < !num0 then begin
           num0 := n0;
           prod12 := n1 * n2;
         end
@@ -57,17 +57,17 @@ struct
     done;
     Array.iter (fun b ->
         Bytes.iter (fun c ->
-            if c = '0' then Ansi.printf " "
-            else Ansi.(printf "%a %a" bg white clear color)
+            if c = '0' then Solution.printf " "
+            else Ansi.(Solution.printf "%a %a" bg green clear color)
           ) b;
-        Ansi.printf "\n%!"
+        Solution.printf "\n%!"
       ) base
 
 
   let solve_part1 () =
     let layers = read_input () in
     let n = count_12 layers in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
   let solve_part2 () =
     let layers = read_input () in
     flatten layers

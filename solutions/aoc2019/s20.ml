@@ -51,7 +51,7 @@ struct
     let g, start, exit = read_input () in
     let map = Alg.dijkstra g start [exit] in
     let n = fst map.%{exit} in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   module Graph2  =
   struct
@@ -72,7 +72,7 @@ struct
     let g, start, exit = read_input () in
     let map = Alg2.dijkstra g (start,0) [(exit,0)] in
     let n = fst map.%{exit,0} in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 end
 
 let () = Solution.register_mod (module S)

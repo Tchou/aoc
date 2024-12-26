@@ -67,7 +67,7 @@ struct
             let i = String.sub w 1 2 |> int_of_string in
             acc + (n lsl i)) wires 0
     in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   module Expr =
   struct
@@ -196,7 +196,7 @@ struct
   let solve_part2 () =
     let wires, gates = read_input () in
     let s = rule_checker wires gates in
-    Ansi.(printf "%a%s%a\n%!" fg green s clear color)
+    Solution.printf "%s" s
 end
 
 let () = Solution.register_mod (module S)

@@ -32,20 +32,19 @@ module S = struct
         let l = String.length s / 2 in
         total + priority (find_unique String.[ sub s 0 l; sub s l l ]))
       0
-    |> Format.printf "%d\n"
-
+    |>  Solution.printf "%d" 
   let solve_part2 () =
     let rec loop total =
       match
-        let l1 = read_line () in
-        let l2 = read_line () in
-        let l3 = read_line () in
+        let l1 = Input.read_line () in
+        let l2 = Input.read_line () in
+        let l3 = Input.read_line () in
         [ l1; l2; l3 ]
       with
       | l -> loop (total + priority (find_unique l))
       | exception End_of_file -> total
     in
-    Format.printf "%d\n" (loop 0)
+    Solution.printf "%d" (loop 0)
 end
 
 let () = Solution.register_mod (module S)

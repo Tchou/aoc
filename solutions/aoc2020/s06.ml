@@ -29,7 +29,7 @@ struct
     !count
   let solve_part1 () =
     let tab = Bytes.make (Char.code 'z' + 1) '\x00' in
-    let acc = Input.fold_lines (fun acc s -> 
+    let acc = Input.fold_lines (fun acc s ->
         if s = "" then begin
           let acc = acc + sum tab in
           reset tab;
@@ -40,11 +40,11 @@ struct
         end
       ) 0
     in
-    Ansi.printf "%d\n" acc
+    Solution.printf "%d" acc
 
   let solve_part2 () =
     let tab = Bytes.make (Char.code 'z' + 1) '\x00' in
-    let acc,_ = Input.fold_lines (fun (acc,l) s -> 
+    let acc,_ = Input.fold_lines (fun (acc,l) s ->
         if s = "" then begin
           let acc = acc + count_distinct tab l in
           reset tab;
@@ -55,7 +55,7 @@ struct
         end
       ) (0,0)
     in
-    Ansi.printf "%d\n" acc
+    Solution.printf "%d" acc
 
 end
 

@@ -70,7 +70,7 @@ struct
     let parts = load_parts () in
     eval rule_table parts
     |> compute_score
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 
   let eval_constr table =
@@ -125,7 +125,7 @@ struct
     let _parts = load_parts () in
     eval_constr rule_table
     |> List.fold_left (Agg.Left.sum merge_intervals) 0
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 end
 

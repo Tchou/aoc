@@ -17,7 +17,7 @@ struct
   let pp_bin fmt n =
     for i = 9 downto 0 do
       Format.fprintf fmt "%d" ((n lsr i) land 1)
-    done 
+    done
   let pp_tile fmt tile =
     Format.fprintf fmt "Tile %d:\n" tile.id;
     Array.iter (fun b ->
@@ -105,7 +105,7 @@ struct
     loop (TileSet.singleton tile)
 
   let read_tile () =
-    let l = read_line () in
+    let l = Input.read_line () in
     Scanf.sscanf l "Tile %d:"
       (fun id ->
          let i = ref 0 in
@@ -117,7 +117,7 @@ struct
                let () = grid.(!i) <- Bytes.of_string line in
                (true, incr i)
            ) ();
-         update_borders{id;grid;borders}
+         update_borders {id;grid;borders}
       )
 
   let read_input () =
@@ -184,7 +184,7 @@ struct
     { id = !count; grid = image; borders = [|0;0;0;0|]}
 
   let has_monster last grid x y =
-    let coords = [(0,0); (1,1); (4,1); (5,0); 
+    let coords = [(0,0); (1,1); (4,1); (5,0);
                   (6,0); (7,1); (10,1); (11,0);
                   (12,0);(13,1); (16,1); (17,0);
                   (18,0); (18,-1);(19,0)]
@@ -215,8 +215,7 @@ struct
   let solve trigger =
     let tiles = read_input () in
     let n = try find_arrangement trigger tiles;0 with Found k -> k in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
-
+    Solution.printf "%d" n
   let solve_part1 () =
     let f grid =
       let k = Array.length grid - 1 in

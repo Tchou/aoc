@@ -55,7 +55,7 @@ struct
   let solve md limit =
     let grid, start, exit = read_input () in
     let n = find_shortcuts md limit grid start exit in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve 2 100
   let solve_part2 () = solve 20 100

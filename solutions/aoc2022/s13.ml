@@ -76,15 +76,13 @@ let locate_dividers lp =
 module Sol = struct
   let name = Name.mk "s13"
 
-  let solve_part1 () =
+  let solve f =
     let packets = parse_packets () in
-    let n = count_ordered packets in
-    Format.printf "%d@\n" n
+    let n = f packets in
+    Solution.printf "%d" n
 
-  let solve_part2 () =
-    let packets = parse_packets () in
-    let n = locate_dividers packets in
-    Format.printf "%d@\n" n
-end
+  let solve_part1 () = solve count_ordered
+  let solve_part2 () = solve locate_dividers
+  end
 
 let () = Solution.register_mod (module Sol)

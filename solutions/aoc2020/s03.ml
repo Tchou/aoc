@@ -19,12 +19,12 @@ struct
   let solve_part1 () =
     load_input ()
     |> count_trees 1 3
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () =
     let grid = load_input () in
-    let steps = [ 1,1; 1,3; 1,5; 1,7;2, 1] in
+    let steps = [ 1,1; 1,3; 1,5; 1,7; 2,1 ] in
     List.fold_left (fun acc (d, r) -> acc * count_trees d r grid ) 1 steps
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

@@ -36,7 +36,7 @@ struct
           res := Char.code v - Char.code '0' + 1 + !res;
       done;
     done;
-    Printf.printf "%d\n" !res
+    Solution.printf "%d" !res
 
   let rec find_basin grid nr nc r c visited count =
     if not (visited %? (r, c)) then begin
@@ -63,7 +63,7 @@ struct
     done;
     match List.sort (fun a b -> compare b a) !res with
       x :: y :: z :: _ ->
-      Printf.printf "%d\n" (x * y * z)
+      Solution.printf "%d" (x * y * z)
     | _ -> assert false
 end
 

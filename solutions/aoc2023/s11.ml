@@ -55,7 +55,7 @@ struct
   let solve factor =
     load_input factor
     |> compute_distances
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part1 () = solve 2
   let solve_part2 () = solve 1_000_000

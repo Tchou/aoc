@@ -73,11 +73,12 @@ struct
   let solve_part1 () =
     let map = read_input () in
     let n = expand map [(1, "FUEL")] in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
-  let solve_part2 () =
+    Solution.printf "%d" n
+
+    let solve_part2 () =
     let map = read_input () in
     let n = binary_search map 1000000000000 in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 end
 
 let () = Solution.register_mod (module S)

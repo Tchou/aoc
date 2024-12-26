@@ -20,8 +20,7 @@ struct
   let solve calc =
     let modules = read_input () in
     let n = List.fold_left (Agg.Left.sum calc) 0 modules in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
-
+    Solution.printf "%d" n
 
   let solve_part1 () = solve fuel
 

@@ -33,7 +33,7 @@ struct
             |> dir
             |> complete
          )) 0
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part1 () = solve Fun.id
 
   let solve_part2 () = solve List.rev

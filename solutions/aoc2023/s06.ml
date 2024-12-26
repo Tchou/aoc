@@ -4,12 +4,12 @@ struct
   let name = Name.mk "s06"
 
   let read_numbers () =
-    read_line ()
+    Input.read_line ()
     |> String.split_on_char ' '
     |> List.filter_map int_of_string_opt
 
   let read_numbers2 () =
-    read_line ()
+    Input.read_line ()
     |> String.split_on_char ' '
     |> List.filter_map int_of_string_opt
     |> List.map string_of_int
@@ -39,12 +39,12 @@ struct
   let solve_part1 () =
     let times, records = load_input read_numbers in
     List.fold_left2 (fun acc t r -> acc * solve_equation t r) 1 times records
-    |> Ansi.printf "%d@\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
     let t, r = load_input read_numbers2 in
     solve_equation t r
-    |> Ansi.printf "%d@\n"
+    |> Solution.printf "%d"
 
 end
 

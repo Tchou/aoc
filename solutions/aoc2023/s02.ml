@@ -37,11 +37,11 @@ struct
 
   let solve_part1 () =
     let n = read_file valid_game in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part2 () =
     let n = read_file cube_power in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

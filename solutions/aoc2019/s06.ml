@@ -65,7 +65,7 @@ struct
   let solve count  =
     let map = read_input () in
     let n = count map in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve count_orbits
   let solve_part2 () = solve min_orbital_transfers

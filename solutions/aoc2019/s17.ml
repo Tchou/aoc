@@ -43,8 +43,8 @@ struct
     let code = Intcode.read () in
     let map = get_map code in
     let n = count_inter map in
-    Array.iter (Format.printf "%s\n%!") map;
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    (*Array.iter (Format.printf "%s\n%!") map;*)
+    Solution.printf "%d" n
 
   let right (i, j) = (-j, i)
   let left (i, j)  = (j, -i)
@@ -86,7 +86,7 @@ struct
       | e :: ll, [] -> loop ll [[e]]
       | e :: ll, []::_ -> loop ll ([e]::acc)
     in
-    loop l [[]] 
+    loop l [[]]
     |> List.filter (fun l ->
         List.length l > 1 &&
         List.for_all (fun (ll,_) ->
@@ -214,8 +214,8 @@ struct
     let code = Intcode.read () in
     let map = get_map (Array.copy code) in
     let moves = explore map in
-    Array.iter (Format.printf "%s\n%!") map;
-    Format.printf "%a\n%!" pp moves;
+    (*Array.iter (Format.printf "%s\n%!") map;
+    Format.printf "%a\n%!" pp moves;*)
     let smoves = all_subsequences moves in
     let cmoves = subsequence_candidates smoves |> Array.of_list in
     let (prog, fa, fb, fc) = find_mapping moves cmoves in
@@ -231,7 +231,7 @@ struct
     in
     let res = Intcode.eval state in
     let n =  state.stdout |> Queue.to_seq |> List.of_seq |> List.rev |> List.hd in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

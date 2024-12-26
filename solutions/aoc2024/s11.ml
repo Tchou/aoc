@@ -5,7 +5,7 @@ struct
 
   let name = Name.mk "s11"
   let read_input () =
-    read_line () |> String.split_on_char ' ' |> List.map int_of_string
+    Input.read_line () |> String.split_on_char ' ' |> List.map int_of_string
 
   let rec num_digits n =
     if n < 10 then 1
@@ -42,7 +42,7 @@ struct
   let solve n =
     let l = read_input () in
     let n = run n l in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
   let solve_part1 () = solve 25
   let solve_part2 () = solve 75
 end

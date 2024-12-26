@@ -42,18 +42,18 @@ struct
     try
       loop ()
     with OxygenFound (state, np, d) -> (state, np, d)
-    | OxygenFull -> state, start, !max_dist
+       | OxygenFull -> state, start, !max_dist
 
 
   let solve_part1 () =
     let code = Intcode.read () in
     let _, _, dist = bfs false (0,0) (Intcode.make_state code) in
-    Ansi.(printf "%a%d%a\n%!" fg green dist clear color)
+    Solution.printf "%d" dist
   let solve_part2 () =
-  let code = Intcode.read () in
-  let state, tank, _ = bfs false (0,0) (Intcode.make_state code) in
-  let _, _, time = bfs true tank state in
-  Ansi.(printf "%a%d%a\n%!" fg green time clear color)
+    let code = Intcode.read () in
+    let state, tank, _ = bfs false (0,0) (Intcode.make_state code) in
+    let _, _, time = bfs true tank state in
+    Solution.printf "%d" time
 
 end
 

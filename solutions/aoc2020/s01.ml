@@ -27,7 +27,7 @@ struct
   let solve_part1 () =
     load_input ()
     |> find2020
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () =
     let numbers = load_input () in
     let cache = ~%[] in
@@ -40,7 +40,7 @@ struct
     List.find (fun k ->
         let c = 2020 - k in
         match cache.%?{c} with
-          Some (n,m) -> Ansi.printf "%d\n" (k*n*m); true
+          Some (n,m) -> Solution.printf "%d" (k*n*m); true
         | None -> false
       ) numbers
     |> ignore

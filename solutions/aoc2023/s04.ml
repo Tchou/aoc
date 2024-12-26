@@ -23,7 +23,7 @@ struct
 
   let solve_part1 () =
     load_input score1 0
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
     let card_list =
@@ -40,7 +40,7 @@ struct
           cards.(i) <- cards.(i) + num_id;
         done;
         num_id)) 0 card_list
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

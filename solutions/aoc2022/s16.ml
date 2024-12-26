@@ -78,7 +78,6 @@ module Graph = struct
     let todo = List.sort_uniq (fun a b -> compare_names val_list a b) !todo in
     List.iter new_name todo;
     let id_to_name = Array.make (!count + 1) "" in
-    Format.eprintf "TOTAL of  : %d@\n%!" (!count + 1);
     Hashtbl.iter (fun n i -> id_to_name.(i) <- n) name_to_id;
     let valves = ~%[] in
     List.iter (fun (s, c) -> valves.%{name_to_id.%{s}} <- c) val_list;
@@ -193,11 +192,6 @@ let load_level () =
   let nrates = List.map (fun (s, r) -> s ^ "o", r) rates in
   let g = Graph.build edges nrates in
   let () =
-    Format.eprintf "VALVES HAVE ID: ";
-    Hashtbl.iter (fun n _ -> if n <> 0 then Format.eprintf "%d " n) g.valves;
-    Format.eprintf "@\n%!"
-  in
-  let () =
     List.iter
       (fun (s, _) ->
         let sop_id = g.name_to_id.%{s ^ "o"} in
@@ -222,15 +216,11 @@ module Sol = struct
 
   let solve_part1 () =
     let g, dist_array = prepare () in
-    let t0 = Unix.gettimeofday () in
     let _, n = all_simple_paths 30 g dist_array g.name_to_id.%{"AA"} in
-    let t1 = Unix.gettimeofday () in
-    Format.eprintf "%fms@\n%!" (1000. *. (t1 -. t0));
-    Format.printf "%d@\n%!" n
+    Solution.printf "%d" n
 
   let solve_part2 () =
     let g, dist_array = prepare () in
-    let t0 = Unix.gettimeofday () in
     let max_for_valves, _ =
       all_simple_paths 26 g dist_array g.name_to_id.%{"AA"}
     in
@@ -249,9 +239,7 @@ module Sol = struct
         done
       done
     in
-    let t1 = Unix.gettimeofday () in
-    Format.eprintf "%fms@\n%!" (1000. *. (t1 -. t0));
-    Format.printf "%d@\n%!" !max_cost
+    Solution.printf "%d" !max_cost
 end
 
 let () = Solution.register_mod (module Sol)

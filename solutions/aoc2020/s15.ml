@@ -4,7 +4,7 @@ struct
   let name = Name.mk "s15"
 
   let read_input () =
-    read_line ()
+    Input.read_line ()
     |> String.split_on_char ','
     |> List.map int_of_string
 
@@ -30,11 +30,10 @@ struct
     in
     loop turn num_to_say
 
-
   let solve n =
     let l = read_input () in
     let n = play n l in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve 2020
   let solve_part2 () = solve 30000000

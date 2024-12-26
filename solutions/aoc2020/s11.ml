@@ -40,7 +40,7 @@ struct
         let n = find_first_in_diagonal grid pos' d in
         acc + n) 0 dirs
 
-  let count_occuppied grid = 
+  let count_occuppied grid =
     let n = ref 0 in
     for r = 0 to Array.length grid - 1 do
       for c = 0 to Bytes.length grid.(r) - 1 do
@@ -84,12 +84,12 @@ struct
   let solve_part1 () =
     load_input ()
     |> stabilize count_occuppied_adjacent 4
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
       load_input ()
       |> stabilize count_occuppied_diagonal 5
-      |> Ansi.printf "%d\n"
+      |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

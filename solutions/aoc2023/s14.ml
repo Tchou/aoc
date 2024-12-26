@@ -110,7 +110,7 @@ struct
     let grid = load_input () in
     tilt_north grid;
     score grid
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 let solve_part2 () =
     let grid_v = load_input () in
@@ -120,7 +120,7 @@ let solve_part2 () =
     for _ = 1 to start + rem do
       do_cycle grid_v grid_h;
     done;
-    Ansi.printf "%d\n" (score grid_v)
+    Solution.printf "%d" (score grid_v)
 
 end
 

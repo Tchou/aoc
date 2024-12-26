@@ -8,9 +8,9 @@ struct
     let dirs =
       String.map
         (function 'L' -> '\x00' | _ -> '\x01')
-        (read_line ())
+        (Input.read_line ())
     in
-    let _ = read_line () (* empty*) in
+    let _ = Input.read_line () (* empty*) in
     let map = ~%[] in
     Input.fold_scan
       "%[^ ] = (%[^,], %[^)])"
@@ -31,7 +31,7 @@ struct
   let solve_part1 () =
     let dirs, map = load_input () in
     walk dirs map "AAA"
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () =
     let dirs, map = load_input () in
     Hashtbl.to_seq_keys map
@@ -39,7 +39,7 @@ struct
     |> List.filter (fun s -> s.[2] = 'A')
     |> List.rev_map (walk dirs map)
     |> List.fold_left Math.lcm 1
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

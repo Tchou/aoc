@@ -49,7 +49,7 @@ struct
   let solve count  =
     let grid = G.read () in
     let n = count grid in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () =
     solve count_xmas

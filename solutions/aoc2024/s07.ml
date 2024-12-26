@@ -35,7 +35,7 @@ struct
   let solve ops =
     let lst = read_input () in
     let n = total_calibration_result ops lst in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve false
 

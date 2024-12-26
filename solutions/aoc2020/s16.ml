@@ -16,14 +16,14 @@ struct
         []
     in
     let my_ticket =
-      read_line () |> ignore;
-      read_line ()
+      Input.read_line () |> ignore;
+      Input.read_line ()
       |> String.split_on_char ','
       |> List.map int_of_string
     in
     let other_tickets =
-      read_line () |> ignore;
-      read_line () |> ignore;
+      Input.read_line () |> ignore;
+      Input.read_line () |> ignore;
       Input.fold_fields ',' (fun acc l ->
           let l = l |> List.map int_of_string
           in l ::acc) []
@@ -46,7 +46,7 @@ struct
             if contains v intervals then v else 0))
       ) 0
     in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
 
   let is_compatible_interval all_tickets i inter =
@@ -109,7 +109,7 @@ struct
           n := !n * my_ticket.(i)
       ) arr
     in
-    Ansi.(printf "%a%d%a\n" fg green !n clear color)
+    Solution.printf "%d" !n
 end
 
 let () = Solution.register_mod (module S)

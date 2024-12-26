@@ -95,7 +95,7 @@ struct
     let moons = read_input () in
     let velocities = simulate 1000 moons in
     let n = energy moons velocities in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part2 () =
     let moons = read_input () in
@@ -104,7 +104,7 @@ struct
         ignore (simulate (-1) moons); -1
       with Found tab -> Array.fold_left (Math.lcm) 1 tab
     in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

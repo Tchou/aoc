@@ -4,7 +4,7 @@ struct
   let name = Name.mk "s16"
 
   let read_input () =
-    let byte = read_line () |> Bytes.of_string in
+    let byte = Input.read_line () |> Bytes.of_string in
     for i = 0 to Bytes.length byte - 1 do
       Bytes.set_uint8 byte i (Bytes.get_uint8 byte i - Char.code '0');
     done;
@@ -50,7 +50,8 @@ struct
     let byte_out = Bytes.copy byte_in in
     let byte_out = fft phase 0 100 byte_in byte_out in
     let s = Bytes.sub_string (output_byte byte_out) 0 8 in
-    Ansi.(printf "%a%s%a\n" fg green s clear color)
+    Solution.printf "%s" s
+
 
   let expand byte =
     let blen = Bytes.length byte in
@@ -72,8 +73,7 @@ struct
     let byte_out = fft phase2 offset 100 byte byte in
     let outb = Bytes.sub byte offset 8 in
     let s = output_byte outb |> Bytes.to_string in
-    Ansi.(printf "%a%s%a\n" fg green s clear color)
-
+    Solution.printf "%s" s
 
 end
 

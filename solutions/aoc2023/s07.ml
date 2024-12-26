@@ -61,7 +61,7 @@ struct
     |> Array.fold_left (fun (i, total) (_, bid) ->
         (i+1, i*bid + total)) (1, 0)
     |> snd
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part1 () = solve false
   let solve_part2 () = solve true

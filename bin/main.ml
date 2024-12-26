@@ -9,19 +9,26 @@ let () =
   pp_set_margin std_formatter 2000;
   pp_set_max_indent std_formatter 2000
 
-let usage ppf =
-  Format.fprintf ppf "Usage: %s [prefix] sol [1|2] [variant]"
+let usage ppf s =
+  let open Format in
+  fprintf ppf "Usage:\n";
+  fprintf ppf "%s [prefix] sol [1|2] [variant]: execute a given solution.\n\n"
+    s;
+  fprintf ppf "%s list: list all registered solutions.\n\n"
+    s;
+  fprintf ppf "%s all prefix file1, ..., filen: execute all solutions of the input files given on the command line.\n\n"
+    s
+
 
 let main () =
   try
-    let (), t = Utils.Time.time Solution.run Sys.argv in
-    Utils.Ansi.(printf "%a%f ms%a\n" bfg yellow t clear color)
+    Solution.run Sys.argv
   with
-    Failure msg ->
+  | Solution.Error msg ->
     Format.eprintf "%s\n" msg;
     usage Format.err_formatter Sys.argv.(0);
     Format.eprintf "\n%!";
     exit 1
-
+  | _ -> Printexc.print_backtrace stderr; exit 2
 
 let () = main ()

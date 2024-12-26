@@ -10,7 +10,7 @@ struct
   let mk_sol f =
     let l1, l2 = read_input () in
     let res = f l1 l2 in
-    Ansi.(printf "%a%d%a\n" fg green res clear color)
+    Solution.printf "%d" res
 
   let solve_part1 () =
     mk_sol (fun l1 l2 ->

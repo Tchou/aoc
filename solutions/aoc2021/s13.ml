@@ -10,7 +10,7 @@ struct
     let ngrid = ~%[] in
     Hashtbl.iter (fun (x, y) () ->
         let y = if y <= n then y else 2*n - y in
-        ngrid.%{x, y} <- ()) 
+        ngrid.%{x, y} <- ())
       grid;
     ngrid
 
@@ -25,7 +25,7 @@ struct
   let read_points () =
     let grid = ~%[] in
     InputUntil.fold_fields ',' (fun () -> function
-          [sx; sy] -> 
+          [sx; sy] ->
           grid.%{int_of_string sx, int_of_string sy} <- ();
           true, ()
         | _ -> false,()) ();
@@ -43,12 +43,12 @@ struct
     in
     for y = 0 to max_y do
       for x = 0 to max_x do
-        if grid %? (x, y) then 
-          Ansi.(printf "%a %a" bbg green clear color)
+        if grid %? (x, y) then
+          Ansi.(Solution.printf "%a %a" bbg green clear color)
         else
-          Ansi.printf " "
+          Solution.printf " "
       done;
-      Ansi.printf "\n%!"
+      Solution.printf "\n%!"
     done
   let solve_part1 () =
     let grid = read_points () in
@@ -58,7 +58,7 @@ struct
       | `Y n :: _ -> apply_fold_y grid n
       | _ -> grid
     in
-    Ansi.printf "%d\n" (Hashtbl.length ngrid)
+    Solution.printf "%d" (Hashtbl.length ngrid)
   let solve_part2 () =
     let grid = read_points () in
     let instrs = read_instructions () in

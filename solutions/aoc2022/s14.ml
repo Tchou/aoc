@@ -149,7 +149,7 @@ let count_sand ?(fall = false) ?(animate = false) g start =
 let solve animate fall =
   let g = load_level () in
   let n = count_sand ~fall ~animate g (0, 500) in
-  Format.printf "%d@\n" (if fall then n+1 else n)
+  Solution.printf "%d" (if fall then n+1 else n)
 
 module Sol = struct
   let name = Name.mk "s14"

@@ -86,7 +86,7 @@ struct
   let solve scoref =
     let maps = load_input () in
     List.fold_left (fun acc m -> acc + scoref m) 0 maps
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part1 () = solve score1
   let solve_part2 () = solve score2

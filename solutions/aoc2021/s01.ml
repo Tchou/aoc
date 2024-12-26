@@ -8,12 +8,12 @@ struct
     Input.fold_scan "%d" (fun (count, prev) d ->
         (if d > prev then count+1 else count), d) (0, max_int)
     |> fst
-    |> Ansi.printf "%d@\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
-    let a0 = read_line () |> int_of_string in
-    let a1 = read_line () |> int_of_string in
-    let a2 = read_line () |> int_of_string in
+    let a0 = Input.read_line () |> int_of_string in
+    let a1 = Input.read_line () |> int_of_string in
+    let a2 = Input.read_line () |> int_of_string in
     let window = [|a0; a1; a2|] in
     let sum = a0 + a1 + a2 in
     Input.fold_scan "%d" (fun (count, sum) d ->
@@ -24,7 +24,7 @@ struct
         window.(2) <- d;
         (count, nsum)) (0, sum)
     |> fst
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 end
 

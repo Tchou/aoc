@@ -78,7 +78,7 @@ struct
       low := l + !low;
     done;
     let total = !high * !low in
-    Ansi.printf "%d\n" total
+    Solution.printf "%d" total
 
   (* By using the function below which prints the paths
      from rx to broadcaster, we see that the graph has this shape:
@@ -131,9 +131,9 @@ struct
           ) found;
         if !watch_list = [] then raise Exit
       done;
-      Ansi.printf "NOT FOUND\n"
+      Solution.printf "<SOLUTION NOT FOUND>"
     with Exit ->
-      Ansi.printf "%d\n" !lcm
+      Solution.printf "%d" !lcm
 end
 
 let () = Solution.register_mod (module S)

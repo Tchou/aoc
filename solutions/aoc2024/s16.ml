@@ -50,12 +50,12 @@ struct
   let solve_part1 () =
     let grid, start, exit = read_input () in
     let n,_ = score false grid start exit in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part2 () =
     let grid, start, exit = read_input () in
     let _, n = score true grid start exit in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

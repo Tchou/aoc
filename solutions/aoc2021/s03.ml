@@ -4,7 +4,7 @@ module S =
 struct
   let name = Name.mk "s03"
   let solve_part1 () =
-    let s = read_line () in
+    let s = Input.read_line () in
     let acc = Array.make (String.length s) 0 in
     String.iteri (fun i c -> acc.(i) <- if c = '0' then -1 else 1) s;
     Input.fold_lines (fun () s ->
@@ -22,7 +22,7 @@ struct
       epsilon := !epsilon + !pow * (1-k);
       pow := !pow * 2;
     done;
-    Printf.printf "%d\n" (!gamma * !epsilon)
+    Solution.printf "%d" (!gamma * !epsilon)
 
 
   let filter_by_bits i cmp def lst =
@@ -53,11 +53,11 @@ struct
       co2 := filter_by_bits i (<) '0' !co2;
     done;
     match !oxygen, !co2 with
-      [s1], [s2] -> 
+      [s1], [s2] ->
       let res =
         (int_of_string ("0b" ^ s1)) * (int_of_string ("0b" ^ s2))
       in
-      Printf.printf "%d\n" res
+      Solution.printf "%d" res
     | _ -> assert false
 end
 

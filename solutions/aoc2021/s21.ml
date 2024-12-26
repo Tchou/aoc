@@ -25,7 +25,7 @@ struct
 
 
   let read_player () =
-    Scanf.scanf "Player %d starting position: %d\n" (fun _ b -> b)
+    Scanf.sscanf (Input.read_line()) "Player %d starting position: %d" (fun _ b -> b)
   let read_input () =
     let p1 = read_player () in
     let p2 = read_player () in
@@ -37,7 +37,7 @@ struct
   let solve_part1 () =
     let players = read_input () in
     play 0 1 players
-    |> Ansi.printf "%d@\n"
+    |> Solution.printf "%d"
 
   (* We observe that backtracking individual
      dices score is not needed. Combining the result
@@ -50,7 +50,7 @@ struct
   let dice_freq =    [|1; 3; 6; 7; 6; 3; 1|]
 
   (* we use a simple backtracking algorithm that goes through
-     this possibilities.
+     these possibilities.
   *)
   let quantum_play players limit =
     let rec play round0 pos0 score0 pos1 score1 =
@@ -81,8 +81,8 @@ struct
 
   let solve_part2 () =
     let players = read_input () in
-    let (c0, c1), t = Time.time (quantum_play players) 21 in
-    Printf.printf "%d %f\n" (max c0 c1) t
+    let (c0, c1) = quantum_play players 21 in
+    Solution.printf "%d" (max c0 c1)
 end
 
 let () = Solution.register_mod (module S)

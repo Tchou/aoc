@@ -68,7 +68,10 @@ module type RWGRID = sig
   val (.!()<-) : t -> position -> elt -> unit
   val copy : t -> t
 end
-let read_until ?(input=stdin) f cast =
+
+let get_input = function Some ic -> ic | None -> Solution.get_input ()
+let read_until ?input f cast =
+  let input = get_input input in
   let l = ref [] in
   let s = ref (input_line input) in
   let () =
@@ -83,8 +86,8 @@ let read_until ?(input=stdin) f cast =
   |> List.rev
   |> Array.of_list
 
-let read ?(input=stdin) cast =
-  read_until ~input (fun _ -> false) cast
+let read ?input cast =
+  read_until ?input (fun _ -> false) cast
 
 module Make(L : LINE) = struct
 
@@ -123,11 +126,11 @@ module Make(L : LINE) = struct
     let w = width t in
     List.iter (apply t w h p f) dir8
 
-  let read_until ?(input=stdin) f =
-    read_until ~input f L.of_string
+  let read_until ?(input) f =
+    read_until ?input f L.of_string
 
-  let read ?(input=stdin) () =
-    read ~input L.of_string
+  let read ?(input) () =
+    read ?input L.of_string
 
   let find_from f t (x0, y0) =
     let h = height t in

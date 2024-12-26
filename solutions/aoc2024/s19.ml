@@ -8,13 +8,13 @@ struct
     let c = compare (String.length s2) (String.length s1) in
     if c <> 0 then c  else compare s1 s2
   let read_input () =
-    let s = read_line () in
+    let s = Input.read_line () in
     let ls = String.split_on_char ',' s in
     let map = ~%[] in
     List.iter (fun s -> let s = String.trim s in
                 map.%{s.[0]} <- List.sort comp_length (s :: (map.%?{s.[0]} or []));
               ) ls;
-    let  _ = read_line () in
+    let  _ = Input.read_line () in
 
     map, Input.fold_lines (fun acc s -> s :: acc) [] |> List.rev
 
@@ -68,7 +68,7 @@ struct
   let solve count =
     let map, l = read_input () in
     let n = count map l in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve count_valid
   let solve_part2 () = solve count_all_comb_valid

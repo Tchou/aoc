@@ -41,7 +41,7 @@ struct
     loop probe 0
 
   let read_input () =
-    Scanf.scanf "target area: x=%d..%d, y=%d..%d"
+    Scanf.sscanf (Input.read_line ()) "target area: x=%d..%d, y=%d..%d"
       (fun x_min x_max y_min y_max -> {x_min;x_max;y_min;y_max})
 
   let debug_simu probe area y_max valid =
@@ -68,12 +68,12 @@ struct
   let solve_part1 () =
     let area = read_input () in
     let y_max,_ = brute_force area area.x_max in
-    Ansi.printf "%d\n" y_max
+    Solution.printf "%d" y_max
 
   let solve_part2 () =
     let area = read_input () in
     let _, distinct = brute_force area area.x_max in
-    Ansi.printf "%d\n" distinct
+    Solution.printf "%d" distinct
 
 end
 

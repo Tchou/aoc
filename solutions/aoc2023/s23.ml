@@ -73,7 +73,7 @@ struct
   let solve_part1 () =
     let grid, start, dest = load_input () in
     path_finder grid (dims grid) next_part1 start dest
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let rec replace w n l =
     match l with
@@ -126,7 +126,7 @@ struct
       | _ -> stop, 0
     in
     c + path_finder igraph gdims next_part2 start stop'
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 end
 

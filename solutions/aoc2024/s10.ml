@@ -35,7 +35,7 @@ struct
   let solve uniq =
     let grid = G.read () in
     let n = count_paths uniq grid in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve true
   let solve_part2 () = solve false

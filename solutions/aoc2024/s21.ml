@@ -255,7 +255,7 @@ struct
   let solve ?animate verbose lmap =
     let l = read_input () in
     let n = score ?animate verbose lmap l in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve false lmap_part1
   let solve_part2 () = solve false lmap_part2

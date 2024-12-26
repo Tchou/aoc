@@ -111,8 +111,7 @@ struct
     let floor = flip_tiles dirs in
     let floor = if part2 then evolve_days 100 floor else floor in
     let n = count_black_tiles floor in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
-
+    Solution.printf "%d" n
   let solve_part1 () = solve false
   let solve_part2 () = solve true
 

@@ -76,7 +76,6 @@ let read_prog () =
     ~%[]
 
 let rec solve f e =
-  Format.eprintf "%a = %a@\n" Frac.pp f pp_expr e;
   let open Frac in
   match e with
   | Binop (Frac f1, Add, e2) -> solve (f -/ f1) e2
@@ -120,7 +119,7 @@ module Sol = struct
 
   let solve_part1 () =
     let res = eval_for_var (read_prog ()) "root" in
-    Format.printf "%a@\n" pp_expr res
+    Solution.printf "%a" pp_expr res
 
   let solve_part2 () =
     let prog = read_prog () in
@@ -129,7 +128,7 @@ module Sol = struct
         let s1 = eval_for_var ~sym:"humn" prog x1 in
         let s2 = eval_for_var ~sym:"humn" prog x2 in
         let f, _e = solve (Frac.int 0) (Binop (s1, Sub, s2)) in
-        Format.printf "%a@\n%!" Frac.pp f
+        Solution.printf "%a" Frac.pp f
     | _ -> assert false
 end
 

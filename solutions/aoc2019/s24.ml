@@ -5,7 +5,6 @@ struct
   module G = Grid.BytesGrid
   let name = Name.mk "s24"
 
-
   let step grid =
     let dest = G.copy grid in
     G.iter (fun p c ->
@@ -29,7 +28,6 @@ struct
     let cache = ~%[] in
     let rec loop grid s =
       if cache %? s then s else begin
-        Format.printf "%a\n--\n%!" pp grid;
         let grid' = step grid in
         let s' = score grid' in
         cache.%{s} <- s';
@@ -41,8 +39,7 @@ struct
   let solve_part1 () =
     let grid = G.read () in
     let n = evolve grid in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
-
+    Solution.printf "%d" n
 
   module Coord =
   struct
@@ -108,7 +105,8 @@ struct
   let solve_part2 () =
     let grid = G.read () in
     let n = iterate grid 200 in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
+
 end
 
 let () = Solution.register_mod (module S)

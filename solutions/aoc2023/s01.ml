@@ -37,7 +37,7 @@ let solve debug read_digit  =
         if debug then Printf.printf "%s %d%d\n" line d1 d2;
         d1 * 10 + d2 + acc) 0
   in
-  Ansi.(printf "%a%d%a\n%!" bfg green res clear color)
+  Solution.printf "%d" res
 
 let mk_sol ?variant debug =
   let module S = struct

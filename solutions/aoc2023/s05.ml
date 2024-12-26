@@ -11,11 +11,11 @@ struct
 
   let load_input map =
     let seeds =
-      match String.split_on_char ' ' (read_line ()) with
+      match String.split_on_char ' ' (Input.read_line ()) with
         [] -> []
       | _ :: l -> List.map int_of_string l
     in
-    let _ = read_line () in (* empty line *)
+    let _ = Input.read_line () in (* empty line *)
     let maps,_ =
       Input.fold_lines (fun (accf, accl) ->  function
             "" -> ((map (List.rev accl))::accf), []
@@ -29,7 +29,7 @@ struct
   let solve_part1 () =
     let seeds, maps = load_input map in
     Compare.min_list (List.fold_right (@@) maps) seeds
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   (*
   For part two, we need to map interval to interval since
@@ -82,10 +82,10 @@ struct
     let seeds = make_seeds seeds [] in
     let () =
       List.fold_left (Agg.Left.sum snd) 0 seeds
-      |> Printf.printf "%d\n"
+      |> Solution.printf "%d"
     in
     let res = List.fold_left apply_map seeds maps in
     Compare.min_list fst res
-    |> Printf.printf "%d\n"
+    |> Solution.printf "%d"
 end
 let () = Solution.register_mod (module S)

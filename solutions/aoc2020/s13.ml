@@ -6,9 +6,9 @@ struct
   let name = Name.mk "s13"
 
   let input1() =
-    let timestamp = read_line () |> int_of_string in
+    let timestamp = Input.read_line () |> int_of_string in
     let bus_ids =
-      read_line ()
+      Input.read_line ()
       |> String.split_on_char ','
       |> List.filter_map int_of_string_opt
     in
@@ -26,14 +26,14 @@ struct
           if diff < adif then (bid, diff) else acc
         ) (-1, max_int) bus_ids
     in
-    Ansi.(printf "%a%d%a\n" fg green (bid * d) clear color)
+    Solution.printf "%d" (bid * d)
 
   module ZMath = MathGen(Z)
 
   let solve_part2 () =
-    let _ = read_line () in
+    let _ = Input.read_line () in
     let _, l =
-      read_line ()
+      Input.read_line ()
       |> String.split_on_char ','
       |> List.fold_left (fun (acc_i, acc_l) s ->
           if s = "x" then Z.succ acc_i , acc_l
@@ -45,7 +45,7 @@ struct
 
     in
     let t, _ = ZMath.solve_crt l in
-    Ansi.(printf "%a%a%a\n" fg green Z.pp_print t clear color)
+    Solution.printf "%a" Z.pp_print t
 
 
 end

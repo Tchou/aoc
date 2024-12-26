@@ -57,11 +57,11 @@ struct
   let read_input () =
     let state = mk_state () in
     let open Scanf in
-    sscanf (read_line ()) "Register A: %d" (fun n -> state.a <- n);
-    sscanf (read_line ()) "Register B: %d" (fun n -> state.b <- n);
-    sscanf (read_line ()) "Register C: %d" (fun n -> state.c <- n);
-    read_line () |> ignore;
-    sscanf (read_line ()) "Program: %s" (fun s ->
+    sscanf (Input.read_line ()) "Register A: %d" (fun n -> state.a <- n);
+    sscanf (Input.read_line ()) "Register B: %d" (fun n -> state.b <- n);
+    sscanf (Input.read_line ()) "Register C: %d" (fun n -> state.c <- n);
+    Input.read_line () |> ignore;
+    sscanf (Input.read_line ()) "Program: %s" (fun s ->
         s
         |> String.split_on_char ','
         |> String.concat "", state)
@@ -69,7 +69,7 @@ struct
     let code, state = read_input () in
     let () = eval code state in
     let s = display state.stdout in
-    Ansi.(printf "%a%s%a\n%!" fg green s clear color)
+    Solution.printf "%s" s
 
 
   (* if we decode the program from the input:
@@ -119,7 +119,7 @@ struct
     let a = find_quine code state in
     let () = eval code { state_copy with a } in
     assert (code = (display state_copy.stdout |> String.split_on_char ',' |> String.concat ""));
-    Ansi.(printf "%a%d%a\n%!" fg green a clear color)
+    Solution.printf "%d" a
 
 end
 

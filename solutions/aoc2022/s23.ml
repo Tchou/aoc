@@ -105,12 +105,12 @@ module Sol = struct
     let min_x, max_x, min_y, max_y = count_elves elves in
     let size = (max_x - min_x + 1) * (max_y - min_y + 1) in
     let empty = size - Hashtbl.length elves in
-    Format.printf "%d@\n%!" empty
+    Solution.printf "%d" empty
 
   let solve_part2 () =
     let elves = load_level () in
     let n = simulate elves max_int in
-    Format.printf "%d@\n%!" (n + 1)
+    Solution.printf "%d" (n + 1)
 end
 
 let () = Solution.register_mod (module Sol)

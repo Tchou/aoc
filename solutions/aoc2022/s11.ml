@@ -93,9 +93,9 @@ let parse_monkeys reducer () =
   let acc = ref [] in
   let divisors = ref [] in
   let rec loop () =
-    let _monkey_number = read_line () in
+    let _monkey_number = Input.read_line () in
     let items =
-      match String.split_on_char ':' (read_line ()) with
+      match String.split_on_char ':' (Input.read_line ()) with
       | [ _; lst ] ->
           let values =
             lst |> String.split_on_char ',' |> List.map String.trim
@@ -107,30 +107,30 @@ let parse_monkeys reducer () =
       | _ -> failwith "Invalid item spec:"
     in
     let operation =
-      match String.split_on_char '=' (read_line ()) with
+      match String.split_on_char '=' (Input.read_line ()) with
       | [ _; formula ] ->
           formula |> String.trim |> String.split_on_char ' ' |> mk_operation
       | _ -> failwith "Invalid compute spec"
     in
     let divisor =
-      match read_line () |> String.trim |> String.split_on_char ' ' with
+      match Input.read_line () |> String.trim |> String.split_on_char ' ' with
       | [ "Test:"; "divisible"; "by"; sn ] -> int_of_string sn
       | _ -> failwith "Invalid criterion"
     in
     let () = divisors := divisor :: !divisors in
     let dest_true =
-      match read_line () |> String.trim |> String.split_on_char ' ' with
+      match Input.read_line () |> String.trim |> String.split_on_char ' ' with
       | [ "If"; "true:"; "throw"; "to"; "monkey"; sn ] -> int_of_string sn
       | _ -> failwith "Invalid destination true"
     in
     let dest_false =
-      match read_line () |> String.trim |> String.split_on_char ' ' with
+      match Input.read_line () |> String.trim |> String.split_on_char ' ' with
       | [ "If"; "false:"; "throw"; "to"; "monkey"; sn ] -> int_of_string sn
       | _ -> failwith "Invalid destination false"
     in
     acc :=
       { items; operation; divisor; dest_true; dest_false; count = 0 } :: !acc;
-    let _empty = read_line () in
+    let _empty = Input.read_line () in
     loop ()
   in
   let monkeys =
@@ -159,7 +159,7 @@ let solve reducer rounds () =
   let monkeys = parse_monkeys reducer () in
   let () = eval reducer monkeys rounds in
   let mb = monkey_business monkeys in
-  Format.printf "%d\n" mb
+  Solution.printf "%d" mb
 
 module Sol = struct
   let name = Name.mk "s11"

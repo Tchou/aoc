@@ -49,7 +49,7 @@ struct
          let dys_list = fd (numbers s2) in
          acc + count_arrangements puzzle dys_list
       ) 0
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let five s l =
     List.concat [l;s;l;s;l;s;l;s;l]

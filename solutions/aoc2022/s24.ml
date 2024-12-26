@@ -149,17 +149,12 @@ module Sol = struct
 
   let solve_part1 () =
     let start, exit, width, height, grid = load_level () in
-    let () =
-      Format.eprintf "START is : %d %d\n%!" (fst start) (snd start);
-      Format.eprintf "EXIT is : %d %d w=%d, h=%d, @\n%!" (fst exit) (snd exit)
-        width height
-    in
     let period = find_period grid width height in
     let graph, goals = create_digrpah start exit width height period grid in
     let finish_map = Algo.dijkstra graph (start, 0) goals in
     let res = Hashtbl.fold (fun _ (n, _) acc -> min n acc) finish_map max_int in
 
-    Format.eprintf "%d@\n%!" res
+    Solution.printf "%d" res
 
   let solve_part2 () =
     let start, exit, width, height, grid = load_level () in
@@ -172,7 +167,6 @@ module Sol = struct
         finish_map
         ((start, 0), max_int)
     in
-    Format.eprintf "LEN1: %d@\n%!" len1;
     let targets1 = ref [] in
     let () =
       for i = 0 to period - 1 do
@@ -186,7 +180,6 @@ module Sol = struct
         finish_map1
         ((start, 0), max_int)
     in
-    Format.eprintf "LEN2: %d@\n%!" len2;
     let targets2 = ref [] in
     let () =
       for i = 0 to period - 1 do
@@ -200,8 +193,7 @@ module Sol = struct
         finish_map2
         ((start, 0), max_int)
     in
-    Format.eprintf "LEN3: %d@\n%!" len3;
-    Format.printf "%d@\n%!" (len1 + len2 + len3)
+    Solution.printf "%d" (len1 + len2 + len3)
 end
 
 let () = Solution.register_mod (module Sol)

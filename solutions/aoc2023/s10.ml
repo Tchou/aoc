@@ -114,13 +114,13 @@ struct
   let solve_part1 () =
     let start, maze = Maze.load () in
     let n,_ = Maze.simplify maze start in
-    Ansi.printf "%d\n" n
+    Solution.printf "%d" n
 
-  let solve_part2 () =
+  let part2 verbose =
     let start, maze = Maze.load () in
     let _, out_maze = Maze.simplify maze start in
     let n, map = Maze.count_cells out_maze in
-    Array.iteri (fun r l ->
+    if verbose then Array.iteri (fun r l ->
         String.iteri (fun c s ->
             if map %? (r,c) then
               Ansi.(printf "%a*%a" bfg cyan clear color)
@@ -129,7 +129,16 @@ struct
           ) l;
         Ansi.printf "\n"
       ) out_maze;
-    Ansi.printf "%d\n" n
+    Solution.printf "%d" n
+
+  let solve_part2 () = part2 false
 end
 
 let () = Solution.register_mod (module S)
+module SV =
+struct
+  let name = S.name
+  let solve_part1 = S.solve_part1
+  let solve_part2 () = S.part2 true
+end
+let () = Solution.register_mod ~variant:"verbose" (module SV)

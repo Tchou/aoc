@@ -19,7 +19,7 @@ struct
               if the intersection of tr2 and relative1 has more
                 than 12 elements, we know that p1 and p2
                 represent the same beacon, seen from 2 sensors s1 and s2, break
-                we can deduce the position of s2 w.r.t s1 and the transformation to apply.  
+                we can deduce the position of s2 w.r.t s1 and the transformation to apply.
   *)
 
   module Point = struct
@@ -172,7 +172,7 @@ struct
 
   let solve_part1 () =
     let beacons, _ = solve () in
-    Ansi.printf "%d@\n" (PointSet.cardinal beacons)
+    Solution.printf "%d" (PointSet.cardinal beacons)
   let solve_part2 () =
     let _, scanner_pos = solve () in
     let max_dist = ref 0 in
@@ -183,7 +183,7 @@ struct
         max_dist := max !max_dist (abs d.x + abs d.y + abs d.z);
       done
     done;
-    Ansi.printf "%d@\n" !max_dist
+    Solution.printf "%d" !max_dist
 end
 
 let () = Solution.register_mod (module S)

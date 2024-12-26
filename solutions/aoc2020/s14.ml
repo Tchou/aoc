@@ -58,8 +58,7 @@ struct
   let solve_part1 () =
     let instrs = read_input () in
     let s = eval_instrs instrs in
-    Ansi.(printf "%a%d%a\n" fg green s clear color)
-
+    Solution.printf "%d" s
 
   type trie =
       Empty
@@ -68,7 +67,9 @@ struct
     | One of trie
     | X of trie
     | ZeroOne of trie * trie
+
   type bit = B0 | B1 | BX
+
   let bit_of_char = function '0' -> B0
     | '1' -> B1
     | _ -> BX
@@ -121,7 +122,7 @@ struct
         List.fold_left (insert instr.smask) t instr.instrs
       ) Empty instrs in
     let n = sum_trie trie in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 end
 
 

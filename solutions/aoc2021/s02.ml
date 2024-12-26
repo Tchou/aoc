@@ -13,7 +13,7 @@ struct
           | "up" -> (hpos, depth - d)
           | _ -> assert false
         ) (0, 0)
-    in Ansi.printf "%d\n" (x*y)
+    in Solution.printf "%d" (x*y)
   let solve_part2 () =
     let x, y, _ =
       Input.fold_scan "%s %d" (fun (hpos, depth, aim) s d ->
@@ -23,7 +23,7 @@ struct
           | "up" -> (hpos, depth, aim - d)
           | _ -> assert false
         ) (0, 0, 0)
-    in Ansi.printf "%d\n" (x*y)
+    in Solution.printf "%d" (x*y)
 
 end
 

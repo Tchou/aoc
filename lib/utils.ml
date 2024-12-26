@@ -176,8 +176,7 @@ module Time = struct
     let t1 = Unix.gettimeofday () in
     res, 1000. *. (t1 -. t0)
 end
-let input = ref stdin
-let get_input = function None -> !input | Some i -> i
+let get_input = function None -> Solution.get_input () | Some i -> i
 module InputUntil = struct
 
   let rec fold_lines ?input f acc =
@@ -261,7 +260,7 @@ module InputUntil = struct
 end
 module Input =
 struct
-  let set_input ic = input := ic
+  let set_input = Solution.set_input
   let fold_lines ?input f = InputUntil.fold_lines ?input (fun a e -> true, f a e)
   let fold_scan ?input fmt f acc =
     fold_lines ?input (fun acc s -> Scanf.sscanf s fmt (f acc)) acc
@@ -272,51 +271,16 @@ struct
   let fold_chars ?input f = InputUntil.fold_chars ?input (fun a e -> true, f a e)
   let fold_uchars ?input f = InputUntil.fold_uchars ?input (fun a e -> true, f a e)
 
-end
-module Ansi = struct
-  let printf = Format.printf
-  let sprintf = Format.asprintf
-  let eprintf = Format.eprintf
-  let fprintf = Format.fprintf
+  let read_line ?input () =
+    let input = get_input input in
+    input_line input
 
-  module FTable = Hashtbl.Make(struct type t = Format.formatter let hash = Hashtbl.hash let equal = (==) end)
-  let for_tty_table = FTable.create 16
-  let set_for_tty fmt = FTable.replace for_tty_table fmt ()
-  let unset_for_tty fmt = FTable.remove for_tty_table fmt
-  let is_a_tty fmt =
-    let open Format in
-    if FTable.mem for_tty_table fmt then true
-    else
-      let ofmt = if fmt == std_formatter then Some Unix.stdout
-        else if fmt == err_formatter then Some Unix.stderr
-        else None
-      in match ofmt with
-        None -> false
-      | Some fd -> Unix.isatty fd
-
-  type color = int
-  type dev = string
-  let black = 30
-  let red = 31
-  let green = 32
-  let yellow = 33
-  let blue = 34
-  let magenta = 35
-  let cyan = 36
-  let white = 37
-  let cursor = "1;1H"
-  let screen  = "2J"
-  let line = "2K"
-  let color = "0m"
-  let clear fmt s = (*if is_a_tty fmt then*) Format.fprintf fmt "\x1b[%s" s
-  let pr fmt d = (*if is_a_tty fmt then *)Format.fprintf fmt "\x1b[%dm" d
-  let fg fmt d = pr fmt d
-  let bg fmt d = pr fmt (d + 10)
-  let bfg fmt d = pr fmt (d + 60)
-  let bbg fmt d = pr fmt (d + 70)
-
+  let read_char ?input () =
+    let input = get_input input in
+    input_char input
 
 end
+module Ansi = Ansi
 module Agg = struct
   module type T = sig
     type ('acc, 'elem) t

@@ -69,7 +69,7 @@ are unnaccounted for. To compensate we add half the perimeter + 1.
     let input = load_input () in
     let rects, perim = make_rect take input in
     let area = shoelace rects in
-    Ansi.printf "%d\n" (area + perim / 2 + 1)
+    Solution.printf "%d" (area + perim / 2 + 1)
   let solve_part1 () = solve fst
 
   let solve_part2 () = solve snd

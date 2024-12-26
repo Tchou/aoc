@@ -63,8 +63,7 @@ struct
     let code = Intcode.read () in
     let network = init_network 50 code in
     let y = run_network with_nat  network in
-    Ansi.(printf "%a%d%a\n%!" fg green y clear color)
-
+    Solution.printf "%d" y
   let solve_part1 () = solve false
 
   let solve_part2 () = solve true

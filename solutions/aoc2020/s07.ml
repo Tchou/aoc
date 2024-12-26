@@ -8,7 +8,7 @@ struct
   let load_input () =
     let tree = ~%[] in
     Input.fold_scan "%s %s bags contain%[ a-z0-9,]." (fun () key1 key2 s ->
-        let key = key1 ^ " " ^ key2 in  
+        let key = key1 ^ " " ^ key2 in
         let l =
           match String.split_on_char ',' s with
             [" no other bags" ] -> []
@@ -42,7 +42,7 @@ struct
   let solve_part1 () =
     load_input ()
     |> count_shiny_gold
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 
   let rec count_bags k tree =
@@ -53,7 +53,7 @@ struct
     load_input ()
     |> count_bags "shiny gold"
     |> pred (* don't count the shiny bag itself *)
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 end
 

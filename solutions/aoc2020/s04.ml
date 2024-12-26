@@ -50,12 +50,12 @@ struct
       Scanf.sscanf h.%{"pid"} "%[0-9]" (fun s -> String.length s = 9)
     with _ ->
       false
-  let solve_part1 () =
-    let n, _ = load_input valid1 in
-    Ansi.printf "%d\n" n
-  let solve_part2 () =
-    let n, _ = load_input valid2 in
-    Ansi.printf "%d\n" n
+  let solve valid =
+    let n, _ = load_input valid in
+    Solution.printf "%d" n
+
+  let solve_part1 () = solve valid1
+  let solve_part2 () = solve valid2
 
 end
 

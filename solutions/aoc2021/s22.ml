@@ -195,12 +195,10 @@ struct
            else Cube.remove acc cube
          else acc) []
     |> count
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part1 () = solve 50
-  let solve_part2 () =
-    let (), t = Time.time solve (max_int - 1) in
-    Ansi.printf "%fms@\n" t
+  let solve_part2 () = solve (max_int - 1) 
 
 end
 let () = Solution.register_mod (module S)

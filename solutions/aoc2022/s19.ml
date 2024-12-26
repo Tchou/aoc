@@ -194,15 +194,11 @@ let run_blueprints f init bps n =
   let res =
     List.fold_left
       (fun acc (i, bp) ->
-         Format.eprintf "Running blueprint %d@\n%!" i;
-         let t0 = Unix.gettimeofday () in
          let geode = simulate n bp default_config in
-         let t1 = Unix.gettimeofday () in
-         Format.eprintf "Found %d geodes in %fms@\n%!" geode (1000. *. (t1 -. t0));
          f acc i geode)
       init bps
   in
-  Format.printf "%d@\n" res
+  Solution.printf "%d" res
 
 module Sol = struct
   let name = Name.mk "s19"

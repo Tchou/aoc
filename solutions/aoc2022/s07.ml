@@ -66,7 +66,7 @@ let solve compute () =
       root_path
   in
   let t = Dir ~%[ "/", Dir root_dir ] in
-  Format.printf "%d@\n" (compute t)
+  Solution.printf "%d" (compute t)
 
 module Sol = struct
   let name = Name.mk "s07"

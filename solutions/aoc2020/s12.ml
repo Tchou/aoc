@@ -108,7 +108,7 @@ struct
           | _ -> state
         ) initial moves
     in
-    Ansi.(printf "%a%d%a\n" fg green (dist s) clear color)
+    Solution.printf "%d" (dist s)
 
   let solve_part1 () = solve (module Move1)
   let solve_part2 () = solve (module Move2)

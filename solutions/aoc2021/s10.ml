@@ -28,7 +28,7 @@ struct
         | Some '}' -> 1197 + acc
         | Some '>' -> 25137 + acc
         | _ -> acc) 0
-    |>Printf.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () =
     let scores =
       Input.fold_lines (fun acc s ->
@@ -47,7 +47,7 @@ struct
     let scores = Array.of_list scores in
     let () = Array.sort compare scores in
     let len = Array.length scores / 2 in
-    Printf.printf "%d\n" scores.(len)
+    Solution.printf "%d" scores.(len)
 end
 
 let () = Solution.register_mod (module S)

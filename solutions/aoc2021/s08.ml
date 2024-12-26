@@ -14,7 +14,7 @@ struct
                            acc+1
                          else acc) acc
         | _ -> acc) 0
-    |> Printf.printf "%d\n"
+    |> Solution.printf "%d"
 
   module CharSet = Set.Make(Char)
 
@@ -66,7 +66,7 @@ struct
         function [s1; s2] ->
           let decoded = String.split_on_char ' ' s1 |> decode in
           let l2 = String.split_on_char ' ' s2 in
-          let l2 = l2 |> List.filter_map 
+          let l2 = l2 |> List.filter_map
                      (function "" -> None
                              | s -> Some (CharSet.of_list (String.explode s)))
           in
@@ -75,10 +75,9 @@ struct
               Array.iteri (fun i cs2 ->
                   if CharSet.equal cs cs2 then s := !s * 10 + i) decoded
             );
-          Printf.printf "%d\n" !s;
           acc + !s
                | _ -> acc) 0
-    |> Printf.printf "%d\n"
+    |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

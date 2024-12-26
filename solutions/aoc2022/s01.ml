@@ -21,8 +21,8 @@ module S = struct
           | i -> current_sum + int_of_string i)
         0
     in
-    let sum = Array.fold_left ( + ) 0 arr_max in
-    Printf.printf "%d\n" sum
+    let n = Array.fold_left ( + ) 0 arr_max in
+    Solution.printf "%d" n
 
   let solve_part1 () = solve 1
   let solve_part2 () = solve 3

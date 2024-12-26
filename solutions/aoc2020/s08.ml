@@ -46,12 +46,12 @@ struct
     load_input ()
     |> eval [] 0 0
     |> fst
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
     load_input ()
     |> fix_loop
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 end
 

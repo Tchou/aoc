@@ -5,13 +5,13 @@ struct
   let name = Name.mk "s03"
 
   let read_wire () =
-    read_line ()
+    Input.read_line ()
     |> String.split_on_char ','
     |> List.map (fun s ->
         Scanf.sscanf s "%[DULR]%d" (fun ds n ->
             let d =
               match ds with
-                "D" -> (0,1)
+              |"D" -> (0,1)
               |"U" -> (0, -1)
               |"L" -> (-1, 0)
               |"R" -> (1, 0)
@@ -53,7 +53,7 @@ struct
     let wire1 = read_wire () in
     let wire2 = read_wire () in
     let n = f (run_wires wire1 wire2) in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
   let solve_part1 () = solve fst
   let solve_part2 () = solve snd
 end

@@ -26,11 +26,6 @@ struct
   let compose_list m = List.fold_left (compose m) id
 
   let apply m (a, b) x = Z.((a * x + b) mod m)
-  (*
-            cut 4
-
-      4  5  6  7  8  9  0  1  2  3
-  *)
 
 
   let read_input () =
@@ -57,7 +52,7 @@ struct
     let len = Z.of_int 10007 in
     let op = compose_list len ops in
     let n = apply len op (Z.of_int 2019) in
-    Ansi.(printf "%a%a%a\n%!" fg green Z.pp n clear color)
+    Solution.printf "%a" Z.pp n
 
   module ZMath = MathGen(Z)
 
@@ -80,8 +75,7 @@ struct
     let ainv, _, _ = ZMath.egcd a len in
     let b = Z.((-b * ainv) mod len) in
     let n = apply len (ainv, b) Z.(of_int 2020) in
-    Ansi.(printf "%a%a%a\n%!" fg green Z.pp n clear color)
-
+    Solution.printf "%a" Z.pp n
 
 end
 

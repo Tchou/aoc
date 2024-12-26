@@ -18,7 +18,7 @@ let solve test_interval =
         | _ -> total)
       0
   in
-  Printf.printf "%d\n" res
+  Solution.printf "%d" res
 
 let intersect (a, b) (c, d) = (a <= c && c <= b) || (c <= a && a <= d)
 

@@ -34,8 +34,7 @@ struct
           else lb
   in
   let n = mul_reader 0 lb in
-  Ansi.(printf "%a%d%a\n" fg green n clear color)
-
+  Solution.printf "%d" n
   let solve_part1 () = solve false
   let solve_part2 () = solve true
 

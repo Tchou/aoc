@@ -26,12 +26,12 @@ struct
     in
     let _ = Intcode.eval state in
     let n = state.Intcode.@(0) in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part2 () =
     let code = Intcode.read () in
     let n = find_inputs code in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

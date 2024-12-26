@@ -40,7 +40,7 @@ struct
     let count = ref 0 in
     iter_neighbours (fun n -> if map %? n then incr count
                       else
-                        inactives.%{Array.copy n} <- 
+                        inactives.%{Array.copy n} <-
                           1 + (inactives.%?{n} or 0)) cube;
     !count
   let count map cube =
@@ -66,7 +66,7 @@ struct
       map := cycle !map;
     done;
     let n = Hashtbl.length !map in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve false
   let solve_part2 () = solve true

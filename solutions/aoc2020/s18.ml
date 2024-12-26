@@ -82,7 +82,7 @@ struct
     let n = exprs
             |> List.fold_left (Agg.Left.sum (eval prio)) 0
     in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve prio1
   let solve_part2 () = solve prio2

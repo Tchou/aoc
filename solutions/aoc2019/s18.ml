@@ -75,7 +75,6 @@ struct
             grid.G.!(q) <- '@';
             keys := (q,'@') :: !keys;
           end);
-    G.iter_lines (fun b -> Format.printf "%a\n%!" Format.pp_print_bytes b) grid;
     let keys = List.sort (Compare.snd) !keys in
     let graph = ~%[] in
     let rec loop = function
@@ -103,7 +102,6 @@ struct
                   else acc
                 ) graph []
               in
-              Format.printf "ORIGIN: %c, keys=>%a\n%!" orig pp_letters (List.map (fun c -> 0,c) keys);
               keys |> String.implode);
        origin = if part1 then 0x40 else 0x3d3e3f40;
     }
@@ -188,7 +186,7 @@ struct
     let grid = G.read () in
     let graph = init part1 grid in
     let n = min_dist (if part1 then 1 else 4) graph in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve true
   let solve_part2 () = solve false

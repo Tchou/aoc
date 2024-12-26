@@ -2,7 +2,7 @@ open Utils
 module S =
 struct
   let name = Name.mk "s09"
-  let read_input () = read_line ()
+  let read_input () = Input.read_line ()
   let total_length =
     String.fold_left (Agg.Left.sum (fun c -> Char.code c - Char.code '0')) 0
 
@@ -70,7 +70,7 @@ struct
     let blocks = rle s in
     let files = compact insert blocks in
     let n = checksum files in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve insert_split
   let solve_part2 () = solve insert_fit

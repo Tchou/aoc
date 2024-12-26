@@ -52,11 +52,11 @@ struct
   let solve_part1 () =
     load_input ()
     |> count_diff
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () =
     load_input ()
     |> count_arrangements
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 end
 
 let () = Solution.register_mod (module S)

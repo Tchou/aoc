@@ -32,7 +32,7 @@ struct
   let solve resonnance =
     let grid = G.read() in
     let n = count_antinodes resonnance grid in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve false
   let solve_part2 () = solve true

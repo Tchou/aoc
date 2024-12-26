@@ -43,7 +43,7 @@ struct
   end
 
   let read_player () =
-    let s = read_line () in
+    let s = Input.read_line () in
     Scanf.sscanf s "Player %[12]:"
       (fun _ ->
          InputUntil.fold_lines (fun acc l ->
@@ -93,7 +93,7 @@ struct
     let _, n = Pqueue.fold
         (fun (i, n) c -> (i-1, n+i*c)) (l, 0) q
     in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve false
 

@@ -43,7 +43,7 @@ struct
   end
 
   let read_input () =
-    let s = read_line () in
+    let s = Input.read_line () in
     let t = Dll.make (Char.code s.[0] - Char.code '0') in
     for i = 1 to String.length s - 1 do
       Dll.push_before t (Char.code s.[i] - Char.code '0')
@@ -101,14 +101,14 @@ struct
     let t = read_input () in
     let t1 = play 9 100 t in
     let s = collect t1 in
-    Ansi.(printf "%a%s%a\n" fg green s clear color)
+    Solution.printf "%s" s
 
   let solve_part2 () =
     let t = read_input () in
     let t = fill_million t in
     let t1 = play 1_000_000 10_000_000 t in
     let n = t1.next.value * t1.next.next.value in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

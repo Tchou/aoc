@@ -80,8 +80,7 @@ struct
         (if V.random then Seq.of_dispenser random_dir else List.to_seq moves)
     in
     let n = score grid in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
-
+    Solution.printf "%d" n
 
   let zoom grid =
     grid |> G.map_lines (fun b ->
@@ -165,7 +164,7 @@ struct
         (if V.random then Seq.of_dispenser random_dir else List.to_seq moves)
     in
     let n = score grid in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 module S = Make (struct let animate = Float.nan let skip = 0 let random = false end)

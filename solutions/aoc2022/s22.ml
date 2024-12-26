@@ -18,7 +18,7 @@ For Part two the following approach is used :
   above the current face. We use this information to realign the faces from our
   table (by doing a circular rotation of the array of the other faces until it
   matches). With that we can number each face and its neighbours:
-
+@\n%!
 
         ...#               5
         .#..              314
@@ -170,21 +170,21 @@ let pp_face_with_pos pos fmt f =
   Format.fprintf fmt "adjacent:%s@\n"
     (String.concat ", "
        ((Array.mapi (fun i e ->
-             Format.asprintf "%d(%a)" e Edge.pp Edge.(of_int i)))
+            Format.asprintf "%d(%a)" e Edge.pp Edge.(of_int i)))
           f.adjacent
-       |> Array.to_list));
+        |> Array.to_list));
   Format.fprintf fmt "pixels:@\n";
   Array.iteri
     (fun i r ->
-      Array.iteri
-        (fun j (_, c) ->
-          let c =
-            let (a, b), dir = pos in
-            if a = i && b = j then char_of_idir (int_of_dir dir) else c
-          in
-          Format.fprintf fmt "%c" c)
-        r;
-      Format.fprintf fmt "@\n")
+       Array.iteri
+         (fun j (_, c) ->
+            let c =
+              let (a, b), dir = pos in
+              if a = i && b = j then char_of_idir (int_of_dir dir) else c
+            in
+            Format.fprintf fmt "%c" c)
+         r;
+       Format.fprintf fmt "@\n")
     f.pixels
 
 let pp_face fmt f = pp_face_with_pos dummy_pos fmt f
@@ -202,7 +202,6 @@ let prepare_faces g =
             pixels.(i - row).(j - col) <- (i, j), get g (i, j)
           done
         done;
-        Format.eprintf "FOUND FACE: %d, %d@\n%!" row col;
         faces_by_coords.%{row, col} <- { dummy_face with pixels }
       done
     done
@@ -212,15 +211,15 @@ let prepare_faces g =
     if faces_by_coords %? (r, c) then begin
       match faces_by_coords.%{r, c} with
       | { adjacent = [||]; _ } ->
-          let adjacent =
-            Dice.align_faces (List.assoc id Dice.faces) parent (to_int par_edge)
-          in
-          let face = { (faces_by_coords.%{r, c}) with id; adjacent; coord } in
-          faces_by_coords.%{r, c} <- face;
-          g.faces.%{id} <- face;
-          loop_faces (r, c - g.size) adjacent.(to_int Left) id Right;
-          loop_faces (r, c + g.size) adjacent.(to_int Right) id Left;
-          loop_faces (r + g.size, c) adjacent.(to_int Bottom) id Top
+        let adjacent =
+          Dice.align_faces (List.assoc id Dice.faces) parent (to_int par_edge)
+        in
+        let face = { (faces_by_coords.%{r, c}) with id; adjacent; coord } in
+        faces_by_coords.%{r, c} <- face;
+        g.faces.%{id} <- face;
+        loop_faces (r, c - g.size) adjacent.(to_int Left) id Right;
+        loop_faces (r, c + g.size) adjacent.(to_int Right) id Left;
+        loop_faces (r + g.size, c) adjacent.(to_int Bottom) id Top
       | _ -> ()
     end
   in
@@ -254,13 +253,13 @@ let step3d grid (face, (r, c)) ((i, j) as dir) =
     | Top, Left | Bottom, Right -> (nface, (c, r)), right dir
     | Left, Top | Right, Bottom -> (nface, (c, r)), left dir
     | Right, Top | Left, Bottom ->
-        (nface, (grid.size - c - 1, grid.size - r - 1)), right dir
+      (nface, (grid.size - c - 1, grid.size - r - 1)), right dir
     | Top, Right | Bottom, Left ->
-        (nface, (grid.size - c - 1, grid.size - r - 1)), left dir
+      (nface, (grid.size - c - 1, grid.size - r - 1)), left dir
     | Bottom, Bottom | Top, Top ->
-        (nface, (r, grid.size - c - 1)), left (left dir)
+      (nface, (r, grid.size - c - 1)), left (left dir)
     | Right, Right | Left, Left ->
-        (nface, (grid.size - r - 1, c)), left (left dir)
+      (nface, (grid.size - r - 1, c)), left (left dir)
 
 let p3d_to_2d (face, (row, col)) = fst face.pixels.(row).(col)
 
@@ -271,20 +270,20 @@ let dummy = ~%[]
 let pp_grid ?(map = dummy) fmt grid =
   Array.iteri
     (fun r row ->
-      Format.fprintf fmt "%s" (String.make row.start ' ');
-      for i = 0 to row.length - 1 do
-        let c = row.start + i in
-        let chr, pre, post =
-          try
-            let dir, color = map.%{r, c} in
-            ( char_of_idir (int_of_dir dir),
-              Format.sprintf "\x1b[0;3%dm" color,
-              "\x1b[0m" )
-          with Not_found -> get grid (r, c), "", ""
-        in
-        Format.fprintf fmt "%s%c%s" pre chr post
-      done;
-      Format.fprintf fmt "@\n")
+       Format.fprintf fmt "%s" (String.make row.start ' ');
+       for i = 0 to row.length - 1 do
+         let c = row.start + i in
+         let chr, pre, post =
+           try
+             let dir, color = map.%{r, c} in
+             ( char_of_idir (int_of_dir dir),
+               Format.sprintf "\x1b[0;3%dm" color,
+               "\x1b[0m" )
+           with Not_found -> get grid (r, c), "", ""
+         in
+         Format.fprintf fmt "%s%c%s" pre chr post
+       done;
+       Format.fprintf fmt "@\n")
     grid.rows
 
 let index_of s c = try String.index s c with Not_found -> String.length s
@@ -294,35 +293,35 @@ let load_level () =
   let accg, acco =
     Input.fold_lines
       (fun (accg, acco) line ->
-        if line = "" then accg, acco
-        else
-          let i = index_of line '.' in
-          if i >= String.length line then
-            (* order line *)
-            ( accg,
-              let buff = Buffer.create 16 in
-              let () =
-                line
-                |> String.iter (function
+         if line = "" then accg, acco
+         else
+           let i = index_of line '.' in
+           if i >= String.length line then
+             (* order line *)
+             ( accg,
+               let buff = Buffer.create 16 in
+               let () =
+                 line
+                 |> String.iter (function
                      | ('L' | 'R') as c ->
-                         Buffer.add_char buff ';';
-                         Buffer.add_char buff c;
-                         Buffer.add_char buff ';'
+                       Buffer.add_char buff ';';
+                       Buffer.add_char buff c;
+                       Buffer.add_char buff ';'
                      | c -> Buffer.add_char buff c)
-              in
-              Buffer.contents buff |> String.split_on_char ';'
-              |> List.filter_map (function
+               in
+               Buffer.contents buff |> String.split_on_char ';'
+               |> List.filter_map (function
                    | "" -> None
                    | "L" -> Some Move.Left
                    | "R" -> Some Move.Right
                    | i -> Some (Move.Forward (int_of_string i))) )
-          else
-            (* grid *)
-            let start = min (index_of line '.') (index_of line '#') in
-            let line = String.trim line in
-            ( { start; length = String.length line; row = Bytes.of_string line }
-              :: accg,
-              acco ))
+           else
+             (* grid *)
+             let start = min (index_of line '.') (index_of line '#') in
+             let line = String.trim line in
+             ( { start; length = String.length line; row = Bytes.of_string line }
+               :: accg,
+               acco ))
       ([], [])
   in
   let rows = accg |> List.rev |> Array.of_list in
@@ -353,34 +352,46 @@ let walk step init_pos to2d grid orders =
     | Move.Left :: ll -> loop pos (left dir) ll
     | Move.Right :: ll -> loop pos (right dir) ll
     | Move.Forward n :: ll ->
-        let npos, ndir = forward step to2d grid pos dir n in
-        loop npos ndir ll
+      let npos, ndir = forward step to2d grid pos dir n in
+      loop npos ndir ll
   in
   loop init_pos (0, 1) orders
 
 module Sol = struct
   let name = Name.mk "s22"
 
-  let solve_part1 () =
+  let part1 display =
     let grid, moves = load_level () in
     let (r, c), dir =
       walk step2d (0, grid.rows.(0).start) (fun x -> x) grid moves
     in
     let d = int_of_dir dir in
-    Format.eprintf "%a@\n%!" (pp_grid ~map:path) grid;
+    if display then Ansi.printf "%a@\n%!" (pp_grid ~map:path) grid;
     let res = (1000 * (1 + r)) + (4 * (1 + c)) + d in
-    Format.printf "%d@\n%!" res
+    Solution.printf "%d" res
 
-  let solve_part2 () =
+  let part2 display =
     let grid, moves = load_level () in
     let _ = prepare_faces grid in
     let init = grid.faces.%{1}, (0, 0) in
     let fpos, dir = walk step3d init p3d_to_2d grid moves in
     let r, c = p3d_to_2d fpos in
     let d = int_of_dir dir in
-    Format.eprintf "%a@\n%!" (pp_grid ~map:path) grid;
+    if display then Ansi.printf "%a@\n%!" (pp_grid ~map:path) grid;
     let res = (1000 * (1 + r)) + (4 * (1 + c)) + d in
-    Format.printf "%d@\n%!" res
+    Solution.printf "%d" res
+
+  let solve_part1 () = part1 false
+  let solve_part2 () = part2 false
 end
 
 let () = Solution.register_mod (module Sol)
+
+module SA =
+struct
+  let name = Sol.name
+  let solve_part1 () = Sol.part1 true
+  let solve_part2 () = Sol.part2 true
+end
+
+let () = Solution.register_mod ~variant:"display" (module SA)

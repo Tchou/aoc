@@ -57,8 +57,7 @@ struct
   let solve_part1 () =
     let grid = read_input () in
     let n, _, _ = count_max_visible grid in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
-
+    Solution.printf "%d" n
 
   (* Angle between V1 and V2, with origin V0,
      clockwise in degrees.
@@ -103,17 +102,7 @@ struct
     let grid = read_input () in
     let _, ((x0, y0) as origin), all_points = count_max_visible grid in
     let x, y = vaporize 200 origin all_points in
-    Ansi.(printf "%a%d%a\n" fg green (x*100+y) clear color)
-
-  (*
-                (3,2)
-                /
-   (-2, 0)--(0,0)
-
-   cos -1 [(3)(-2) + (2)(0)][ sqrt(13)*sqrt(4)]
-
-  *)
-
+    Solution.printf "%d" (x*100+y)
 
 end
 

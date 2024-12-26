@@ -37,7 +37,7 @@ struct
   let (.@()) grid (r, c) = grid.(r).[c]
   let is_valid grid (r, c) =
     r >= 0 && c >= 0 && r < Array.length grid &&
-    c < String.length grid.(c) && grid.@(r, c) <> '#'
+    c < String.length grid.(r) && grid.@(r, c) <> '#'
 
   module PosSet = Set.Make (struct type t = int * int let compare = compare end)
   let rec walk grid n positions =
@@ -56,16 +56,17 @@ struct
     let grid, start = load_input () in
     walk grid 64 (PosSet.singleton start)
     |> PosSet.cardinal
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let emod a b = ((a  mod b) + b ) mod b
   let ediv a b = if a >= 0 then a / b else ((a+1) /b) - 1
+
   let count_walk grid n set =
     let height = Array.length grid in
     let width = String.length grid.(0) in
     let rec loop n set =
       if n > 0 then begin
-        PosSet.fold (fun pos acc -> 
+        PosSet.fold (fun pos acc ->
             List.fold_left (fun acc d ->
                 let r, c = pos +> d in
                 let r_mod = emod r height in
@@ -79,40 +80,40 @@ struct
     in
     loop n set
 
-  let split grid set =
-    let table = ~%[] in
-    let width = String.length grid.(0) in
-    let height = Array.length grid in
-    PosSet.iter (fun (r, c) ->
-        let rg = ediv r height in
-        let cg = ediv c width in
-        table.%{rg, cg} <- PosSet.add (r, c) (table.%?{rg, cg} or PosSet.empty)
-      ) set;
-    Hashtbl.iter (fun (i, j) s ->
-        Ansi.printf "(%d, %d) => %d\n%!" i j (PosSet.cardinal s))
-      table;
-    Ansi.printf "---\n%!"
+    let split grid set =
+      let table = ~%[] in
+      let width = String.length grid.(0) in
+      let height = Array.length grid in
+      PosSet.iter (fun (r, c) ->
+          let rg = ediv r height in
+          let cg = ediv c width in
+          table.%{rg, cg} <- PosSet.add (r, c) (table.%?{rg, cg} or PosSet.empty)
+        ) set(*;
+               Hashtbl.iter (fun (i, j) s ->
+               Ansi.printf "(%d, %d) => %d\n%!" i j (PosSet.cardinal s))
+               table;
+               Ansi.printf "---\n%!"*)
 
   let solve_part2 () =
     let grid, start = load_input () in
     let table = PosSet.singleton start in
     let x1 = 0 in
     let table = count_walk grid 65 table in
-    let () = split grid table in
+    (*let () = split grid table in*)
     let y1 = PosSet.cardinal table in
     let x2 = 1 in
     let table = count_walk grid 131 table in
-    let () = split grid table in
+    (*let () = split grid table in*)
     let y2 = PosSet.cardinal table in
     let x3 = 2 in
     let table = count_walk grid 131 table in
-    let () = split grid table in
+    (*let () = split grid table in*)
     let y3 = PosSet.cardinal table in
     let f x =
       ((x-x2) * (x-x3)) / ((x1-x2) * (x1-x3)) * y1 + ((x-x1) * (x-x3)) / ((x2-x1) * (x2-x3)) * y2 + ((x-x1) * (x-x2)) / ((x3-x1) * (x3-x2)) * y3
     in
     let res0 = f 202300 in
-    Ansi.printf "%d\n" res0
+    Solution.printf "%d" res0
 end
 
 let () = Solution.register_mod (module S)

@@ -92,13 +92,13 @@ struct
     | _ -> assert false
   let parse_num s = fst (parse_num s 0)
   let solve_part1 () =
-    let n1 = parse_num (read_line ()) in
+    let n1 = parse_num (Input.read_line ()) in
     Input.fold_lines (fun acc line ->
         let n = parse_num line in
         let nacc = add acc n in
         nacc) n1
     |> magnitude
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
     let numbers =
@@ -113,7 +113,7 @@ struct
         max_m := max !max_m (magnitude (add numbers.(j) numbers.(i)));
       done;
     done;
-    Ansi.printf "%d\n" !max_m
+    Solution.printf "%d" !max_m
 
 end
 

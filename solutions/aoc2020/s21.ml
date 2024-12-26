@@ -71,7 +71,8 @@ struct
   let solve_part1 () =
     let food_list = read_input () in
     let _, n = count_non_allergen food_list in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
+
   let solve_part2 () =
     let food_list = read_input () in
     let map, _ = count_non_allergen food_list in
@@ -87,7 +88,7 @@ struct
         |> List.map snd
         |> String.concat ","
     in
-    Ansi.(printf "%a%s%a\n" fg green s clear color)
+    Solution.printf "%s" s
 
 end
 

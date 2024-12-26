@@ -29,7 +29,7 @@ struct
     let entries = load_input () in
     List.fold_left (fun acc t -> acc + if valid t then 1 else 0)
       0 entries
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
 
 
   let solve_part1 () = solve valid1

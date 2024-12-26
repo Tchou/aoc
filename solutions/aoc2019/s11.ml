@@ -29,7 +29,7 @@ struct
   let solve_part1 () =
     let code = Intcode.read () in
     let h = paint code 0 in
-    Ansi.(printf "%a%d%a\n" fg green (Hashtbl.length h) clear color)
+    Solution.printf "%d" (Hashtbl.length h)
 
   let render map =
     let min_x = ref 0 in
@@ -47,10 +47,10 @@ struct
     for y = !min_y to !max_y do
       for x = !min_x to !max_x do
         let color = map.%?{x, y} or 0 in
-        if color = 1 then Ansi.(printf "%a %a" bg green clear color)
-        else Ansi.printf " "
+        if color = 1 then Ansi.(Solution.printf "%a %a" bg green clear color)
+        else Solution.printf " "
       done;
-      Ansi.printf "\n%!"
+      Solution.printf "\n%!"
     done
   let solve_part2 () =
     let code = Intcode.read () in

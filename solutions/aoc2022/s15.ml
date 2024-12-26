@@ -17,9 +17,8 @@ abs (X0 - x ) + abs (Y0 - C) < D0
 abs (X0 - x) + < D0 - abs (Y0 - C)
 if D0 - abs (Y0 - C) negative, skip (the point is too far)
   otherwise: let M = D0 - abs (Y0 - C)
- 
-    -M  < X0 - x < M
-    -M - X0 < - x  < M - X0
+    - M  < X0 - x < M
+    - M - X0 < - x  < M - X0
     - (M - X0)  <   x < - (-M - X0)
     X0 - M < x < X0 + M
     2 M-1 integers.
@@ -64,7 +63,7 @@ module Sol = struct
   let solve_part1 () =
     load_level ()
     |> solve_for_y min_int max_int 10
-    |> count_intervals |> Format.printf "%d@\n"
+    |> count_intervals |> Solution.printf "%d"
 
   let solve_part2 () =
     (* Brute force*)
@@ -81,11 +80,11 @@ module Sol = struct
           raise_notrace Exit
         end
       done;
-      Format.printf "Not_found\n%!"
+      Solution.printf "Not_found"
     with Exit ->
       let x, y = !point in
       let res = (4000000 * x) + y in
-      Format.printf "%d@\n%!" res
+      Solution.printf "%d" res
 end
 
 let () = Solution.register_mod (module Sol)

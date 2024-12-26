@@ -7,8 +7,8 @@ struct
     let state = Intcode.make_state code in
     let () = Queue.push input state.stdin in
     let _ = Intcode.eval state in
-    let n = Queue.take state.stdout in 
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    let n = Queue.take state.stdout in
+    Solution.printf "%d" n
 
   let solve_part1 () = solve 1
   let solve_part2 () = solve 5

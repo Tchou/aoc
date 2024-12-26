@@ -43,7 +43,7 @@ struct
   let solve_part1 () =
     load_input()
     |> simulate
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () = ()
 end
 

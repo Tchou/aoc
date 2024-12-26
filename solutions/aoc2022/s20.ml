@@ -79,7 +79,7 @@ let solve f =
       (fun acc n -> acc + find_at_pos cell0 len n)
       0 [ 1000; 2000; 3000 ]
   in
-  Format.printf "%d@\n%!" res
+  Solution.printf "%d" res
 
 module Sol = struct
   let name = Name.mk "s20"

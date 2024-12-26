@@ -62,11 +62,10 @@ struct
     with Found n -> n
 
   let solve_part1 () =
-    let pk1 = read_line () |> int_of_string in
-    let pk2 = read_line () |> int_of_string in
+    let pk1 = Input.read_line () |> int_of_string in
+    let pk2 = Input.read_line () |> int_of_string in
     let n = find_solution pk1 pk2 100 in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
-
+    Solution.printf "%d" n
   let solve_part2 () = ()
 end
 

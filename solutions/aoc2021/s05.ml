@@ -25,7 +25,7 @@ struct
         ) ~%[]
     in
     let num = Hashtbl.fold (fun _ n acc -> if n > 1 then acc+1 else acc) table 0 in
-    Printf.printf "%d\n" num
+    Solution.printf "%d" num
 
   let select1 x1 y1 x2 y2 =
     if x1 = x2 then

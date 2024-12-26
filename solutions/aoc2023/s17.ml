@@ -117,7 +117,7 @@ struct
             )
             s; printf "\n" )g
     end;
-    Ansi.printf "%d\n" len
+    Solution.printf "%d" len
 
 
   let solve_part1 () = solve (module  Graph)

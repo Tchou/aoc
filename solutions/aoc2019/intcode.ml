@@ -7,7 +7,7 @@ let read_from_string s =
   |> List.map int_of_string
   |> Array.of_list
 
-let read () = read_line () |> read_from_string
+let read () = Input.read_line () |> read_from_string
 
 type state = { code : int array;
                mutable pc : int;

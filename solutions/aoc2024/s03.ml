@@ -55,7 +55,7 @@ struct
     let s = read_input () in
     let () = fix s in
     let n = read_muls s in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
   let solve_part1 () = solve ignore
   let solve_part2 () = solve erase_don't
 

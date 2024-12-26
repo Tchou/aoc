@@ -40,7 +40,7 @@ struct
       let l = [ (-1, 0); (1, 0); (0,1); (0,-1)] in
       let nr = n_row g in
       let nc = n_col g in
-      List.iter (fun (i, j) -> 
+      List.iter (fun (i, j) ->
           let ri = r + i in
           let cj = c + j in
           if ri >= 0 && cj >= 0 && ri < nr && cj < nc then
@@ -75,7 +75,7 @@ struct
     let graph = read_input () in
     let n, _p = path_finder size graph in
     (*display size graph p;*)
-    Ansi.printf "%d\n" n
+    Solution.printf "%d" n
   let solve_part1 () = solve 1
 
   let solve_part2 () = solve 5

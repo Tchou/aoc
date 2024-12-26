@@ -77,7 +77,7 @@ struct
   let solve_part1 () =
     load_grid ()
     |> simulate 100 (fun _ n -> n > 0)
-    |> Printf.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part2 () =
     let step = ref 0 in
@@ -89,7 +89,7 @@ struct
           incr step;true
         )
       |> ignore
-    with Exit -> Printf.printf "%d\n" !step
+    with Exit -> Solution.printf "%d" !step
 
 end
 

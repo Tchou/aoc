@@ -48,11 +48,10 @@ struct
         ) ~%[]
     in
     let n = dfs revisit graph in
-    Ansi.printf "%d\n" n
+    Solution.printf "%d" n
 
   let solve_part1 () = solve false
-  let solve_part2 () =
-    Time.time solve true |> snd |> Printf.printf "%f ms\n%!"
+  let solve_part2 () = solve true
 end
 
 let () = Solution.register_mod (module S)

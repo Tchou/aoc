@@ -45,7 +45,7 @@ struct
   let solve sort =
     let order, updates = read_input () in
     let n = sum order sort updates in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve is_sorted
   let solve_part2 () = solve sort

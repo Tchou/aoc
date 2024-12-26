@@ -112,8 +112,19 @@ sig
 
   val fold_uchars : ?input:in_channel -> ('a -> Uchar.t -> 'a) -> 'a -> 'a
   (** [fold_chars f acc] folds over the unicode scalar values of [input], if
-      specified or to the default input channel (see [set_input]). The input is assumed to bu UTF-8 encoded.
+      specified or to the default input channel (see [set_input]). The input is assumed to be UTF-8 encoded.
   *)
+
+  val read_line : ?input:in_channel -> unit -> string
+  (** [read_line ()] reads one line of input from [input], if
+      specified or to the default input channel (see [set_input]).
+  *)
+
+  val read_char : ?input:in_channel -> unit -> char
+  (** [read_line ()] reads one char of input from [input], if
+      specified or to the default input channel (see [set_input]).
+  *)
+
 end
 module InputUntil :
 sig
@@ -159,40 +170,7 @@ sig
 end
 
 (** Ainsi escape sequences, mainly for pretty-printing. *)
-module Ansi : sig
-  type color
-  type dev
-
-  val black : color
-  val red : color
-  val green : color
-  val yellow : color
-  val blue : color
-  val magenta : color
-  val cyan : color
-  val white : color
-
-  val line : dev
-  val color : dev
-  val screen : dev
-  val cursor : dev
-
-  val bg : Format.formatter -> color -> unit
-  val fg : Format.formatter -> color -> unit
-  val bbg : Format.formatter -> color -> unit
-  val bfg : Format.formatter -> color -> unit
-
-  val clear : Format.formatter -> dev -> unit
-
-  val printf : ('a, Format.formatter, unit) format -> 'a
-  val eprintf : ('a, Format.formatter, unit) format -> 'a
-  val sprintf : ('a, Format.formatter, unit, string) format4 -> 'a
-  val fprintf : Format.formatter -> ('a, Format.formatter, unit) format -> 'a
-
-  val set_for_tty : Format.formatter -> unit
-  val unset_for_tty : Format.formatter -> unit
-
-end
+module Ansi : module type of Ansi
 
 (** Some comparison functions, built on top of Stdlib.compare. *)
 module Compare :

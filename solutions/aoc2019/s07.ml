@@ -24,8 +24,7 @@ struct
   let solve_part1 () =
     let code = Intcode.read () in
     let n = max_thruster code in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
-
+    Solution.printf "%d" n
 
   let feedback_loop code settings =
     let state = Intcode.make_state code in
@@ -62,7 +61,7 @@ struct
   let solve_part2 () =
     let code = Intcode.read () in
     let n = find_max_output code in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
 end
 

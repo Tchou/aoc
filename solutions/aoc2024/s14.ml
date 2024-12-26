@@ -76,7 +76,7 @@ struct
     let l = simulate w h 100 l in
     let res = count w h l in
     let n = res.(0) * res.(1) * res.(2) * res.(3) in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part2_gen display =
     let w = 101 in
@@ -85,7 +85,7 @@ struct
     let num_robots = List.length l in
     let n,l' = find_tree w h l num_robots in
     if display then print w h l';
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
   let solve_part2 () = solve_part2_gen false
 end
 

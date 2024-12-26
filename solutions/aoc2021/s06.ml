@@ -17,14 +17,14 @@ struct
   let solve n =
     let pool = Array.make 9 0 in
     let new_pool = Array.make 9 0 in
-    read_line ()
+    Input.read_line ()
     |> String.split_on_char ','
     |> List.iter (fun s ->
         let i = int_of_string s in
         pool.(i) <- pool.(i) + 1);
     simulate n pool new_pool
     |> Array.fold_left (+) 0
-    |> Printf.printf "%d\n"
+    |> Solution.printf "%d"
 
   let solve_part1 () = solve 80
 

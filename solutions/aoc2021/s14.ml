@@ -3,7 +3,7 @@ open Syntax
 
 (**
    Observation :
-   the template grows exponentially, since on char is added between every
+   the template grows exponentially, since one char is added between every
    pair, the size increases by ~ 50%. Hence the size after n steps, for
    an initial template size t :
    s = t*1.5*1.5... *1.5 = t (3/2)^n.
@@ -15,7 +15,7 @@ open Syntax
    AB BX XC CD DE
    We keep the invariant that every letter is duplicated, except the initial A
    and terminal E.
-   So we just need to 
+   So we just need to:
    - count the number of times each rule is applied.
    - after that for each pair XY with a count of n, create a table saying that
    X occurs n times, and Y n times
@@ -32,7 +32,7 @@ struct
   let name = Name.mk "s14"
 
   let read_template () =
-    let s = read_line ()  in
+    let s = Input.read_line ()  in
     let template = ~%[] in
     for i = 1 to String.length s - 1 do
       let key = s.[i-1], s.[i] in
@@ -78,14 +78,14 @@ struct
 
   let solve n =
     let template, c0, cn = read_template () in
-    let _ = read_line () in (* empty *)
+    let _ = Input.read_line () in (* empty *)
     let map = ~%[] in
     Input.fold_scan "%c%c -> %c" (fun () c1 c2 r ->
         map.%{c1,c2} <- r
       ) ();
     let template = repeat map template n in
     let n = score template c0 cn in
-    Ansi.printf "%d\n" n
+    Solution.printf "%d" n
 
   let solve_part1 () = solve 10
   let solve_part2 () = solve 40

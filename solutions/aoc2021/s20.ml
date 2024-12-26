@@ -115,8 +115,8 @@ struct
     !total
 
   let load_input () =
-    let bitmap = read_line () in
-    let _ = read_line () in
+    let bitmap = Input.read_line () in
+    let _ = Input.read_line () in
     let lines = Input.fold_lines (fun acc l -> l::acc) []
                 |> List.rev
     in
@@ -128,8 +128,8 @@ struct
 
   let solve applied =
     let img = { (load_input ()) with applied  } in
-    let n, t = Time.time count_lit_pixels img in
-    Ansi.printf "%d (%fms)@\n" n t
+    let n = count_lit_pixels img in
+    Solution.printf "%d" n
 
   let solve_part1 () = solve 2
 

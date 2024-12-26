@@ -93,7 +93,7 @@ let solve f () =
       []
   in
   let res = Array.of_list (List.rev res) in
-  Printf.printf "%d\n" (f res)
+  Solution.printf "%d" (f res)
 
 module Sol = struct
   let name = Name.mk "s08"

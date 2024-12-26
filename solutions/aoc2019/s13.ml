@@ -19,7 +19,7 @@ struct
     let state = Intcode.make_state code in
     let _ = Intcode.eval state in
     let n = count_blocks state.stdout in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let play animate state =
     let screen = Array.init 100 (fun _ -> Bytes.make 100 '\x00') in
@@ -88,8 +88,7 @@ struct
     code.(0) <- 2;
     let state = Intcode.make_state code in
     let n = play animate state in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
-
+    Solution.printf "%d" n
   let solve_part2 () = solve2 false
 end
 module SA =

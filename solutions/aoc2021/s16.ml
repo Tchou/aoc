@@ -147,11 +147,11 @@ struct
 
   let name = Name.mk "s16"
   let solve score =
-    let s = read_line () in
+    let s = Input.read_line () in
     let b = Bits.make s in
     let _, op = parse_packet b 0 in
     let n = score op in
-    Printf.printf "%d\n" n
+    Solution.printf "%d" n
   let solve_part1 () = solve score1
 
   let solve_part2 () = solve score2

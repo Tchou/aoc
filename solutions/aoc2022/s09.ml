@@ -112,7 +112,7 @@ let pp_config row_num col_num fmt config =
 
 let animate n () =
   let rec loop acc r c max_r max_c min_r min_c =
-    match String.split_on_char ' ' (read_line ()) with
+    match String.split_on_char ' ' (Input.read_line ()) with
     | [ sdir; sn ] ->
       let d = dir_of_string sdir in
       let n = int_of_string sn in
@@ -140,7 +140,7 @@ let animate n () =
          config)
       config cmd
   in
-  Format.printf "%d@\n" (Hashtbl.length config.grid)
+  Solution.printf "%d" (Hashtbl.length config.grid)
 
 module SA =
 struct

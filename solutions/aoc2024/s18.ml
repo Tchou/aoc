@@ -43,7 +43,7 @@ struct
   let solve_part1 () =
     let grid, positions = read_input 71 in
     let n,_, _ = min_dist 1024 grid positions in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let rec min_block limit grid positions =
     let _, l, rem_positions = min_dist limit grid positions in
@@ -72,7 +72,7 @@ struct
   let solve_part2 () =
     let grid, positions = read_input 71 in
     let x, y = min_block 1024 grid positions in
-    Ansi.(printf "%a%d,%d%a\n%!" fg green x y clear color)
+    Solution.printf "%d,%d" x y
 
 end
 

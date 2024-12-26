@@ -42,10 +42,9 @@ module Sol = struct
     let l = load_numbers () in
     let sum = List.fold_left (fun acc i -> acc + int_of_snafu i) 0 l in
     let u = snafu_of_int sum in
-    Format.eprintf "SUM=%d@\n%!" sum;
-    Format.printf "%s@\n%!" u
+    Solution.printf "%s" u
 
-  let solve_part2 () = assert false
+  let solve_part2 () = ()
 end
 
 let () = Solution.register_mod (module Sol)

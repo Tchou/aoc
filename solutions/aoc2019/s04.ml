@@ -44,7 +44,7 @@ struct
   let solve f =
     let n1, n2 = read_input () in
     let n = count_valid_numbers f n1 n2 in
-    Ansi.(printf "%a%d%a\n" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve valid_number1
 

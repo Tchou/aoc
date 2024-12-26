@@ -58,7 +58,7 @@ struct
   let solve part1  =
     let eqn = read_input () in
     let n = solve_list part1 eqn in
-    Ansi.(printf "%a%d%a\n%!" fg green n clear color)
+    Solution.printf "%d" n
 
   let solve_part1 () = solve true
   let solve_part2 () = solve false

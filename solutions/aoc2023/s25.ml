@@ -98,7 +98,7 @@ struct
     Random.self_init ();
     load_input  ()
     |> solve 1
-    |> Ansi.printf "%d\n"
+    |> Solution.printf "%d"
   let solve_part2 () = ()
 end
 

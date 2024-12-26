@@ -12,7 +12,7 @@ struct
     !cost
 
   let solve phi =
-    let crabs = read_line ()
+    let crabs = Input.read_line ()
                 |> String.split_on_char ','
                 |> List.map int_of_string
     in
@@ -28,7 +28,7 @@ struct
         min_pos := i;
       end
     done;
-    Printf.printf "%d\n" !min_cost
+    Solution.printf "%d" !min_cost
   let solve_part1 () = solve (fun x -> x)
 
   let solve_part2 () = solve (fun x -> x * (x + 1) / 2)
