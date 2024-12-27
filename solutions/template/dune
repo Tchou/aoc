@@ -10,7 +10,6 @@ let () = Printf.sprintf {|
 (library
  (name %s)
  (library_flags -linkall)
- (ocamlopt_flags (-inline 100))
  (libraries unix utils zarith))
 
 %s

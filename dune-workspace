@@ -3,9 +3,9 @@
 (env
  (dev
   (flags
-   (:standard -g -warn-error -A -w -20-26-32-39-27)))
+   (:standard -warn-error -A -w -20-26-32-39-27)))
  (perf
-  (flags
-   (:standard -warn-error -A -w -20-26-32-39-27))
   (ocamlopt_flags
-   (:standard -inline 1000 -noassert -unsafe))))
+   (:standard -inline 1000 -noassert -unsafe))
+  (flags
+   (:standard -warn-error -A -w -20-26-32-39-27))))
