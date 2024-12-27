@@ -35,7 +35,7 @@ struct
         map
         |> Hashtbl.iter (fun _ (_, paths) ->
             paths |> List.iter (fun path ->
-                path |> List.iter (fun (v, _) -> if visited.GB.!(v) = '\x00' then begin
+                path |> List.iter (fun (v, _) -> if visited.GB.!!(v) == '\x00' then begin
                     visited.GB.!(v) <- '\x01';
                     incr all_positions;
                   end)

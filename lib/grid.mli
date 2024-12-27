@@ -23,6 +23,9 @@ sig
 
   val map : (elt -> elt) -> t -> t
   (** Apply f to each element, returning a new line *)
+
+  val unsafe_get : t -> int -> elt
+  (** Returns the ith element of a line *)
 end
 
 (** Types of read-write lines of a grid *)
@@ -112,6 +115,9 @@ sig
   val ( .!() ) : t -> position -> elt
   (** Indexig operator get *)
 
+  val (.!!()) : t -> position -> elt
+  (** Indexig operator unsafe get *)
+
   val read_until : ?input:in_channel -> (string -> bool) -> t
   (** Reads an input line-by line. The line is first given to the test function until it returns true. *)
 
@@ -124,7 +130,7 @@ sig
       Raises Not_found if no such position is found *)
 
   val find : (elt -> bool) -> t -> position
-   (* [find f grid] is equivalent to [find_from f grid (0, 0)]*)
+  (* [find f grid] is equivalent to [find_from f grid (0, 0)]*)
 end
 
 (** The type of read-write grids *)

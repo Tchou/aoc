@@ -8,6 +8,8 @@ module type LINE = sig
   val of_string : string -> t
   val map : (elt -> elt) -> t -> t
 
+  val unsafe_get : t -> int -> elt
+
 end
 
 module type RWLINE = sig
@@ -57,6 +59,7 @@ module type GRID = sig
   val map_lines : (line -> line) -> t -> t
 
   val (.!()) : t -> position -> elt
+  val (.!!()) : t -> position -> elt
   val read_until : ?input:in_channel -> (string -> bool) -> t
   val read : ?input:in_channel -> unit -> t
   val find_from : (elt -> bool) -> t -> position -> position
@@ -98,6 +101,8 @@ module Make(L : LINE) = struct
   let width t = L.length t.(0)
   let height t = Array.length t
   let (.!()) t (x, y) = L.get (Array.get t y) x
+
+  let (.!!()) t (x, y) = L.unsafe_get (Array.unsafe_get t y) x
 
   let inside t (x, y) = y >= 0 && x >= 0 && y < height t && x < width t
 
