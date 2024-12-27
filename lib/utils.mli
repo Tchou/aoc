@@ -303,7 +303,8 @@ end
 
 module GraphAlgo (Graph : GRAPH) : sig
 
-  val dijkstra : ?h:(Graph.v -> int) -> ?first:bool -> ?all_path:bool -> Graph.t ->
+  val dijkstra : ?h:(Graph.v -> int) ->
+    ?post:(Graph.v -> unit) -> ?first:bool -> ?all_path:bool -> Graph.t ->
     Graph.v -> Graph.v list -> (Graph.v, int * Graph.v list list) Hashtbl.t
 
   (** [dijsktra g src targets] computes the shortest path

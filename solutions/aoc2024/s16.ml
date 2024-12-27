@@ -1,4 +1,5 @@
 open Utils
+open Syntax
 module S =
 struct
   module G = Grid.StringGrid
@@ -22,25 +23,25 @@ struct
   end
   module Alg = GraphAlgo(Gra)
 
+
   let score part2 grid start exit =
     let el = ref [] in
     G.iter4 (fun _ c d -> if c = '.' then el := (exit, Grid.opposite d) :: !el ) grid exit;
     let all_path = part2 in
-    let map = Alg.dijkstra grid ~all_path (start, Grid.east) !el in
     let all_positions = ref 0 in
-    let () = if part2 then
+    let post = if part2 then
         let module GB = Grid.BytesGrid in
         let h, w = G.(height grid, width grid) in
         let visited = GB.init h (fun _ -> Bytes.make w '\x00') in
-        map
-        |> Hashtbl.iter (fun _ (_, paths) ->
-            paths |> List.iter (fun path ->
-                path |> List.iter (fun (v, _) -> if visited.GB.!!(v) == '\x00' then begin
-                    visited.GB.!(v) <- '\x01';
-                    incr all_positions;
-                  end)
-              ))
-    in Hashtbl.fold (fun _ (dist, _) acc -> min dist acc) map max_int, !all_positions
+        Some (fun ((v, _) as u) ->
+            if visited.GB.!!(v) == '\x00' then begin
+              visited.GB.!(v) <- '\x01';
+              incr all_positions;
+            end)
+      else None
+    in
+    let map = Alg.dijkstra grid ?post ~all_path (start, Grid.east) !el in
+    Hashtbl.fold (fun _ (dist, _) acc -> min dist acc) map max_int, !all_positions
 
   let read_input () =
     let grid = G.read () in

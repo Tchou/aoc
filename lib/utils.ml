@@ -400,7 +400,6 @@ module type GRAPH = sig
   val iter_vertices : t -> (v -> unit) -> unit
   val iter_succ : t -> v -> (v * int -> unit) -> unit
 end
-
 module Pqueue (X : sig type t val compare : t -> t -> int end) =
 struct
   type t = { mutable size : int; mutable data : X.t array }
@@ -525,21 +524,20 @@ module GraphAlgo (Graph : GRAPH) = struct
          done);
     rdist
 
-  let rebuild_path2 t last =
+  let rebuild_path2 post t last =
     let rec loop acc_p v =
       match t.%{v} with
       | lv ->
+        post v;
         let n_acc = List.fold_left
             (fun acc v -> List.fold_left (fun acc l -> (v::l)::acc) acc acc_p) [] lv
         in
         List.fold_left (fun acc v -> List.rev_append (loop n_acc v) acc) [] lv
-      | exception Not_found -> acc_p
+      | exception Not_found -> post v; acc_p
     in
     loop [ [last] ] last
 
-
-
-  let dijkstra ?(h=(fun (_:Graph.v) -> 0)) ?(first=false) ?(all_path=false) g start targets =
+  let dijkstra ?(h=(fun (_:Graph.v) -> 0)) ?(post=(fun (_:Graph.v) -> ())) ?(first=false) ?(all_path=false) g start targets =
     let finish_map = ~%(List.map (fun v -> (v, (max_int, []))) targets) in
     (*  let todo = ref (Hashtbl.length finish_map) in *)
     let prev = ~%[] in
@@ -560,7 +558,7 @@ module GraphAlgo (Graph : GRAPH) = struct
       else
         let _, u = Pq.remove_min queue in
         if finish_map %? u && prev %? u then begin
-          let l = rebuild_path2 prev u in
+          let l = rebuild_path2 post prev u in
           finish_map.%{u} <- dist.%{u}, l;
           let todo = todo - 1 in
           if first || todo = 0 then finish_map
