@@ -37,7 +37,9 @@ struct
 
   let run r l =
     let cache = ~%[] in
-    List.fold_left (Agg.Left.sum (fun n -> blink cache r n)) 0 l
+    l
+    |> List.map (blink cache r)
+    |> Iter.sum (module Int) List.to_seq
 
   let solve n =
     let l = read_input () in

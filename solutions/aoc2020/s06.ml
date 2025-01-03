@@ -5,57 +5,51 @@ module S =
 struct
   let name = Name.mk "s06"
 
-  let set tab c =
-    tab.$[Char.code c - Char.code 'a'] <- '\x01'
+  let read_input () =
+    Input.fold_lines (fun acc s ->
+        match acc, s with
+          _, "" -> ([]::acc)
+        | l::acc', _ ->(s::l)::acc'
+        | _ -> assert false
+      ) [[]]
 
-  let incr_ tab c =
-    let idx = Char.code c - Char.code 'a' in
-    let n = 1 + Bytes.get_int8 tab idx in
-    Bytes.set_int8 tab idx n
+  let tab = Bytes.make (Char.code 'z' - Char.code 'a' + 1) '\x00'
+  let count_answers l =
+    Bytes.fill tab 0 (Bytes.length tab) '\x00';
+    List.iter (fun s ->
+        String.iter (fun c ->
+            tab.$[Char.code c - Char.code 'a']<- '\x01') s) l;
+    Bytes.to_seq tab
+    |> Seq.map Char.code
+    |> Iter.sum (module Int) Fun.id
 
-  let reset tab =
-    for i = 0 to Bytes.length tab - 1 do
-      tab.$[i] <- '\x00'
-    done
-  let sum =
-    Bytes.fold_left (Agg.Left.sum Char.code) 0
-
-  let count_distinct tab l =
-    let count = ref 0 in
-    for i = 0 to Bytes.length tab - 1 do
-      let v = Bytes.get_int8 tab i in
-      if v = l then incr count
-    done;
-    !count
   let solve_part1 () =
-    let tab = Bytes.make (Char.code 'z' + 1) '\x00' in
-    let acc = Input.fold_lines (fun acc s ->
-        if s = "" then begin
-          let acc = acc + sum tab in
-          reset tab;
-          acc
-        end else begin
-          String.iter (fun c -> set tab c) s;
-          acc
-        end
-      ) 0
-    in
-    Solution.printf "%d" acc
+    let l = read_input () in
+    l
+    |> List.map count_answers
+    |> Iter.sum (module Int) List.to_seq
+    |> Solution.printf "%d"
 
-  let solve_part2 () =
-    let tab = Bytes.make (Char.code 'z' + 1) '\x00' in
-    let acc,_ = Input.fold_lines (fun (acc,l) s ->
-        if s = "" then begin
-          let acc = acc + count_distinct tab l in
-          reset tab;
-          acc,0
-        end else begin
-          String.iter (fun c -> incr_ tab c) s;
-          acc,l+1
-        end
-      ) (0,0)
-    in
-    Solution.printf "%d" acc
+  let count_distinct_answers l =
+    Bytes.fill tab 0 (Bytes.length tab) '\x00';
+    let n = List.length l in
+    List.iter (fun s ->
+        String.iter (fun c ->
+            let idx = Char.code c - Char.code 'a' in
+            tab.$[idx] <- Char.unsafe_chr ((Char.code tab.$[idx]) + 1)) s) l;
+    Bytes.to_seq tab
+    |> Seq.map Char.code
+    |> Iter.count_if ((=) n) Fun.id
+
+  let solve count =
+    let l = read_input () in
+    l
+    |> List.map count
+    |> Iter.sum (module Int) List.to_seq
+    |> Solution.printf "%d"
+
+  let solve_part1 () = solve count_answers
+  let solve_part2 () = solve count_distinct_answers
 
 end
 

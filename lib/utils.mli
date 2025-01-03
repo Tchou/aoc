@@ -62,6 +62,9 @@ sig
   val ( %- ) : ('a, 'b) Hashtbl.t -> 'a -> unit
   (** [h %- k] is [Hashtbl.remove h k]. *)
 
+  val ( %+ ) : ('a, unit) Hashtbl.t -> 'a -> unit
+  (** [h %+ k] is [Hashtbl.replace h k ()], to use [h] as a [Hashset]. *)
+
   val ( ~% ) : ('a* 'b) list -> ('a, 'b) Hashtbl.t
   (** [ ~% l] creates a fresh Hashtbl.t from the bindings listed in [l]. *)
 
@@ -182,19 +185,13 @@ sig
   (* [snd x y] compares the second component of [x] and [y] and
      ignores the first. *)
 
+  val lex: ('a -> 'a -> int) list -> 'a -> 'a -> int
+  (* [lex l] is the lexicographic order made of individual orders
+     in [l]. If [l] is empty, it is the constant function [0].
+  *)
+
   val min_list : ('a -> 'b) -> 'a list -> 'b
   val max_list : ('a -> 'b) -> 'a list -> 'b
-end
-module Agg : sig
-  module type T = sig
-    type ('acc, 'elem) t
-    val min : ('acc, 'elem) t
-    val max : ('acc, 'elem) t
-    val sum : (int, 'elem) t
-    val prod : (int, 'elem) t
-  end
-  module Left : T with type ('a, 'b) t = ('b -> 'a) -> 'a -> 'b -> 'a
-  module Right : T with type ('a, 'b) t = ('b -> 'a) -> 'b -> 'a -> 'a
 end
 
 (** Timing functions. *)
@@ -358,3 +355,55 @@ end
 module Solution : module type of Solution
 
 module Grid : module type of Grid
+
+
+module Dll : sig
+  type 'a t
+
+  val singleton : 'a -> 'a t
+  val next : 'a t -> 'a t
+  val prev : 'a t -> 'a t
+  val forward : int -> 'a t -> 'a t
+  val backward : int -> 'a t -> 'a t
+  val iter : ('a t -> unit) -> 'a t -> unit
+  val peek : 'a t -> 'a
+  val insert_before : 'a t -> 'a -> 'a t
+  val insert_after : 'a t -> 'a -> 'a t
+  val pop : 'a t -> 'a * 'a t
+end
+
+module Misc :
+sig
+  val find_cycle : ('a -> 'a -> bool) -> ('a -> 'a) -> 'a -> int * int * 'a
+  (** Brent's cycle detection algorithm. [find_cycle equal f x0] returns the
+        triple [(lam, mu, x)], where [lam] is the cycle length [mu] the first
+        position this cycle starts and [x] is the value of the function at that
+        position.
+  *)
+
+end
+
+module Dynarray :
+sig
+  type 'a t
+
+  val create : int -> 'a t
+
+  val length : 'a t -> int
+
+  val push : 'a t -> 'a -> unit
+
+  val pop : 'a t -> 'a
+
+  val get : 'a t -> int -> 'a
+
+  val set : 'a t -> int -> 'a -> unit
+
+  val iter : ('a -> unit) -> 'a t -> unit
+
+  val fold_left : ('b -> 'a -> 'b) -> 'b -> 'a t -> 'b
+
+
+end
+
+module Iter = Iter

@@ -224,7 +224,9 @@ struct
     |> List.rev
 
   let score ?animate verbose lmap l =
-    List.fold_left (Agg.Left.sum (fun s ->
+    l
+    |>
+    List.map (fun s ->
         let r = enumerate lmap (String.explode s) in
         let () = match animate with None -> () | Some f -> f s r in
         let n = Rope.length r in
@@ -238,7 +240,8 @@ struct
             Format.printf "%s: %s (%d)\n%!" s (Rope.implode r) n
         in
         let c = String.sub s 0 3 |> int_of_string in
-        n * c)) 0 l
+        n * c)
+    |> Iter.sum (module Int) List.to_seq
 
   let dir_conf = (dir_idx, (0,0), dir_coords)
   let num_conf = (num_idx, (0,3), num_coords)

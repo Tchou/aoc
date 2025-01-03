@@ -73,6 +73,7 @@ struct
   let (%?) h k = Hashtbl.mem h k
   let (.%{}<-) h k v = Hashtbl.replace h k v
   let ( %- ) h k = Hashtbl.remove h k
+  let ( %+ ) h k = Hashtbl.replace h k ()
   let (~%) l =
     let h =  Hashtbl.create 16 in
     List.iter (fun (k,v) -> h.%{k} <- v) l;
@@ -281,33 +282,6 @@ struct
 
 end
 module Ansi = Ansi
-module Agg = struct
-  module type T = sig
-    type ('acc, 'elem) t
-    val min : ('acc, 'elem) t
-    val max : ('acc, 'elem) t
-    val sum : (int, 'elem) t
-    val prod : (int, 'elem) t
-  end
-  module Left =
-  struct
-    type ('a, 'b) t = ('b -> 'a) -> 'a -> 'b -> 'a
-    let agg op f acc x = op acc (f x)
-    let min f = agg min f
-    let max f = agg max f
-    let sum f = agg (+) f
-    let prod f = agg ( * ) f
-  end
-  module Right =
-  struct
-    type ('a, 'b) t = ('b -> 'a) -> 'b -> 'a -> 'a
-    let agg op f x acc = op (f x) acc
-    let min f = agg min f
-    let max f = agg max f
-    let sum f = agg (+) f
-    let prod f = agg ( * ) f
-  end
-end
 
 module Compare =
 struct
@@ -321,6 +295,25 @@ struct
 
   let min_list f l = agg_list min f l
   let max_list f l = agg_list max f l
+
+  let rec lex l x y =
+    match l with
+      [] -> 0
+    | [ o ] -> o x y
+    | o1::o2::[] ->
+      let c = o1 x y in
+      if c <> 0 then c
+      else o2 x y
+    | o1::o2::o3::[] ->
+      let c = o1 x y in
+      if c <> 0 then c
+      else let c = o2 x y in
+        if c <> 0 then c
+        else o3 x y
+    | o :: ll ->
+      let c = o x y in
+      if c <> 0 then c
+      else lex ll x y
 end
 module Comb =
 struct
@@ -476,6 +469,7 @@ module GraphAlgo (Graph : GRAPH) = struct
     let compare (i, _) (j, _) = Int.compare i j
   end
 
+
   module Pq = Pqueue(X)
 
   let add_dist d1 d2 =
@@ -627,3 +621,159 @@ end
 
 module Solution = Solution
 module Grid = Grid
+
+module Dll = struct
+  type 'a t = { value : 'a; mutable next : 'a t; mutable prev : 'a t}
+
+  let singleton value =
+    let rec next = { value; next; prev = next } in next
+
+  let next t = t.next
+  let prev t = t.prev
+
+  let rec loop_f n d =
+    if n = 0 then d
+    else loop_f (n-1) d.next
+  let rec loop_b n d =
+    if n = 0 then d
+    else loop_b (n-1) d.prev
+
+  let forward n t =
+    if n < 0 then loop_b (-n) t else loop_f n t
+  let backward n t =
+    if n < 0 then loop_f (-n) t else loop_b n t
+
+  let insert_before t value =
+    let t1 = t.prev in
+    let nd =  { value; next = t; prev = t1 } in
+    t.prev <- nd;
+    t1.next <- nd;
+    nd
+
+  let insert_after t v =
+    let t2 = t.next in
+    let nd = {value = v; next = t2; prev = t} in
+    t.next <- nd;
+    t2.prev <- nd;
+    nd
+  let pop t =
+    if t.next == t then failwith "Dll.pop"
+    else
+      let v = t.value in
+      let t2 = t.next in
+      let t1 = t.prev in
+      t.prev <- t; t.next <- t;
+      (* make t point to itself in case someone holds a reference to it *)
+      t1.next <- t2;
+      t2.prev <- t1;
+      v, t2
+
+  let peek t = t.value
+  let iter f t =
+    let rec loop t' =
+      if t' == t then ()
+      else begin
+        f t';
+        loop t'.next;
+      end
+    in
+    f t;
+    loop t.next
+end
+
+module Misc =
+struct
+  let find_cycle equal f x0 =
+    let lam = ref 1 in
+    let power = ref 1 in
+
+    let tortoise = ref x0 in
+    let hare = ref (f x0) in
+    while not (equal !tortoise !hare) do
+      if !power == !lam then begin
+        tortoise := !hare;
+        power := !power * 2;
+        lam := 0;
+      end;
+      hare := f !hare;
+      incr lam;
+    done;
+    tortoise := x0;
+    hare := x0;
+    for _i = 0 to !lam - 1 do
+      hare := f !hare;
+    done;
+    let mu = ref 0 in
+    while not (equal !tortoise !hare) do
+      tortoise := f !tortoise;
+      hare := f !hare;
+      incr mu;
+    done;
+    !lam, !mu, !tortoise
+end
+
+module Dynarray =
+struct
+  type 'a t = {
+    mutable array : 'a array;
+    mutable length : int;
+  }
+  let create n =
+    let n = if n <= 0 then 16 else n in {
+      array = [| |];
+      length = -n;
+    }
+
+  let length t = max t.length 0
+
+  let push a v =
+    let () =
+      if a.length < 0 then begin
+        a.array <- Array.make (-a.length) v;
+        a.length <- 0;
+      end
+    in
+    let () =
+      if a.length  + 1 > Array.length a.array then begin
+        let array = Array.make (Array.length a.array * 2) a.array.(0) in
+        Array.blit a.array 0 array 0 a.length;
+        a.array <- array;
+      end
+    in
+    a.array.(a.length) <- v;
+    a.length <- a.length + 1
+
+  let pop a =
+    if length a = 0 then failwith "Dynarray.pop";
+    let v = a.array.(a.length - 1) in
+    a.length <- a.length - 1;
+    if a.length * 4 < Array.length a.array then begin
+      let array = Array.make (Array.length a.array / 2) a.array.(0) in
+      Array.blit a.array 0 array 0 (Array.length array);
+      a.array <- array;
+    end;
+    v
+
+  let get a i = if i >= a.length || i < 0 then failwith "Dynarray.get";
+    Array.unsafe_get a.array i
+
+  let set a i v =
+    if i >= length a || i < 0 then failwith "Dynarray.set";
+    Array.unsafe_set a.array i v
+
+
+  let iter f a =
+    for i = 0 to a.length - 1 do
+      f Array.(unsafe_get a.array i)
+    done
+
+  let fold_left f init a =
+    let acc = ref init in
+    for i = 0 to a.length - 1 do
+      acc := f !acc Array.(unsafe_get a.array i);
+    done;
+    !acc
+
+end
+
+module Iter = Iter

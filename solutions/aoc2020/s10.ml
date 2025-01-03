@@ -29,7 +29,7 @@ struct
 
 
   let count_arrangements l =
-    let max_v = List.fold_left (Agg.Left.max Fun.id) 0 l in
+    let max_v = Iter.max List.to_seq l in
     let l = List.sort compare (0::max_v+3::l) in
     let cache = ~%[] in
     let rec loop l =

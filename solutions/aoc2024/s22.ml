@@ -24,7 +24,9 @@ struct
     step2048 (step32 (step64 n))
 
   let rec iterate k n = if k = 0 then n else iterate (k-1) (next n)
-  let score = List.fold_left (Agg.Left.sum (iterate 2000)) 0
+  let score l =
+    List.map (iterate 2000) l
+    |> Iter.sum (module Int) List.to_seq
   let solve_part1 () =
     let l = read_input () in
     let n = score l in
@@ -47,7 +49,7 @@ struct
 
      Further optimization :
      - actually multiplications / and divisions by constants are quite fast, and allow
-     one to store the data in a smaller array
+       one to store the data in a smaller array
      - we fit both the seen and value in the same array since the max value seems to fit on 16 bits
   *)
   let tabulate cache limit acc_max init =

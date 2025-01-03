@@ -35,9 +35,8 @@ struct
 
   let count_shiny_gold tree =
     let cache = ~%[] in
-    Hashtbl.fold (fun k _ acc ->
-        acc + if has_shiny_gold cache tree k then 1 else 0
-      ) tree 0
+    tree
+    |> Iter.count_if (has_shiny_gold cache tree) Hashtbl.to_seq_keys
 
   let solve_part1 () =
     load_input ()
@@ -46,13 +45,13 @@ struct
 
 
   let rec count_bags k tree =
-    List.fold_left (Agg.Left.sum (fun (n, k')->
-        n * count_bags k' tree
-      )) 1 tree.%{k}
+    1 + (tree.%{k}
+         |> List.map (fun (n, k') -> n* count_bags k' tree)
+         |> Iter.sum (module Int) List.to_seq)
   let solve_part2 () =
     load_input ()
     |> count_bags "shiny gold"
-    |> pred (* don't count the shiny bag itself *)
+    |> pred
     |> Solution.printf "%d"
 
 end

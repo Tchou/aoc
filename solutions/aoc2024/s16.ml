@@ -1,5 +1,4 @@
 open Utils
-open Syntax
 module S =
 struct
   module G = Grid.StringGrid

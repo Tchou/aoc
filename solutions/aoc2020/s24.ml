@@ -70,16 +70,13 @@ struct
     let new_floor = ~%[] in
     let todo_white_tiles = ~%[] in
     let count_black_around mark_white coord =
-      List.fold_left (Agg.Left.sum (fun d ->
+      Iter.count_if(fun d ->
           let n = HCES.move coord d in
-          let col_n =
-            if not (floor %? n) then begin
-              if mark_white then todo_white_tiles.%{n} <- ();
-              false
-            end else floor.%{n}
-          in
-          int_of_bool col_n
-        )) 0 HCES.all_dirs
+          if not (floor %? n) then begin
+            if mark_white then todo_white_tiles.%{n} <- ();
+            false
+          end else floor.%{n}
+        ) List.to_seq HCES.all_dirs
     in
     Hashtbl.iter (fun coord black ->
         if black then
@@ -97,7 +94,8 @@ struct
     new_floor
 
   let count_black_tiles floor =
-    Hashtbl.fold (fun _ b acc -> acc + int_of_bool b) floor 0
+    floor
+    |> Iter.count_if Fun.id Hashtbl.to_seq_values
 
   let evolve_days n floor =
     let floor = ref floor in

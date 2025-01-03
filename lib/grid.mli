@@ -26,6 +26,12 @@ sig
 
   val unsafe_get : t -> int -> elt
   (** Returns the ith element of a line *)
+
+  val compare : t -> t -> int
+  (** Compares two lines *)
+
+  val equal : t -> t -> bool
+  (** Tests for equality between two lines *)
 end
 
 (** Types of read-write lines of a grid *)
@@ -100,6 +106,10 @@ sig
   val iter : (position -> elt -> unit) -> t -> unit
   (** Iterates through all the positions in the grid from 0,0 to (width - 1, height - 1) *)
 
+  val iter_from : (position -> elt -> unit) -> t -> position -> int -> int -> unit
+  (** Iterates through all the positions of the rectangular area specigied by
+        its upper-left corner, width and height. *)
+
   val iter4 : (position -> elt -> dir -> unit) -> t -> position -> unit
   (** Iterates through all the valid neighbours in the 4 axis aligned directions *)
 
@@ -131,6 +141,13 @@ sig
 
   val find : (elt -> bool) -> t -> position
   (* [find f grid] is equivalent to [find_from f grid (0, 0)]*)
+
+  val compare : t -> t -> int
+  (** Compares two grid using the lexicographic ordering of the comparison of
+    their lines. *)
+
+  val equal : t -> t -> bool
+  (** Alias for [compare g1 g2 = 0] *)
 end
 
 (** The type of read-write grids *)
@@ -155,3 +172,5 @@ module StringGrid : GRID with type elt = char and type line = string
 
 module BytesGrid : RWGRID with type elt = char and type line = bytes
 (** Read-write grids of characters *)
+
+module IntGrid : RWGRID with type elt = int and type line = int array

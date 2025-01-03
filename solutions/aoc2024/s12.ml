@@ -17,12 +17,15 @@ struct
 
   let is_on_side grid p a =
     not (G.inside grid p) || grid.G.!(p) <> a
+
   let perimeter grid l a =
-    l |> List.fold_left  (fun acc p ->
-        Grid.dir4 |> List.fold_left (Agg.Left.sum (fun d ->
-            let q = Grid.(p +! d) in
-            int_of_bool (is_on_side grid q a)
-          )) acc) 0
+    l
+    |> List.map (fun p ->
+        Grid.dir4
+        |> Iter.count_if (fun d ->
+            is_on_side grid Grid.(p +! d) a
+          ) List.to_seq)
+    |> Iter.sum (module Int) List.to_seq
 
   (* for the side, find the number of corners, that is the number
      of points that have two neighbors one each vertical/horizontal
@@ -54,14 +57,15 @@ struct
       ((G.inside grid p3) && grid.G.!(p3) <> a)
     in
     let count_corners p test corners =
-      corners |> List.fold_left (Agg.Left.sum (fun d -> int_of_bool(test p d))) 0
+      corners
+      |> Iter.count_if (test p) List.to_seq
     in
     l
-    |> List.fold_left (Agg.Left.sum (fun p ->
+    |> List.map (fun p ->
         let ce = count_corners p is_external ext_corners in
         let ci = count_corners p is_internal int_corners in
-        ci + ce
-      )) 0
+        ci + ce)
+    |> Iter.sum (module Int) List.to_seq
 
   (*
   Do a simple DFS for each (non-visited) point in the grid to find each plot containing
@@ -90,12 +94,14 @@ struct
     map
 
   let count_plots perim grid map =
-    Hashtbl.fold (fun a ll acc ->
+    map
+    |> Hashtbl.to_seq
+    |> Seq.map (fun (a, ll) ->
         ll
-        |> List.fold_left (Agg.Left.sum (fun l ->
-            (perim grid l a) * (List.length l)
-          )) acc
-      ) map 0
+        |> List.map (fun l ->
+            (perim grid l a) * (List.length l))
+        |> Iter.sum (module Int) List.to_seq)
+    |> Iter.sum (module Int) Fun.id
 
   let solve perim =
     let grid = G.read () in

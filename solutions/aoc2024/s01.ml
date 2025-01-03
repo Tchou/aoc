@@ -26,8 +26,8 @@ struct
         let count = ~%[] in
         l2 |> List.iter (fun i2 ->
             count.%{i2}<- 1+ (count.%?{i2} or 0));
-        l1 |> List.fold_left
-          (Agg.Left.sum (fun i -> i * (count.%?{i} or 0))) 0
+        l1 |> List.map(fun i -> i * (count.%?{i} or 0))
+        |> Iter.sum (module Int) List.to_seq
       )
 end
 

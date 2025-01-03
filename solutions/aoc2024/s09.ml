@@ -3,8 +3,11 @@ module S =
 struct
   let name = Name.mk "s09"
   let read_input () = Input.read_line ()
-  let total_length =
-    String.fold_left (Agg.Left.sum (fun c -> Char.code c - Char.code '0')) 0
+  let total_length l =
+    l
+    |> String.to_seq
+    |> Seq.map (fun c -> Char.code c - Char.code '0')
+    |> Iter.sum (module Int) Fun.id
 
   let rle s =
     let blocks = ref [] in
@@ -43,7 +46,7 @@ struct
         ((sidx, flen, fid)::acc_files)
       else (* slen < flen, consume what we can *)
         insert_fit nspaces file acc_files (space::acc_spaces)
-  
+
   let compact insert blocks =
     let rec loop spaces files acc_files =
       match files with

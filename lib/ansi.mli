@@ -22,6 +22,9 @@ val bfg : Format.formatter -> color -> unit
 
 val clear : Format.formatter -> dev -> unit
 
+val show_cursor : Format.formatter -> unit -> unit
+val hide_cursor : Format.formatter -> unit -> unit
+
 val printf : ('a, Format.formatter, unit) format -> 'a
 val eprintf : ('a, Format.formatter, unit) format -> 'a
 val sprintf : ('a, Format.formatter, unit, string) format4 -> 'a

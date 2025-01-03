@@ -1,11 +1,19 @@
 (* -*- tuareg -*- *)
 let name = Filename.basename (Sys.getcwd ())
+
 let mllex = Sys.readdir (Sys.getcwd ())
   |> Array.to_list
   |> List.filter_map (Filename.chop_suffix_opt ~suffix:".mll")
   |> String.concat " "
 let mllex = if mllex = "" then "" else
    "(ocamllex " ^ mllex ^ ")"
+
+let mlyacc = Sys.readdir (Sys.getcwd())
+|> Array.to_list
+  |> List.filter_map (Filename.chop_suffix_opt ~suffix:".mly")
+  |> String.concat " "
+let mlyacc = if mlyacc = "" then "" else
+   "(ocamlyacc " ^ mlyacc ^ ")"
 let () = Printf.sprintf {|
 (library
  (name %s)
@@ -14,8 +22,10 @@ let () = Printf.sprintf {|
 
 %s
 
+%s
+
  (rule
    (target name.ml)
    (action (write-file %%{target} "let mk s = \"%s\", s "))
   )
-  |} name mllex name |> Jbuild_plugin.V1.send
+  |} name mllex mlyacc name |> Jbuild_plugin.V1.send

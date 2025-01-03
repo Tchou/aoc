@@ -32,14 +32,16 @@ struct
     let len = 1 + fst (List.hd card_list) in
     let card_list = List.rev card_list in
     let cards = Array.make len 1 in
-    List.fold_left (Agg.Left.sum (fun(id, (win, my))->
+    card_list
+    |> List.map (fun (id, (win, my))->
         let sc = count_winning win my in
         let num_id = cards.(id) in
         (* card id has sc winning numbers and num_id copies*)
         for i = id + 1 to id + sc do
           cards.(i) <- cards.(i) + num_id;
         done;
-        num_id)) 0 card_list
+        num_id)
+    |> Iter.sum (module Int) List.to_seq
     |> Solution.printf "%d"
 end
 

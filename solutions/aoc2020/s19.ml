@@ -11,7 +11,7 @@ struct
     let rules = ~%[] in
     let () = InputUntil.fold_lines (fun acc line ->
         if line = "" then (false, ()) else
-          Scanf.sscanf line "%d: %[ab\"0-9 |]" (fun n line -> 
+          Scanf.sscanf line "%d: %[ab\"0-9 |]" (fun n line ->
               let rule = String.split_on_char '|' line in
               let rule = rule |> List.map (fun s ->
                   s |> String.trim |> String.split_on_char ' ')
@@ -149,20 +149,30 @@ struct
       Seq.product rule8 rule11
       |> Seq.map (fun (a,b) -> a@b)
     in
-    let len_seq s = List.fold_left (Agg.Left.sum (fun r -> sizes.%{r})) 0 s in
+    let len_seq s =
+      s
+      |> List.map (fun r -> sizes.%{r})
+      |> Iter.sum (module Int) List.to_seq
+    in
     let rule0 = all_combs |> Seq.filter (fun s -> len_seq s <= max_len ) in
     rule0 |> List.of_seq |> List.sort (fun l1 l2 -> compare (List.length l2) (List.length l1))
 
   let solve part2 =
     let rules, words = read_input () in
-    let max_len = List.fold_left (Agg.Left.max (String.length)) 0 words in
+    let max_len =
+      words
+      |> List.map String.length
+      |> Iter.sum (module Int) List.to_seq in
     let sizes = rule_sizes rules in
     let () = if part2 then begin
         rules.%{0} <- `rule (alt_rule0 sizes max_len);
       end
     in
-    let n = List.fold_left (Agg.Left.sum (fun s ->
-        int_of_bool (match_rule rules sizes s ))) 0 words
+    let n =
+      words
+      |> List.map (match_rule rules sizes)
+      |> List.map int_of_bool
+      |> Iter.sum (module Int) List.to_seq
     in
     Solution.printf "%d" n
 

@@ -12,18 +12,19 @@ struct
 
   let solve_part1 () =
     load_input parse_binary
-    |> List.fold_left (Agg.Left.max Fun.id) 0
+    |> Iter.max List.to_seq
     |> Solution.printf "%d"
   let solve_part2 () =
     let arr = Array.make 1024 false in
     Input.fold_lines (fun () s -> arr.(parse_binary s) <- true) ();
-    let exception Found of int in
-    try
-      for i = 1 to Array.length arr - 2 do
-        if arr.(i-1) && arr.(i+1) && not arr.(i) then raise (Found i)
-      done;
-      Solution.printf "NOT FOUND"
-    with Found n -> Solution.printf "%d" n
+    let res = ref 0 in
+    Iter.for_ 1 (Array.length arr - 2)
+      (fun i ->
+         if arr.(i-1) && arr.(i+1) && not arr.(i) then begin
+           res := i;
+           Iter.break ();
+         end);
+    Solution.printf "%d" !res
 
 end
 

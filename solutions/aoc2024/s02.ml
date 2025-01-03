@@ -36,7 +36,10 @@ struct
 
   let solve f =
     let l = read_input () in
-    let n = List.fold_left (Agg.Left.sum (fun l -> int_of_bool (f l) )) 0 l
+    let n =
+      l
+      |> List.map f
+      |> Iter.count_if Fun.id List.to_seq
     in
     Solution.printf "%d" n
 

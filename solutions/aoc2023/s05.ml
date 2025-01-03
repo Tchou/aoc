@@ -81,7 +81,9 @@ struct
     let seeds, maps = load_input Fun.id in
     let seeds = make_seeds seeds [] in
     let () =
-      List.fold_left (Agg.Left.sum snd) 0 seeds
+      seeds
+      |> Iter.snd List.to_seq
+      |> Iter.sum (module Int) Fun.id
       |> Solution.printf "%d"
     in
     let res = List.fold_left apply_map seeds maps in

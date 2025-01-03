@@ -26,13 +26,13 @@ struct
 
   let solve dir =
     Input.fold_fields ' '
-      (Agg.Left.sum
-         (fun fields ->
-            fields
-            |> List.map int_of_string
-            |> dir
-            |> complete
-         )) 0
+      (fun acc fields ->
+         Seq.cons (fields
+                   |> List.map int_of_string
+                   |> dir
+                   |> complete) acc
+      ) Seq.empty
+    |> Iter.sum (module Int) Fun.id
     |> Solution.printf "%d"
   let solve_part1 () = solve Fun.id
 

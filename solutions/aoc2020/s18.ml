@@ -80,7 +80,8 @@ struct
   let solve prio =
     let exprs = read_input () in
     let n = exprs
-            |> List.fold_left (Agg.Left.sum (eval prio)) 0
+            |> List.map (eval prio)
+            |> Iter.sum (module Int) List.to_seq
     in
     Solution.printf "%d" n
 

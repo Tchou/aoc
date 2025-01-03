@@ -35,9 +35,10 @@ struct
     in loop 0 []
 
   let count_valid map l =
-    List.fold_left (Agg.Left.sum (fun txt ->
-        try explore (fun _ -> raise Exit) map txt;0
-        with Exit -> 1)) 0 l
+    l
+    |> Iter.count_if (fun txt ->
+        try explore (fun _ -> raise Exit) map txt;false
+        with Exit -> true) List.to_seq
 
   let explore_all cache map txt =
     let len = String.length txt in
@@ -63,7 +64,9 @@ struct
 
   let count_all_comb_valid map l =
     let cache = ~%[] in
-    List.fold_left (Agg.Left.sum (explore_all cache map)) 0 l
+    l
+    |> List.map (explore_all cache map)
+    |> Iter.sum (module Int) List.to_seq
 
   let solve count =
     let map, l = read_input () in

@@ -22,13 +22,18 @@ let usage ppf s =
 
 let main () =
   try
-    Solution.run Sys.argv
+    Fun.protect ~finally:(fun () ->
+        Ansi.(printf "%a%a%!"
+                clear color show_cursor()))
+      (fun () -> Solution.run Sys.argv)
   with
   | Solution.Error msg ->
     Format.eprintf "%s\n" msg;
     usage Format.err_formatter Sys.argv.(0);
     Format.eprintf "\n%!";
     exit 1
-  | _ -> Printexc.print_backtrace stderr; exit 2
+  | e ->
+    Format.eprintf "%s\n%!" (Printexc.to_string e);
+    Printexc.print_backtrace stderr; exit 2
 
 let () = main ()

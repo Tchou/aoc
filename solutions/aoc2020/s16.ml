@@ -36,15 +36,17 @@ struct
     || ((fst range2) <= v && v <= (snd range2))
 
 
-  let contains v = List.exists (in_range v)
+  let contains interval v = List.exists (in_range v) interval
   let solve_part1 () =
     let intervals, _, tickets = read_input () in
     let n =
       tickets
-      |> List.fold_left (
-        List.fold_left (Agg.Left.sum (fun v ->
-            if contains v intervals then v else 0))
-      ) 0
+      |> List.map (fun l ->
+          l
+          |> List.filter (Fun.negate (contains intervals))
+          |> Iter.sum (module Int) List.to_seq
+        )
+      |> Iter.sum (module Int) List.to_seq
     in
     Solution.printf "%d" n
 
@@ -94,7 +96,7 @@ struct
     let intervals, my_ticket, other_tickets = read_input () in
     let valid_tickets =
       other_tickets
-      |> List.filter (List.for_all (fun v -> contains v intervals))
+      |> List.filter (List.for_all (contains intervals))
     in
     let all_tickets =
       (my_ticket :: valid_tickets)

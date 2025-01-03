@@ -7,8 +7,10 @@ module type LINE = sig
   val length : t -> int
   val of_string : string -> t
   val map : (elt -> elt) -> t -> t
-
   val unsafe_get : t -> int -> elt
+
+  val compare : t -> t -> int
+  val equal : t -> t -> bool
 
 end
 
@@ -53,6 +55,7 @@ module type GRID = sig
   val height : t -> int
   val inside : t -> position -> bool
   val iter : (position -> elt -> unit) -> t -> unit
+  val iter_from : (position -> elt -> unit) -> t -> position -> int -> int -> unit
   val iter4 : (position -> elt -> dir -> unit) -> t -> position -> unit
   val iter8 : (position -> elt -> dir -> unit) -> t -> position -> unit
   val iter_lines : (line -> unit) -> t -> unit
@@ -64,6 +67,9 @@ module type GRID = sig
   val read : ?input:in_channel -> unit -> t
   val find_from : (elt -> bool) -> t -> position -> position
   val find : (elt -> bool) -> t -> position
+
+  val compare : t -> t -> int
+  val equal : t -> t -> bool
 
 end
 module type RWGRID = sig
@@ -106,12 +112,17 @@ module Make(L : LINE) = struct
 
   let inside t (x, y) = y >= 0 && x >= 0 && y < height t && x < width t
 
-  let iter f t =
-    for y = 0 to height t - 1 do
-      for x = 0 to width t - 1 do
-        f (x, y) t.!(x, y)
+
+  let iter_from f t (x0, y0) w h =
+    if x0 < 0 || y0 < 0 || w > (width t) || h > (height t) then
+      invalid_arg "Grid.iter_from";
+    for y = y0 to h - 1 do
+      let l = Array.unsafe_get t y in
+      for x = x0 to w - 1 do
+        f (x, y) (L.unsafe_get l x)
       done
     done
+  let iter f t = iter_from f t (0, 0) (width t) (height t)
 
   let iter_lines = Array.iter
 
@@ -156,6 +167,19 @@ module Make(L : LINE) = struct
   let find f grid = find_from f grid (0, 0)
 
   let init h = Array.init h
+
+  let compare g1 g2 =
+    let rec loop i j n1 n2 =
+      if n1 = i && n2 = j then 0
+      else if n1 = i then -1 else if n2 = j then 1
+      else
+        let c = Array.(L.compare (unsafe_get g1 i) (unsafe_get g2 j)) in
+        if c <> 0 then c else loop (i+1) (j+1) n1 n2
+    in
+    if g1 == g2 then 0 else
+      loop 0 0 (height g1) (height g2)
+
+  let equal g1 g2 = compare g1 g2 = 0
 end
 module MakeRW (L : RWLINE) = struct
   include Make (L)
@@ -167,3 +191,29 @@ end
 module StringGrid : GRID with type elt = char and type line = string = Make(struct include String type elt = char let of_string x = x end)
 
 module BytesGrid : RWGRID with type elt = char and type line = bytes = MakeRW(struct include Bytes type elt = char end)
+
+module IntLine : RWLINE with type elt = int and type t = int array =
+struct
+  type elt = int
+  type t = int array
+  let init = Array.init
+  let get = Array.get
+  let set = Array.set
+  let length = Array.length
+  let of_string s =
+    s |> String.split_on_char ','
+    |> List.map int_of_string
+    |> Array.of_list
+
+  let map = Array.map
+  let unsafe_get = Array.unsafe_get
+
+  let copy = Array.copy
+
+  let equal = (=)
+  let compare = compare
+end
+
+
+module IntGrid : RWGRID with type elt = int and type line = int array =
+  MakeRW(IntLine)

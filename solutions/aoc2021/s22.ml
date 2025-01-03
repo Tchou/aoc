@@ -174,7 +174,10 @@ struct
       let sz = z.sup - z.inf in
       sx * sy * sz
   end
-  let count = List.fold_left (Agg.Left.sum Cube.size) 0
+  let count l =
+    l
+    |> List.map Cube.size
+    |> Iter.sum (module Int) List.to_seq
   let bounded_int int ibound =
     match Interval.cap int ibound with
       Some i when i = int -> true

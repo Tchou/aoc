@@ -79,10 +79,8 @@ struct
     let sum =
       stars
       |> Hashtbl.to_seq_values
-      |> Seq.fold_left
-        (Agg.Left.sum (function
-               [g1; g2] -> g1 * g2
-             | _ -> 0)) 0
+      |> Seq.map (function [g1;g2] ->g1*g2 | _ -> 0)
+      |> Iter.sum (module Int) Fun.id
     in
     Solution.printf "%d" sum
 end

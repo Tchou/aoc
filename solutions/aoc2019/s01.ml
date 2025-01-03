@@ -19,7 +19,11 @@ struct
 
   let solve calc =
     let modules = read_input () in
-    let n = List.fold_left (Agg.Left.sum calc) 0 modules in
+    let n =
+      modules
+      |> List.to_seq
+      |> Seq.map calc
+      |> Iter.sum (module Int) Fun.id in
     Solution.printf "%d" n
 
   let solve_part1 () = solve fuel

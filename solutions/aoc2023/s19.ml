@@ -111,7 +111,9 @@ struct
     List.iter (fun (i,(inf, sup)) ->
         let ainf, asup = tab.(i) in
         tab.(i) <- (max inf ainf, min sup asup)) ints;
-    Array.fold_left (Agg.Left.prod (fun (i,j) -> j-i)) 1 tab
+    tab
+    |> Array.map (fun (i,j) -> j-i)
+    |> Iter.prod (module Int) Array.to_seq
 
   let pp ppf l =
     let fields = List.map (fun (a,b) -> (b,a)) fields in
@@ -124,7 +126,8 @@ struct
     let rule_table = load_rules () in
     let _parts = load_parts () in
     eval_constr rule_table
-    |> List.fold_left (Agg.Left.sum merge_intervals) 0
+    |> List.map merge_intervals
+    |> Iter.sum (module Int) List.to_seq
     |> Solution.printf "%d"
 
 end
