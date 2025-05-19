@@ -35,7 +35,7 @@ struct
 
   let solve_part1 () =
     let ip_reg, prog = read_input () in
-    let n = (eval 1 ip_reg prog).(0) in
+    let n = (eval 0 ip_reg prog).(0) in
     Solution.printf "%d" n
 
   (*

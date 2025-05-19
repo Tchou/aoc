@@ -12,24 +12,22 @@ struct
     let y_max = ref min_int in
     let y_min = ref max_int in
 
-    Input.fold_lines (
-      fun () l ->
-        Scanf.sscanf l "%[xy]=%d, %[xy]=%d..%d"
-          (fun c n1 _ n2 n3 ->
-             let mk = if c = "x" then (fun a b -> a, b)
-               else (fun a b -> b, a)
-             in
-             for i = n2 to n3 do
-               let x, y = mk n1 i in
-               clay %+ (x, y);
-               x_max := max x !x_max;
-               x_min := min x !x_min;
+    Input.fold_scan "%[xy]=%d, %[xy]=%d..%d" (
+      fun () c n1 _ n2 n3 ->
+        let mk = if c = "x" then (fun a b -> a, b)
+          else (fun a b -> b, a)
+        in
+        for i = n2 to n3 do
+          let x, y = mk n1 i in
+          clay %+ (x, y);
+          x_max := max x !x_max;
+          x_min := min x !x_min;
 
-               y_max := max y !y_max;
-               y_min := min y !y_min;
+          y_max := max y !y_max;
+          y_min := min y !y_min;
 
-             done
-          )) ();
+        done
+    ) ();
     clay, (!x_min, !x_max, !y_min, !y_max)
 
   let buff = Buffer.create 16

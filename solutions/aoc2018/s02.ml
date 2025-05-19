@@ -13,8 +13,7 @@ struct
     (c2 > 0, c3 > 0)
 
   let read_input () =
-    Input.fold_lines (fun acc s -> s::acc) []
-    |> List.rev
+    Input.list_lines Fun.id
 
 
   let count l =

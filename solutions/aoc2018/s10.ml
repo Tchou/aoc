@@ -6,10 +6,8 @@ struct
 
   type point = { p : Grid.position; v : Grid.position }
   let read_input () =
-    Input.fold_lines
-      (fun acc l ->
-         Scanf.sscanf l "position=< %d, %d> velocity=< %d, %d>"
-           (fun x y vx vy -> {p=x, y; v=vx,vy}::acc))[]
+    Input.list_scan "position=< %d, %d> velocity=< %d, %d>"
+      (fun acc x y vx vy -> {p=x, y; v=vx,vy})
 
   let move point =
     { point with p = Grid.(point.p +! point.v)}

@@ -80,7 +80,7 @@ struct
       stars
       |> Hashtbl.to_seq_values
       |> Seq.map (function [g1;g2] ->g1*g2 | _ -> 0)
-      |> Iter.sum (module Int) Fun.id
+      |> Iter.(sum seq int)
     in
     Solution.printf "%d" sum
 end

@@ -180,6 +180,25 @@ end
 let get_input = function None -> Solution.get_input () | Some i -> i
 module InputUntil = struct
 
+  let list_lines ?input f =
+    let input = get_input input in
+    let [@tail_mod_cons] rec loop () =
+      match input_line input with
+      | s -> begin match f s with 
+            None -> []
+          | Some e -> e :: loop ()
+        end
+      | exception End_of_file -> []
+    in
+    loop ()
+
+  let list_scan ?input fmt f =
+    list_lines ?input (fun s -> Scanf.sscanf s fmt f)
+
+  let list_fields ?input c f =
+    list_lines ?input (fun s -> f (String.split_on_char c s))
+
+
   let rec fold_lines ?input f acc =
     let input = get_input input in
     match input_line input with
@@ -279,6 +298,12 @@ struct
   let read_char ?input () =
     let input = get_input input in
     input_char input
+
+  let list_lines ?input f = InputUntil.list_lines ?input (fun e -> Some (f e))
+  let list_scan ?input fmt f = 
+    list_lines ?input (fun s -> Scanf.sscanf s fmt f)
+
+  let list_fields ?input c f = InputUntil.list_fields ?input c (fun l -> Some (f l))
 
 end
 module Ansi = Ansi

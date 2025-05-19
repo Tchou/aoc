@@ -128,6 +128,13 @@ sig
       specified or to the default input channel (see [set_input]).
   *)
 
+  val list_scan : ?input:in_channel -> 
+    ('a, Scanf.Scanning.in_channel,'b,'c -> 'd, 'a -> 'e, 'e ) format6 -> 'c -> 'd list 
+    
+  val list_lines : ?input:in_channel -> (string -> 'a) -> 'a list
+
+  val list_fields : ?input:in_channel -> char -> (string list -> 'a) -> 'a list
+
 end
 module InputUntil :
 sig
@@ -170,6 +177,14 @@ sig
       specified or to the default input channel (see [set_input]). The input is assumed to bu UTF-8 encoded.
       [f] must returns [true] to continue processing the input and [false] to stop.
   *)
+
+  val list_scan : ?input:in_channel -> 
+    ('a, Scanf.Scanning.in_channel,'b,'c -> 'd option, 'a -> 'e, 'e ) format6 -> 'c -> 'd list 
+    
+  val list_lines : ?input:in_channel -> (string -> 'a option) -> 'a list
+
+  val list_fields : ?input:in_channel -> char -> (string list -> 'a option) -> 'a list
+  
 end
 
 (** Ainsi escape sequences, mainly for pretty-printing. *)

@@ -241,7 +241,7 @@ struct
         in
         let c = String.sub s 0 3 |> int_of_string in
         n * c)
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list (module Int))
 
   let dir_conf = (dir_idx, (0,0), dir_coords)
   let num_conf = (num_idx, (0,3), num_coords)

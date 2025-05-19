@@ -81,7 +81,7 @@ struct
     let exprs = read_input () in
     let n = exprs
             |> List.map (eval prio)
-            |> Iter.sum (module Int) List.to_seq
+            |> Iter.(sum list int)
     in
     Solution.printf "%d" n
 

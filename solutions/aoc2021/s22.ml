@@ -177,7 +177,7 @@ struct
   let count l =
     l
     |> List.map Cube.size
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
   let bounded_int int ibound =
     match Interval.cap int ibound with
       Some i when i = int -> true

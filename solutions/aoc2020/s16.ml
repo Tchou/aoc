@@ -44,9 +44,9 @@ struct
       |> List.map (fun l ->
           l
           |> List.filter (Fun.negate (contains intervals))
-          |> Iter.sum (module Int) List.to_seq
+          |> Iter.(sum list int)
         )
-      |> Iter.sum (module Int) List.to_seq
+      |> Iter.(sum list int)
     in
     Solution.printf "%d" n
 

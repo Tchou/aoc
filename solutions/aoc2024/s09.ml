@@ -7,8 +7,7 @@ struct
     l
     |> String.to_seq
     |> Seq.map (fun c -> Char.code c - Char.code '0')
-    |> Iter.sum (module Int) Fun.id
-
+    |> Iter.(sum seq int)
   let rle s =
     let blocks = ref [] in
     let idx = ref 0 in

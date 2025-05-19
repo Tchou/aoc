@@ -161,7 +161,7 @@ struct
   let score groups =
     groups
     |> List.map (fun g -> g.units)
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
 
   let fight n1 n2 groups =
     let rec loop () =
@@ -190,7 +190,7 @@ struct
     let orig_groups = List.map (fun g -> {g with id = g.id}) groups in
     let max_power =
       2 * (List.map (fun g -> g.units * g.hp) groups
-           |> Iter.max List.to_seq)
+           |> Iter.(max list))
     in
     let rec loop low hi count =
       if low < hi - 1 then begin
@@ -206,7 +206,7 @@ struct
         if winner = n1 then
           let count' = List.filter_map (fun g -> if g.kind = n1
                                          then Some g.units else None) groups
-                       |> Iter.sum (module Int) List.to_seq
+                       |> Iter.(sum list int)
           in
           loop low mid count'
         else loop mid hi count

@@ -62,11 +62,9 @@ struct
 
 
   let read_input () =
-    Input.fold_lines (fun acc line ->
-        Scanf.sscanf line "#%d @ %d,%d: %dx%d"
-          (fun id x y w h ->
-             (id, Rect.make x y w h)::acc)) []
-    |> List.rev
+    Input.list_scan "#%d @ %d,%d: %dx%d" 
+      (fun id x y w h ->
+         (id, Rect.make x y w h))
 
   let count_inter l =
     l
@@ -78,7 +76,7 @@ struct
       ) []
     |> List.map (fun Rect.{width;height} ->
         Interval.length width * Interval.length height)
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
   let solve_part1 () =
     let l = read_input () in
     let n = count_inter l in

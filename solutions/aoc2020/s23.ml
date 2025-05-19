@@ -5,7 +5,7 @@ struct
   let name = Name.mk "s23"
 
   let read_input () =
-    let s = read_line () in
+    let s = Input.read_line () in
     let t = Dll.singleton (Char.code s.[0] - Char.code '0') in
     for i = 1 to String.length s - 1 do
       ignore @@ Dll.insert_before t (Char.code s.[i] - Char.code '0')

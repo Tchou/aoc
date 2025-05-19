@@ -21,13 +21,13 @@ struct
             tab.$[Char.code c - Char.code 'a']<- '\x01') s) l;
     Bytes.to_seq tab
     |> Seq.map Char.code
-    |> Iter.sum (module Int) Fun.id
+    |> Iter.(sum seq int)
 
   let solve_part1 () =
     let l = read_input () in
     l
     |> List.map count_answers
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
     |> Solution.printf "%d"
 
   let count_distinct_answers l =
@@ -39,13 +39,13 @@ struct
             tab.$[idx] <- Char.unsafe_chr ((Char.code tab.$[idx]) + 1)) s) l;
     Bytes.to_seq tab
     |> Seq.map Char.code
-    |> Iter.count_if ((=) n) Fun.id
+    |> Iter.(count_if seq ((=) n))
 
   let solve count =
     let l = read_input () in
     l
     |> List.map count
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list (module Int))
     |> Solution.printf "%d"
 
   let solve_part1 () = solve count_answers

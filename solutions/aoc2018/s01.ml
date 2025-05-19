@@ -5,10 +5,9 @@ struct
   let name = Name.mk "s01"
 
   let read_input () =
-    Input.fold_scan "%d" (fun acc d -> d :: acc) []
-    |> List.rev
+    Input.list_scan "%d" Fun.id
 
-  let sum = Iter.sum (module Int) List.to_seq
+  let sum = Iter.(sum list int)
   let solve_part1 () =
     let l = read_input () in
     let n = sum l in

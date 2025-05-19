@@ -36,9 +36,10 @@ struct
 
   let count_valid map l =
     l
-    |> Iter.count_if (fun txt ->
-        try explore (fun _ -> raise Exit) map txt;false
-        with Exit -> true) List.to_seq
+    |> Iter.(count_if list
+               (fun txt ->
+                  try explore (fun _ -> raise Exit) map txt;false
+                  with Exit -> true))
 
   let explore_all cache map txt =
     let len = String.length txt in
@@ -66,8 +67,7 @@ struct
     let cache = ~%[] in
     l
     |> List.map (explore_all cache map)
-    |> Iter.sum (module Int) List.to_seq
-
+    |> Iter.(sum list int)
   let solve count =
     let map, l = read_input () in
     let n = count map l in

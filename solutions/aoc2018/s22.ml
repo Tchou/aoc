@@ -90,7 +90,7 @@ struct
     map
     |> Hashtbl.to_seq_values
     |> Seq.map fst
-    |> Iter.min Fun.id
+    |> Iter.(min seq)
   let solve_part2 () =
     let depth, target = read_input () in
     let n = fastest_path depth target in

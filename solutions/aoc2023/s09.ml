@@ -32,7 +32,7 @@ struct
                    |> dir
                    |> complete) acc
       ) Seq.empty
-    |> Iter.sum (module Int) Fun.id
+    |> Iter.(sum seq int)
     |> Solution.printf "%d"
   let solve_part1 () = solve Fun.id
 

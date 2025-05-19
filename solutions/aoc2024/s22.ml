@@ -26,7 +26,7 @@ struct
   let rec iterate k n = if k = 0 then n else iterate (k-1) (next n)
   let score l =
     List.map (iterate 2000) l
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list (module Int))
   let solve_part1 () =
     let l = read_input () in
     let n = score l in

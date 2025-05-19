@@ -62,11 +62,18 @@ module type GRID = sig
   val map_lines : (line -> line) -> t -> t
 
   val (.!()) : t -> position -> elt
+  val get_line : t -> int -> line
   val (.!!()) : t -> position -> elt
   val read_until : ?input:in_channel -> (string -> bool) -> t
   val read : ?input:in_channel -> unit -> t
   val find_from : (elt -> bool) -> t -> position -> position
   val find : (elt -> bool) -> t -> position
+
+  val rotate_left : t -> t
+  val rotate_right : t -> t
+
+  val vertical_flip : t -> t
+  val horizontal_flip : t -> t
 
   val compare : t -> t -> int
   val equal : t -> t -> bool
@@ -98,6 +105,7 @@ let read_until ?input f cast =
 let read ?input cast =
   read_until ?input (fun _ -> false) cast
 
+
 module Make(L : LINE) = struct
 
   type elt = L.elt
@@ -107,6 +115,8 @@ module Make(L : LINE) = struct
   let width t = L.length t.(0)
   let height t = Array.length t
   let (.!()) t (x, y) = L.get (Array.get t y) x
+
+  let get_line t i = t.(i)
 
   let (.!!()) t (x, y) = L.unsafe_get (Array.unsafe_get t y) x
 
@@ -180,6 +190,32 @@ module Make(L : LINE) = struct
       loop 0 0 (height g1) (height g2)
 
   let equal g1 g2 = compare g1 g2 = 0
+
+
+  let rotate_left g =
+    let rows = height g in
+    let cols = width g in
+    Array.init cols (fun i -> L.init rows (fun j -> 
+        L.get g.(j) (cols - 1 - i)))
+  let rotate_right g =
+    let rows = height g in
+    let cols = width g in
+    Array.init cols (fun i -> L.init rows (fun j -> 
+        L.get g.(rows - 1 - j) i))
+
+  let vertical_flip g =
+    let rows = height g in
+    let cols = width g in
+    Array.init rows (fun i -> L.init cols (fun j -> 
+        L.get g.(rows - 1 - i) j))
+
+  let horizontal_flip g =
+    let rows = height g in
+    let cols = width g in
+    Array.init rows (fun i -> L.init cols (fun j -> 
+        L.get g.(i) (cols - 1 - j)))
+
+
 end
 module MakeRW (L : RWLINE) = struct
   include Make (L)

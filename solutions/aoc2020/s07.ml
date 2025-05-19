@@ -36,7 +36,7 @@ struct
   let count_shiny_gold tree =
     let cache = ~%[] in
     tree
-    |> Iter.count_if (has_shiny_gold cache tree) Hashtbl.to_seq_keys
+    |> Iter.(count_if keys (has_shiny_gold cache tree))
 
   let solve_part1 () =
     load_input ()
@@ -47,7 +47,7 @@ struct
   let rec count_bags k tree =
     1 + (tree.%{k}
          |> List.map (fun (n, k') -> n* count_bags k' tree)
-         |> Iter.sum (module Int) List.to_seq)
+         |> Iter.(sum list int))
   let solve_part2 () =
     load_input ()
     |> count_bags "shiny gold"

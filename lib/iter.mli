@@ -3,31 +3,62 @@
     to [Seq.t]
 *)
 
+val list : 'a list -> 'a Seq.t
+
+val ilist : 'a list -> (int * 'a) Seq.t
+
+val array : 'a array -> 'a Seq.t
+
+val iarray : 'a array -> (int * 'a) Seq.t
+
+val string : string -> char Seq.t
+val istring : string -> (int * char) Seq.t
+
+val bytes : bytes -> char Seq.t
+val ibytes : bytes -> (int * char) Seq.t
+
+val seq : 'a Seq.t -> 'a Seq.t
+
+val iseq : 'a Seq.t -> (int * 'a) Seq.t
+
+val keys : ('a, 'b) Hashtbl.t -> 'a Seq.t
+
+val values : ('a, 'b) Hashtbl.t -> 'b Seq.t
+
+val items : ('a, 'b) Hashtbl.t -> ('a * 'b) Seq.t
+
 val count : ('a -> 'b Seq.t) -> 'a -> int
 (** [count to_seq col] returns the number of elements in [col]. *)
 
-val count_if : ('a -> bool) -> ('b -> 'a Seq.t) -> 'b -> int
+val count_if : ('b -> 'a Seq.t) -> ('a -> bool)  -> 'b -> int
 (** [count_if pred to_seq col] returns the number of elements in [col] for
     which [pred] returns true. *)
 
-module type ADD = sig type t val zero : t val add : t -> t -> t end
-(** A minimal module signatures that features [zero] and [add].
-    Modules of the Standard library such as [Int], [Float], [Int64] implement
-    this signature. *)
+module type NUM = 
+sig
+  type t
+  val zero : t 
+  val one : t 
+  val add : t -> t -> t 
+  val mul : t -> t -> t
+end
 
-module type MUL = sig type t val one : t val mul : t -> t -> t end
-(** A minimal module signatures that features [one] and [mul].
-    Modules of the Standard library such as [Int], [Float], [Int64] implement
-    this signature. *)
+val int : (module NUM with type t = int)
+val int64 : (module NUM with type t = int64)
+val int32 : (module NUM with type t = int32)
+val float : (module NUM with type t = float)
 
 val sum :
-  (module ADD with type t = 'a) -> ('b -> 'a Seq.t) -> 'b -> 'a
+  ('b -> 'a Seq.t) -> 
+  (module NUM with type t = 'a) -> 'b -> 'a
 (** [sum (module M) to_seq col] returns the sum of elements of [col].
     Their type should the same as [M.t] where [M] is the module featuring
     [zero] and [add].
 *)
 
-val prod : (module MUL with type t = 'a) -> ('b -> 'a Seq.t) -> 'b -> 'a
+val prod :
+  ('b -> 'a Seq.t) -> 
+  (module NUM with type t = 'a) -> 'b -> 'a
 (** [prod (module M) to_seq col] returns the product of elements of [col].
     Their type should the same as [M.t] where [M] is the module featuring
     [one] and [mul].
@@ -35,27 +66,30 @@ val prod : (module MUL with type t = 'a) -> ('b -> 'a Seq.t) -> 'b -> 'a
 
 
 val max_opt :
-  ?compare:('a -> 'a -> int) -> ('b -> 'a Seq.t) -> 'b -> 'a option
+  ('b -> 'a Seq.t) ->
+  ?compare:('a -> 'a -> int) -> 'b -> 'a option
 (** [max_opt to_seq col] returns [Some m] where [m] is the maximal element of
     [col] according to the [compare] function. The function returns [None] if
     the sequence is empty. [compare] defaults to the polymorphic comparison.
 *)
 
 val min_opt :
-  ?compare:('a -> 'a -> int) -> ('b -> 'a Seq.t) -> 'b -> 'a option
+  ('b -> 'a Seq.t) -> ?compare:('a -> 'a -> int) -> 'b -> 'a option
 (** [min_opt to_seq col] returns [Some m] where [m] is the minimal element of
     [col] according to the [compare] function. The function returns [None] if
     the sequence is empty. [compare] defaults to the polymorphic comparison.
 *)
 
 
-val max : ?compare:('a -> 'a -> int) -> ('b -> 'a Seq.t) -> 'b -> 'a
+val max :
+  ('b -> 'a Seq.t) -> ?compare:('a -> 'a -> int) -> 'b -> 'a
 (** [max to_seq col] returns the maximal elements of [col] according to the
       [compare] function. The function throws [Invalid_argument] if the sequence
       is empty. [compare] defaults to the polymorphic comparison.
 *)
 
-val min : ?compare:('a -> 'a -> int) -> ('b -> 'a Seq.t) -> 'b -> 'a
+val min :
+  ('b -> 'a Seq.t) -> ?compare:('a -> 'a -> int)  -> 'b -> 'a
 (** [min to_seq col] returns [Some m] where [m] is the maximal elements of
     [col] according to the [compare] function. The function returns [None] if
     the sequence is empty. [compare] defaults to the polymorphic comparison.
@@ -77,7 +111,7 @@ val powerset : ('a -> 'b Seq.t) -> 'a -> 'b Seq.t Seq.t
 *)
 
 val pairs :
-  ?sym:bool -> ?refl:bool -> ('a -> 'b Seq.t) -> 'a -> ('b * 'b) Seq.t
+  ('a -> 'b Seq.t) -> ?sym:bool -> ?refl:bool -> 'a -> ('b * 'b) Seq.t
 (** [pairs ~sym ~refl to_seq col] returns the Cartesian product of [col]
     with itself. Let [x] and [y] be elements of [col]:
     - if [sym] is [true] (default) then both [x,y] and [y,x] are in the result
@@ -96,3 +130,7 @@ val for_ : ?step:int -> int -> int -> (int -> unit) -> unit
 val while_ : (unit -> bool) -> (unit -> unit) -> unit
 val break : unit -> 'a
 val continue : unit -> 'a
+type range
+val (--) : int -> int -> range
+val (-%) : range -> int -> range
+val (let&) : range -> (int -> unit) -> unit

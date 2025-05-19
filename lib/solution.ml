@@ -60,23 +60,25 @@ let exec l =
     Ansi.(printf "%a%s, time:   %a%fms%a\n%!" bfg yellow s bfg col t clear color)
 
   | None -> raise (Error String.(concat " " ("Invalid solution:" :: l)))
-let exec_dir prefix files =
-  let solutions = Hashtbl.fold (fun l f acc ->
-      match l with
-        p::s::_::[] when p = prefix -> [p;s]::acc
-      |_ -> acc
-    ) table [] |> List.sort_uniq (fun a b -> compare a b)
+
+let is_digit s = Option.is_some (int_of_string_opt s)
+let exec_dir prefix dir =
+  let entries = Sys.readdir dir 
+                |> Array.to_list
+                |> List.filter_map int_of_string_opt
+                |> List.sort Int.compare
   in
-  let ls = List.length solutions in
-  let ld = List.length files in
-  if ls <> ld then
-    raise (Error Format.(sprintf "prefix %s has %d solutions but %d input files were given." prefix ls ld))
-  else
-    let t0 = Unix.gettimeofday () in
-    List.iter2 (fun sol file ->
+  let t0 = Unix.gettimeofday () in
+  entries
+  |> List.iter (fun e ->
+      let s = string_of_int e in
+      let path = Filename.concat dir s in
+      let input = Filename.concat path "input" in
+      if Sys.is_directory path && Sys.file_exists input then begin
+        let sol = prefix :: Format.sprintf "s%02d" e :: [] in
         try
           for i = 1 to 2 do
-            let ic = open_in file in
+            let ic = open_in input in
             set_input ic;
             Fun.protect
               ~finally:(fun () -> try close_in ic;set_input stdin with _ -> ())
@@ -84,17 +86,18 @@ let exec_dir prefix files =
           done;
           Ansi.printf "\n";
         with Sys_error msg -> raise (Error msg)
-      ) solutions files;
-    let t1 = Unix.gettimeofday () in
-    let t = 1000. *. (t1 -. t0) in
-    let col = if t < 1000. then Ansi.green else if t < 5000. then Ansi.cyan else Ansi.red in
-    Ansi.(printf "\n%a%s, total time:   %a%fms%a\n%!" fg yellow  prefix bfg col t clear color)
+      end
+    );
+  let t1 = Unix.gettimeofday () in
+  let t = 1000. *. (t1 -. t0) in
+  let col = if t < 1000. then Ansi.green else if t < 5000. then Ansi.cyan else Ansi.red in
+  Ansi.(printf "\n%a%s, total time:   %a%fms%a\n%!" fg yellow  prefix bfg col t clear color)
 
 
 let run argv =
   match List.tl (Array.to_list argv) with
     [ "list" ] -> list () |> List.iter (fun l -> String.concat " " l |> print_endline)
-  |  "bench" :: prefix :: dirs -> exec_dir prefix dirs
+  |  "all" :: prefix :: dir::[] -> exec_dir prefix dir
   | [ sol ] -> exec [default_prefix; sol; "1"]
   | [ sol; ("1"|"2" as v) ] -> exec [default_prefix; sol; v]
   | [ sol; ("1"|"2" as v); var ] -> exec [default_prefix; sol; v; var]

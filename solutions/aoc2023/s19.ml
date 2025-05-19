@@ -113,21 +113,29 @@ struct
         tab.(i) <- (max inf ainf, min sup asup)) ints;
     tab
     |> Array.map (fun (i,j) -> j-i)
-    |> Iter.prod (module Int) Array.to_seq
+    |> Iter.(prod array (module Int))
 
   let pp ppf l =
     let fields = List.map (fun (a,b) -> (b,a)) fields in
     List.iter (fun (i, c, b, n) ->
         Ansi.fprintf ppf "%c %s%c %d\n"
-          (List.assoc i fields) (if b then "" else "!") c n 
+          (List.assoc i fields) (if b then "" else "!") c n
       ) l;
     Ansi.fprintf ppf "--\n%!"
+  let pp_path fmt l =
+    let swap (a,b) =(b,a) in
+    List.iter (fun (i, (x,y)) ->
+        Format.fprintf fmt "(%d <= %c < %d) "
+          x (List.assoc i (List.map swap fields))
+          y
+      ) l
   let solve_part2 () =
     let rule_table = load_rules () in
     let _parts = load_parts () in
+    let i = ref 0 in
     eval_constr rule_table
     |> List.map merge_intervals
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
     |> Solution.printf "%d"
 
 end

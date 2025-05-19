@@ -39,8 +39,7 @@ struct
     let cache = ~%[] in
     l
     |> List.map (blink cache r)
-    |> Iter.sum (module Int) List.to_seq
-
+    |> Iter.(sum list int)
   let solve n =
     let l = read_input () in
     let n = run n l in

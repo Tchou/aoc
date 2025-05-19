@@ -42,7 +42,7 @@ struct
         match sort order l with
           Some l -> List.nth l (List.length l /2)
         | None -> 0)
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
 
   let solve sort =
     let order, updates = read_input () in

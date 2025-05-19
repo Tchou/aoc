@@ -22,11 +22,10 @@ struct
     l
     |> List.map (fun p ->
         Grid.dir4
-        |> Iter.count_if (fun d ->
+        |> Iter.(count_if list (fun d ->
             is_on_side grid Grid.(p +! d) a
-          ) List.to_seq)
-    |> Iter.sum (module Int) List.to_seq
-
+          )))
+    |> Iter.(sum list int)
   (* for the side, find the number of corners, that is the number
      of points that have two neighbors one each vertical/horizontal
      which is not in the surface (external) or which has both
@@ -58,14 +57,14 @@ struct
     in
     let count_corners p test corners =
       corners
-      |> Iter.count_if (test p) List.to_seq
+      |> Iter.(count_if list (test p))
     in
     l
     |> List.map (fun p ->
         let ce = count_corners p is_external ext_corners in
         let ci = count_corners p is_internal int_corners in
         ci + ce)
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
 
   (*
   Do a simple DFS for each (non-visited) point in the grid to find each plot containing
@@ -100,8 +99,8 @@ struct
         ll
         |> List.map (fun l ->
             (perim grid l a) * (List.length l))
-        |> Iter.sum (module Int) List.to_seq)
-    |> Iter.sum (module Int) Fun.id
+        |> Iter.(sum list int))
+    |> Iter.(sum seq int)
 
   let solve perim =
     let grid = G.read () in

@@ -12,18 +12,18 @@ struct
 
   let solve_part1 () =
     load_input parse_binary
-    |> Iter.max List.to_seq
+    |> Iter.(max list)
     |> Solution.printf "%d"
   let solve_part2 () =
     let arr = Array.make 1024 false in
     Input.fold_lines (fun () s -> arr.(parse_binary s) <- true) ();
     let res = ref 0 in
-    Iter.for_ 1 (Array.length arr - 2)
-      (fun i ->
-         if arr.(i-1) && arr.(i+1) && not arr.(i) then begin
-           res := i;
-           Iter.break ();
-         end);
+    Iter.(
+      let& i =  1 -- (Array.length arr - 2) in
+      if arr.(i-1) && arr.(i+1) && not arr.(i) then begin
+        res := i;
+        break ();
+      end);
     Solution.printf "%d" !res
 
 end

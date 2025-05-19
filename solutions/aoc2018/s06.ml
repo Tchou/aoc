@@ -61,7 +61,7 @@ struct
     conf.bottom <> dummy_pos
 
   let read_input () =
-    Input.fold_scan "%d, %d" (fun acc x y -> (x, y) :: acc) []
+    Input.list_scan "%d, %d" (fun x y -> (x, y))
 
 
   let dfs continue origin all =

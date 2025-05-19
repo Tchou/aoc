@@ -23,7 +23,7 @@ struct
       modules
       |> List.to_seq
       |> Seq.map calc
-      |> Iter.sum (module Int) Fun.id in
+      |> Iter.(sum seq int) in
     Solution.printf "%d" n
 
   let solve_part1 () = solve fuel

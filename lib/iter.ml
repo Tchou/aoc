@@ -7,33 +7,31 @@ let conv_seq to_seq col f init =
 let count (to_seq:'a -> 'b Seq.t) col =
   conv_seq to_seq col (fun acc _ -> 1+acc) 0
 
-let count_if f to_seq col =
+let count_if to_seq f col =
   conv_seq to_seq col
     (fun acc v -> if f v then 1+acc else acc) 0
 
-module type ADD = sig
+module type NUM = 
+sig
   type t
   val zero : t
-  val add : t -> t -> t
-end
-
-module type MUL = sig
-  type t
   val one : t
+  val add : t -> t -> t
   val mul : t -> t -> t
 end
 
-let sum (type a)
-    (module M : ADD with type t =a) to_seq col =
+let sum (type a) to_seq 
+    (module M : NUM with type t =a) col =
   conv_seq to_seq col
     (fun acc v -> M.add v acc) M.zero
 
 let prod (type a)
-    (module M : MUL with type t =a) to_seq col =
+    to_seq 
+    (module M : NUM with type t =a) col =
   conv_seq to_seq col
     (fun acc v -> M.mul v acc) M.one
 
-let agg_cmp_opt  cmp (compare:'b -> 'b -> int) to_seq col =
+let agg_cmp_opt to_seq cmp (compare:'b -> 'b -> int) col =
   let f a b =
     match a, b with
       None, _ -> Some b
@@ -42,22 +40,22 @@ let agg_cmp_opt  cmp (compare:'b -> 'b -> int) to_seq col =
   conv_seq  to_seq col
     f None
 
-let agg_cmp s cmp compare to_seq col =
-  match agg_cmp_opt  cmp compare to_seq col with
+let agg_cmp to_seq s cmp compare col =
+  match agg_cmp_opt to_seq cmp compare col with
     None -> invalid_arg ("Invalid argument: " ^ s)
   | Some v -> v
 
-let max_opt ?(compare=compare) =
-  agg_cmp_opt  (>) compare
+let max_opt to_seq ?(compare=compare) =
+  agg_cmp_opt to_seq (>) compare
 
-let min_opt ?(compare=compare) =
-  agg_cmp_opt  (>) compare
+let min_opt to_seq ?(compare=compare) =
+  agg_cmp_opt  to_seq (<) compare
 
-let max ?(compare=compare) =
-  agg_cmp "max"  (>) compare
+let max to_seq ?(compare=compare) col =
+  agg_cmp to_seq "max" (>) compare col
 
-let min ?(compare=compare) =
-  agg_cmp "max"  (>) compare
+let min to_seq ?(compare=compare) col =
+  agg_cmp to_seq "min"  (<) compare col
 
 let range ?(step=1) start stop =
   let rec loop i () =
@@ -114,11 +112,11 @@ let pairs_aux sym refl l =
   in
   loop1 l Seq.empty
 
-let pairs ?(sym=true) ?(refl=true) to_seq l =
+let pairs to_seq ?(sym=true) ?(refl=true) l =
   pairs_aux sym refl (to_seq l)
 
 let product to_seq1 to_seq2 l1 l2 =
-  Seq.product (to_seq1 l1) (to_seq2 l2)
+  Seq.product (to_seq1 l1) (to_seq2 l2) 
 
 let fst to_seq l = Seq.map fst (to_seq l)
 let snd to_seq l = Seq.map snd (to_seq l)
@@ -150,12 +148,37 @@ let while_ cond body =
     loop ()
   with Break -> ()
 
+let seq x = x
+let iseq l = Seq.mapi (fun i x -> (i, x)) l
+let list = List.to_seq
+let ilist l = iseq (list l)
+let array = Array.to_seq
+let iarray = Array.to_seqi
+let keys = Hashtbl.to_seq_keys
+let values = Hashtbl.to_seq_values
+let items = Hashtbl.to_seq
 
-module type NUM = 
-sig
-  type t
-  val zero : t
-  val one : t
-  val add : t -> t -> t
-  val mul : t -> t -> t
-end
+let string = String.to_seq
+let istring = String.to_seqi
+
+let bytes = Bytes.to_seq
+
+let ibytes = Bytes.to_seqi
+
+type range = Range of int * int | Step of int * int * int
+let (--) a b = Range (a, b)
+
+let (-%) r n = 
+  match r with
+    Range (a, b) 
+  | Step (a, b, _) -> Step (a, b, n) 
+
+let (let& ) r e =
+  match r with
+    Range (a, b) -> for_ a b e
+  | Step (a, b, step) -> for_ ~step a b e
+
+let int = (module Int : NUM with type t = int)
+let int64 = (module Int64 : NUM with type t = int64)
+let int32 = (module Int32 : NUM with type t = int32)
+let float = (module Float : NUM with type t = float)

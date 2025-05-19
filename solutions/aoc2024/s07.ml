@@ -35,7 +35,7 @@ struct
     l
     |> List.map (fun (total, l) ->
         if can_be_combined part2 total l then total else 0)
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
   let solve ops =
     let lst = read_input () in
     let n = total_calibration_result ops lst in

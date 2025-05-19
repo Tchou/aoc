@@ -33,7 +33,7 @@ struct
       let children = map.%?{node} or [] in
       n + (children
            |> List.map (loop (n+1))
-           |> Iter.sum (module Int) List.to_seq)
+           |> Iter.(sum list int))
     in
     loop 0 "COM"
 

@@ -41,7 +41,7 @@ struct
           cards.(i) <- cards.(i) + num_id;
         done;
         num_id)
-    |> Iter.sum (module Int) List.to_seq
+    |> Iter.(sum list int)
     |> Solution.printf "%d"
 end
 

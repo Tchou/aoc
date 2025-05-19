@@ -7,9 +7,8 @@ struct
 
 
   let read_lines () =
-    Input.fold_lines (fun acc line ->
-        Scanf.sscanf line "[%s %d:%d] %[0-9A-Za-z# ]"
-          (fun date h m txt -> (date, (h,m), txt) :: acc)) []
+    Input.list_scan "[%s %d:%d] %[0-9A-Za-z# ]"
+      (fun date h m txt -> (date, (h,m), txt))
 
   let read_input () =
     let map = ~%[] in
@@ -37,7 +36,7 @@ struct
         let n =
           events
           |> List.map (fun (_, ((_, m1), (_, m2))) -> (m2 - m1)) 
-          |> Iter.sum (module Int) List.to_seq
+          |> Iter.(sum list int)
         in
         if n > an then (id, n) else (aid, an)
       ) map (-1,-1)

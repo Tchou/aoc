@@ -39,7 +39,7 @@ struct
     let n =
       l
       |> List.map f
-      |> Iter.count_if Fun.id List.to_seq
+      |> Iter.(count_if list Fun.id)
     in
     Solution.printf "%d" n
 

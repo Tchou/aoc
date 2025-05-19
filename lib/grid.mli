@@ -125,6 +125,9 @@ sig
   val ( .!() ) : t -> position -> elt
   (** Indexig operator get *)
 
+  val get_line : t -> int -> line
+  (** Returns the ith line *)
+
   val (.!!()) : t -> position -> elt
   (** Indexig operator unsafe get *)
 
@@ -140,7 +143,19 @@ sig
       Raises Not_found if no such position is found *)
 
   val find : (elt -> bool) -> t -> position
-  (* [find f grid] is equivalent to [find_from f grid (0, 0)]*)
+  (** [find f grid] is equivalent to [find_from f grid (0, 0)]*)
+
+  val rotate_left : t -> t
+  (** [rotate_left grid] rotates the grid 90 degrees left *)
+
+  val rotate_right : t -> t
+  (** [rotate_right grid] rotates the grid 90 degrees right *)
+
+  val vertical_flip : t -> t
+  (** [vertical_flip grid] returns the symmetric of the grid along the central line *)
+
+  val horizontal_flip : t -> t
+  (** [horizontal_flip grid] returns the symmetric of the grid along the central column *)
 
   val compare : t -> t -> int
   (** Compares two grid using the lexicographic ordering of the comparison of

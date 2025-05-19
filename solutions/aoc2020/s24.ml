@@ -70,13 +70,13 @@ struct
     let new_floor = ~%[] in
     let todo_white_tiles = ~%[] in
     let count_black_around mark_white coord =
-      Iter.count_if(fun d ->
+      Iter.(count_if list (fun d ->
           let n = HCES.move coord d in
           if not (floor %? n) then begin
             if mark_white then todo_white_tiles.%{n} <- ();
             false
           end else floor.%{n}
-        ) List.to_seq HCES.all_dirs
+        ) HCES.all_dirs)
     in
     Hashtbl.iter (fun coord black ->
         if black then
@@ -95,7 +95,7 @@ struct
 
   let count_black_tiles floor =
     floor
-    |> Iter.count_if Fun.id Hashtbl.to_seq_values
+    |> Iter.(count_if values Fun.id)
 
   let evolve_days n floor =
     let floor = ref floor in

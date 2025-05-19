@@ -143,16 +143,16 @@ struct
     |> Seq.map (fun (a,b) -> a@b)
 
   let alt_rule0 sizes max_len =
-    let rule8 = alt_rule8 sizes max_len in
-    let rule11 = alt_rule11 sizes max_len in
+    let rule8 = alt_rule8 sizes max_len |> Seq.memoize in
+    let rule11 = alt_rule11 sizes max_len |> Seq.memoize in
     let all_combs =
-      Seq.product rule8 rule11
+      Iter.(product seq seq rule8 rule11)
       |> Seq.map (fun (a,b) -> a@b)
     in
     let len_seq s =
       s
       |> List.map (fun r -> sizes.%{r})
-      |> Iter.sum (module Int) List.to_seq
+      |> Iter.(sum list int)
     in
     let rule0 = all_combs |> Seq.filter (fun s -> len_seq s <= max_len ) in
     rule0 |> List.of_seq |> List.sort (fun l1 l2 -> compare (List.length l2) (List.length l1))
@@ -162,7 +162,7 @@ struct
     let max_len =
       words
       |> List.map String.length
-      |> Iter.sum (module Int) List.to_seq in
+      |> Iter.(max list) in
     let sizes = rule_sizes rules in
     let () = if part2 then begin
         rules.%{0} <- `rule (alt_rule0 sizes max_len);
@@ -172,7 +172,7 @@ struct
       words
       |> List.map (match_rule rules sizes)
       |> List.map int_of_bool
-      |> Iter.sum (module Int) List.to_seq
+      |> Iter.(sum list int)
     in
     Solution.printf "%d" n
 
