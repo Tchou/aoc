@@ -7,7 +7,7 @@ struct
   type point = { p : Grid.position; v : Grid.position }
   let read_input () =
     Input.list_scan "position=< %d, %d> velocity=< %d, %d>"
-      (fun acc x y vx vy -> {p=x, y; v=vx,vy})
+      (fun x y vx vy -> {p=x, y; v=vx,vy})
 
   let move point =
     { point with p = Grid.(point.p +! point.v)}
