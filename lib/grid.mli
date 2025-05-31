@@ -32,6 +32,8 @@ sig
 
   val equal : t -> t -> bool
   (** Tests for equality between two lines *)
+
+  val of_array : elt array -> t
 end
 
 (** Types of read-write lines of a grid *)
@@ -163,6 +165,10 @@ sig
 
   val equal : t -> t -> bool
   (** Alias for [compare g1 g2 = 0] *)
+
+  val of_array : line array -> t
+  val of_matrix : elt array array -> t
+  val of_string : string -> t
 end
 
 (** The type of read-write grids *)

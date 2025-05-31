@@ -12,6 +12,8 @@ module type LINE = sig
   val compare : t -> t -> int
   val equal : t -> t -> bool
 
+  val of_array : elt array -> t
+
 end
 
 module type RWLINE = sig
@@ -78,6 +80,10 @@ module type GRID = sig
   val compare : t -> t -> int
   val equal : t -> t -> bool
 
+  val of_array : line array -> t
+  val of_matrix : elt array array -> t
+  val of_string : string -> t
+
 end
 module type RWGRID = sig
   include GRID
@@ -112,6 +118,10 @@ module Make(L : LINE) = struct
   type line = L.t
   type t = L.t array
 
+  let of_array la = Array.copy la
+
+  let of_matrix ea =
+    Array.map L.of_array ea
   let width t = L.length t.(0)
   let height t = Array.length t
   let (.!()) t (x, y) = L.get (Array.get t y) x
@@ -215,18 +225,32 @@ module Make(L : LINE) = struct
     Array.init rows (fun i -> L.init cols (fun j -> 
         L.get g.(i) (cols - 1 - j)))
 
-
+   let of_string s =
+    let l = String.split_on_char '\n' s in
+    let a = Array.of_list l in
+    Array.map L.of_string a
 end
 module MakeRW (L : RWLINE) = struct
   include Make (L)
   let (.!()<-) t (x, y) v = L.set (Array.get t y) x v
 
   let copy = Array.map L.copy
+  let of_array la = copy la
 end
 
-module StringGrid : GRID with type elt = char and type line = string = Make(struct include String type elt = char let of_string x = x end)
+module StringGrid : GRID with type elt = char and type line = string = 
+  Make(struct 
+    include String
+    type elt = char
+    let of_string x = x 
+    let of_array ca = String.init (Array.length ca) (Array.get ca)
+  end)
 
-module BytesGrid : RWGRID with type elt = char and type line = bytes = MakeRW(struct include Bytes type elt = char end)
+module BytesGrid : RWGRID with type elt = char and type line = bytes = MakeRW(struct
+ include Bytes 
+ type elt = char
+ let of_array ca = Bytes.init (Array.length ca) (Array.get ca) 
+end)
 
 module IntLine : RWLINE with type elt = int and type t = int array =
 struct
@@ -245,6 +269,7 @@ struct
   let unsafe_get = Array.unsafe_get
 
   let copy = Array.copy
+  let of_array = Array.copy
 
   let equal = (=)
   let compare = compare
