@@ -17,6 +17,10 @@ sig
       [String.(compare (sub s i (min (length p) (length s - i)) p)]
       but does not allocate intermediary strings.
   *)
+  
+  val remove_prefix : prefix:string -> string -> string
+  val remove_suffix : suffix:string -> string -> string
+
 end
 module Hashtbl :
 sig

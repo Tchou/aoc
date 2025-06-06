@@ -35,6 +35,19 @@ struct
     in
     loop 0
 
+
+  let remove_prefix ~prefix s =
+    if String.starts_with ~prefix s then
+      let len = String.length prefix in
+      String.sub s len (String.length s - len)
+    else s
+
+  let remove_suffix ~suffix s =
+    if String.ends_with ~suffix s then
+      let len = String.length suffix in
+      String.sub s 0 (String.length s - len)
+    else s
+
 end
 module Hashtbl =
 struct
