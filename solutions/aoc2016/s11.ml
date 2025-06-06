@@ -19,10 +19,6 @@ struct
       let chips = set lsr chip_len in
       let gens = set land gen_mask in
       (((lnot chips) lor gens)) land gen_mask == gen_mask
-    let add d set = 
-      set lor d
-    let remove d set = 
-      set land (lnot d)
 
     let union set1 set2 = set1 lor set2
     let diff set1 set2 = set1 land (lnot set2)
@@ -55,6 +51,14 @@ struct
         end
       in
       loop1 set
+
+    let pop_count v =
+      let v = v - ((v lsr 1) land 0x55555555) in
+      let v = (v land 0x33333333) + ((v lsr 2) land 0x33333333) in
+      ((v + (v lsr 4) land 0xF0F0F0F) * 0x1010101) lsr 24
+
+    let count_gens set = pop_count (set land gen_mask)
+    let count_chips set = pop_count (set lsr chip_len)
 
   end
 
@@ -97,13 +101,26 @@ struct
       Format.fprintf fmt "\n%!"
     done
 
+  let key c =
+    let open IDevSet in
+    let c1 = c.(1) in
+    let c2 = c.(2) in
+    let c3 = c.(3) in
+    let c4 = c.(4) in
+    get_floor c, 
+    count_chips c1, count_gens c1,
+    count_chips c2, count_gens c2,
+    count_chips c3, count_gens c3,
+    count_chips c4, count_gens c4
+
   let bfs init final =
     let len = ref 0 in
     let dummy = [||] in
     let queue = Queue.create () in
     Queue.add init queue;
     Queue.add dummy queue;
-    let visited = ~%[init, ()] in (* Configurations can be hashed with generic hash tables *)
+    let visited = Hashtbl.create 4096 in (* Configurations can be hashed with generic hash tables *)
+    visited.%{key init} <- ();
     let rec loop () = 
       (* Don't check for empty queue, will fail if empty which should not happen if the
          final config is reachable
@@ -118,8 +135,9 @@ struct
       in
       if config = final then !len else begin
         iter_next (fun nconf ->
-            if not (visited %? nconf) then begin
-              visited.%{nconf} <- ();
+          let k = key nconf in
+            if not (visited %? k) then begin
+              Hashtbl.add visited k ();
               Queue.add nconf queue
             end) config;
         loop ()
@@ -186,9 +204,9 @@ struct
       d
     in
     let full = Hashtbl.fold (fun s _ acc -> 
-        List.fold_left (fun acc c -> IDevSet.add (make_dev (c,s)) acc)  acc [`Gen;`Chip]) names IDevSet.empty
+        List.fold_left (fun acc c -> IDevSet.union (make_dev (c,s)) acc)  acc [`Gen;`Chip]) names IDevSet.empty
     in
-    let init = Array.append [|1|] (Array.map (List.fold_left (fun acc d -> IDevSet.add (make_dev d) acc) IDevSet.empty) init) in
+    let init = Array.append [|1|] (Array.map (List.fold_left (fun acc d -> IDevSet.union   (make_dev d) acc) IDevSet.empty) init) in
     init, IDevSet.[|4;empty;empty;empty;full|]
 
 
