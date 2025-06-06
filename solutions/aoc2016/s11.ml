@@ -36,6 +36,7 @@ struct
       in
       f set
     let iter f set = Seq.iter f (to_seq set)
+
     let iter12 f set =
       let rec loop2 b n m =
         if n != 0 then begin
@@ -55,43 +56,33 @@ struct
       in
       loop1 set
 
-    let swap set  =
-    (set lsr chip_len) lor ((set land gen_mask) lsl chip_len)
   end
 
-  type configuration = int * IDevSet.t array
-  let iter12 f devset =
-    let s1 = IDevSet.to_seq devset in
-    let s2 = Iter.(pairs ~refl:false ~sym:false Fun.id s1) 
-             |> Seq.map (fun (d1,d2) -> IDevSet.union d1 d2) in
-    Seq.iter f s1;
-    Seq.iter f s2
+  type configuration = IDevSet.t array
 
-  let iter_next f (floor, conf) =
+  let get_floor conf = conf.(0)
+  let iter_next f conf =
+    let floor = get_floor conf in
     let src_dev = conf.(floor) in
     let iter_floor nfloor =
       let dst_dev = conf.(nfloor) in
-      src_dev |> IDevSet.iter12 (fun ss -> 
-          let dst_dev' = IDevSet.union ss dst_dev in
-          if IDevSet.is_valid dst_dev' then begin
-            let nconf = Array.copy conf in
-            nconf.(nfloor) <- dst_dev';
-            nconf.(floor) <- IDevSet.diff src_dev ss;
-            f (nfloor, nconf)
-          end)
+      if nfloor > floor || dst_dev != 0 then
+        src_dev |> IDevSet.iter12 (fun ss -> 
+            let dst_dev' = IDevSet.union ss dst_dev in
+            if IDevSet.is_valid dst_dev' then begin
+              let nconf = Array.copy conf in
+              nconf.(nfloor) <- dst_dev';
+              nconf.(floor) <- IDevSet.diff src_dev ss;
+              nconf.(0) <- nfloor;
+              f nconf
+            end)
     in
     match floor with
-      0 -> iter_floor 1
-    | 1 -> iter_floor 2; iter_floor 0
+      1 -> iter_floor 2
     | 2 -> iter_floor 3; iter_floor 1
-    | 3 -> iter_floor 2
+    | 3 -> iter_floor 4; iter_floor 2
+    | 4 -> iter_floor 3
     | _ -> assert false
-
-  let fold_next f init c  =
-    let acc = ref init in
-    iter_next (fun n -> acc := f !acc n) c;
-    !acc
-
 
   let device_by_id = Hashtbl.create 16
   let device_by_name = Hashtbl.create 16
@@ -106,16 +97,14 @@ struct
       Format.fprintf fmt "\n%!"
     done
 
-  let swap (c, a) = c, Array.map (IDevSet.swap) a
-
   let bfs init final =
     let len = ref 0 in
-    let dummy = (-1, [||]) in
+    let dummy = [||] in
     let queue = Queue.create () in
     Queue.add init queue;
     Queue.add dummy queue;
     let visited = ~%[init, ()] in (* Configurations can be hashed with generic hash tables *)
-    let rec loop () =
+    let rec loop () = 
       (* Don't check for empty queue, will fail if empty which should not happen if the
          final config is reachable
       *)
@@ -127,8 +116,7 @@ struct
           Queue.pop queue 
         end else config
       in
-      if config = final then !len 
-      else begin
+      if config = final then !len else begin
         iter_next (fun nconf ->
             if not (visited %? nconf) then begin
               visited.%{nconf} <- ();
@@ -136,9 +124,7 @@ struct
             end) config;
         loop ()
       end
-    in
-    loop ()
-
+    in loop ()
   let fix_and s =
     let rec loop l =
       match l with 
@@ -202,8 +188,8 @@ struct
     let full = Hashtbl.fold (fun s _ acc -> 
         List.fold_left (fun acc c -> IDevSet.add (make_dev (c,s)) acc)  acc [`Gen;`Chip]) names IDevSet.empty
     in
-    let init = Array.map (List.fold_left (fun acc d -> IDevSet.add (make_dev d) acc) IDevSet.empty) init in
-    (0, init), (3, IDevSet.[|empty;empty;empty;full|])
+    let init = Array.append [|1|] (Array.map (List.fold_left (fun acc d -> IDevSet.add (make_dev d) acc) IDevSet.empty) init) in
+    init, IDevSet.[|4;empty;empty;empty;full|]
 
 
   let solve l =
