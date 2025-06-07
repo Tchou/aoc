@@ -147,29 +147,25 @@ module MathGen (N : Num) : MATH with type t = N.t = struct
     let _, _, r = egcd a b in r
   let lcm a b = N.(mul a  (div b  (gcd a b)))
 
-  let rec fix a n =
-    if N.(compare n a <= 0) then N.rem a n
-    else if N.(compare a (neg n) < 0) then fix N.(rem a n) n
-    else if N.(compare a zero < 0) then fix N.(add a  n) n
-    else a
-  let rec solve_crt l =
-    match l with
-      [] -> failwith "solve_crt"
-    | [ (a, n) ] ->  fix a n, n
-    | (a1, n1) :: (a2, n2) :: ll ->
-      let m1, m2 , x = egcd n1 n2 in
-      if not N.(compare x one = 0) then begin
-        let s1 = N.to_string n1 in
-        let s2 = N.to_string n2 in
-        raise (Invalid_argument Printf.(sprintf
-                                          "coefficient %s and %s are not coprime (gcd(%s, %s)=%s)"
-                                          s1 s2 s1 s2 (N.to_string x)))
-      end;
-      let n12 = N.mul n1  n2 in
-      let k1 = N.(mul a1 (mul m2 n2)) in
-      let k2 = N.(mul a2 (mul m1 n1)) in
-      let a12 = N.add k1 k2 in
-      solve_crt ((a12, n12) :: ll)
+  let mod_inv a m =
+    let x, _y, g = egcd a m in
+    if N.(compare g one <> 0) then
+      let s1 = N.to_string a in
+      let s2 = N.to_string m in
+      raise (Invalid_argument Printf.(sprintf
+                                        "coefficient %s and %s are not coprime (gcd(%s, %s)=%s)"
+                                        s1 s2 s1 s2 (N.to_string g)))
+    else N. (rem (add (rem x m) m) m)
+
+  let solve_crt pairs =
+    let n_product = List.fold_left (fun acc (_, n) -> N.mul acc n) one pairs in
+    let solve_term (a_i, n_i) =
+      let m_i = N.div n_product  n_i in
+      let inv = mod_inv m_i n_i in
+      N.(mul a_i (mul m_i  inv))
+    in
+    let a = List.fold_left (fun acc pair -> N.add acc (solve_term pair)) N.zero pairs in
+    (N.rem (N.add (N.rem a  n_product)  n_product)  n_product), n_product
 
   let pow a b =
     let rec loop r x e =
