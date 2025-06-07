@@ -5,42 +5,32 @@ struct
 
   type tree = 
       Str of string
-    | Inv of int * tree
-    | Concat of int * tree * tree
+    | Node of tree * int
 
   let length = function
       Str s -> String.length s
-    | Inv (len, _) -> len
-    | Concat (len, _, _) -> len
+    | Node (_, i) -> 2*i + 1
 
   let str s = Str s
-  let inv t = Inv (length t, t)
 
-  let concat t1 t2 =
-    let len = length t1 + length t2 in
-    Concat (len, t1, t2)
-
-  let zero = Str "0"
-
-  let step t =
-    concat t (concat zero (inv t))
+  let node t = Node (t, length t)
 
   let rec expand_until n t =
     let len = length t in
     if len >= n then t
     else
-      expand_until n (step t)
-
-  let rec get t i =
-    match t with
-      Str s -> String.get s i
-    | Inv (len, t') ->
-      let c = get t' (len - i - 1) in
-      if c = '0' then '1' else '0'
-    | Concat (_, t1, t2) ->
-      let len = length t1 in
-      if i < len then get t1 i
-      else get t2 (i-len)
+      expand_until n (node t)
+  let get t i =
+    let rec loop t i b =
+      match t with
+        Str s -> let c = String.unsafe_get s i in if b then c else if c = '0' then '1' else '0'
+      | Node (t, j) ->
+        if i < j then loop t i b
+        else if i = j then if b then '0' else '1'
+        else let i' = (j lsl 1) - i in
+          loop t i' (not b)
+    in
+    loop t i true
 
   let rec crc t i len =
     if len = 1 then get t i
