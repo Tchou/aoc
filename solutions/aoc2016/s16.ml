@@ -3,39 +3,30 @@ module S =
 struct
   let name = Name.mk "s16"
 
-  type tree = 
-      Str of string
-    | Node of tree * int
+  type text = string * int
 
-  let length = function
-      Str s -> String.length s
-    | Node (_, i) -> 2*i + 1
-
-  let str s = Str s
-
-  let node t = Node (t, length t)
-
-  let rec expand_until n t =
-    let len = length t in
-    if len >= n then t
-    else
-      expand_until n (node t)
-  let get t i =
-    let rec loop t i b =
-      match t with
-        Str s -> let c = String.unsafe_get s i in if b then c else if c = '0' then '1' else '0'
-      | Node (t, j) ->
-        if i < j then loop t i b
-        else if i = j then if b then '0' else '1'
-        else let i' = (j lsl 1) - i in
-          loop t i' (not b)
+  let expand_until n s =
+    let rec loop len = if n < len then len else
+        loop (2*len+1)
     in
-    loop t i true
+    s, loop (String.length s)
 
+  let get (s, len) i =
+    let mlen = String.length s in
+    let rec loop len i b =
+      if i < mlen then let c = String.unsafe_get s i in if b then c else if c = '0' then '1' else '0' 
+      else
+        let hlen = len lsr 1 in
+        if i < hlen then loop hlen i b
+        else if i = hlen then if b then '0' else '1'
+        else let i' = (len lor 1) - 1 - i in
+          loop hlen i' (not b)
+    in
+    loop len i true
   let rec crc t i len =
     if len = 1 then get t i
     else
-      let hlen = len / 2 in
+      let hlen = len lsr 1 in
       match crc t i hlen, crc t (i+hlen) hlen with
       '0', '0' | '1', '1' -> '1'
                | _ -> '0'
@@ -55,7 +46,7 @@ struct
 
 
   let solve len =
-    let pattern = str (read_input ()) in
+    let pattern = read_input () in
     let t = expand_until len pattern in
     let s = find_crc t len in
     Solution.printf "%s" s

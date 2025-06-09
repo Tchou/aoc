@@ -54,8 +54,8 @@ struct
 
     let pop_count v =
       let v = v - ((v lsr 1) land 0x55555555) in
-      let v = (v land 0x33333333) + ((v lsr 2) land 0x33333333) in
-      ((v + (v lsr 4) land 0xF0F0F0F) * 0x1010101) lsr 24
+      let v = (v land 0x33333333) + ((v asr 2) land 0x33333333) in
+      ((((v + (v asr 4)) land 0xF0F0F0F) * 0x1010101) lsr 24) land 0xff
 
     let count_gens set = pop_count (set land gen_mask)
     let count_chips set = pop_count (set lsr chip_len)
