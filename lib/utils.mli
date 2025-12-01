@@ -17,7 +17,7 @@ sig
       [String.(compare (sub s i (min (length p) (length s - i)) p)]
       but does not allocate intermediary strings.
   *)
-  
+
   val remove_prefix : prefix:string -> string -> string
   val remove_suffix : suffix:string -> string -> string
 
@@ -134,7 +134,7 @@ sig
 
   val list_scan : ?input:in_channel -> 
     ('a, Scanf.Scanning.in_channel,'b,'c -> 'd, 'a -> 'e, 'e ) format6 -> 'c -> 'd list 
-    
+
   val list_lines : ?input:in_channel -> (string -> 'a) -> 'a list
 
   val list_fields : ?input:in_channel -> char -> (string list -> 'a) -> 'a list
@@ -184,11 +184,11 @@ sig
 
   val list_scan : ?input:in_channel -> 
     ('a, Scanf.Scanning.in_channel,'b,'c -> 'd option, 'a -> 'e, 'e ) format6 -> 'c -> 'd list 
-    
+
   val list_lines : ?input:in_channel -> (string -> 'a option) -> 'a list
 
   val list_fields : ?input:in_channel -> char -> (string list -> 'a option) -> 'a list
-  
+
 end
 
 (** Ainsi escape sequences, mainly for pretty-printing. *)
@@ -323,8 +323,9 @@ module GraphAlgo (Graph : GRAPH) : sig
     ?post:(Graph.v -> unit) -> ?first:bool -> ?all_path:bool -> Graph.t ->
     Graph.v -> Graph.v list -> (Graph.v, int * Graph.v list list) Hashtbl.t
 
-  (** [dijsktra g src targets] computes the shortest path
-      from [src] to all other vertices of [targets]. The result is given
+  (** [dijsktra g src is_target] computes the shortest path
+      from [src] to all other vertices for which [is_target] returns true.
+      The result is given
       as a table [tbl] from vertices [v] to pairs [d, path_list ] where
       [d] is the distance from [src] to [v] and [path_list] is the
       list of sequence of vertices of cost [d] to follow to
@@ -334,6 +335,13 @@ module GraphAlgo (Graph : GRAPH) : sig
       first found target.
       If [all_path] is true, (default to false) the algorithm tracks all the
       equivalently good path to each exit (otherwise, [path_list] is a singleton)
+  *)
+
+  val astar : (module Hashtbl.S with type key = Graph.v) -> h:(Graph.v -> int) -> Graph.t -> Graph.v -> (Graph.v -> bool) -> Graph.v list
+  (**
+      Simpler version of the above, for implicit graphs where one cannot enumerate
+      the possible targets.
+
   *)
 
   val floyd_warshall : Graph.t -> (Graph.v * Graph.v, int) Hashtbl.t

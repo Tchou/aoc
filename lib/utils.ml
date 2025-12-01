@@ -612,6 +612,51 @@ module GraphAlgo (Graph : GRAPH) = struct
     loop (Hashtbl.length finish_map)
 
 
+  let astar (module H:Hashtbl.S with type key = Graph.v) ~h g start is_target =
+    let (%?) = H.mem in
+    let (.%{}) = H.find in
+    let (.%{}<-) = H.replace in
+    let build_path prev u = 
+      let rec loop v acc =
+        if not (prev %? v) then v::acc else
+          loop (prev.%{v}) (v::acc)
+      in
+      loop u []
+    in
+    let prev = H.create 16 in
+    let dist = H.create 16 in
+    let get_dist v = try dist.%{v} with Not_found -> max_int in
+    let add_dist d1 d2 =
+      let d = d1+d2 in
+      if d < 0 then max_int else d
+    in
+    let queue = Pq.create 16 in
+    let () =
+      let d = h start in
+      dist.%{start} <- 0;
+      Pq.add queue (d, start);
+    in
+    let rec loop () =
+      if Pq.is_empty queue then raise Not_found
+      else
+        let _, u = Pq.remove_min queue in
+        if is_target u then build_path prev u else begin
+          let udist = get_dist u in
+          Graph.iter_succ g u (fun (v, d) ->
+              let v_dist = get_dist v in
+              let alt = add_dist udist d in
+              if alt < v_dist then begin
+                prev.%{v} <- u;
+                dist.%{v} <- alt;
+                Pq.add queue (alt + h v, v);
+              end);
+          loop ()
+        end
+    in
+    loop ()
+
+
+
 end
 
 (* from 2021 day 22... *)
