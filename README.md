@@ -1,4 +1,4 @@
-# Tchou's advent of Code repository
+# Tchou's [advent of Code repository](https://adventofcode.com/)
 
 ## General usage
 Invoke the code with:
@@ -21,7 +21,8 @@ $ dune exec -- bin/main.exe list
 ## Code structure
 
 The repository is organized as follows:
-- `aoc_private` : a private submodule that contains my personal problem inputs as well as the full text of problems
+- `aoc_private` : a private submodule that contains a script to locally sync 
+my personal problem inputs (the problems/inputs are themselves not on github).
 - `bin` the directory containing the main executable
 - `lib` the directory containing utility libraries. Besides helpers to register
   solutions, it contains [various utility functions](lib/utils.mli) to easily
@@ -30,3 +31,7 @@ The repository is organized as follows:
   few common math and graph algorithms.
 
 - `solutions` contains the solutions to the problems
+
+## License
+
+See the file [LICENSE](LICENSE) for details.
