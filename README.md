@@ -30,7 +30,34 @@ my personal problem inputs (the problems/inputs are themselves not on github).
   places, provide convenient syntax extensions, and implement once and for all a
   few common math and graph algorithms.
 
-- `solutions` contains the solutions to the problems
+- `solutions` contains the solutions to the problems.
+
+## Adding a new year
+
+ To add a new year, create
+a directory `aoc20XX` in `solutions`. Inside it, symlink the file `template/dune`.
+Copy the file `template/template.ml` as `sYY.ml` and inside change the name of
+the solution:
+```ocaml
+open Utils
+module S =
+struct
+  let name = Name.mk "sYY" (* change to e.g. s04 *)
+  let solve_part1 () = ()  (* Code for part 1 *)
+  let solve_part2 () = ()  (* Code for part 2 *)
+end
+
+let () = Solution.register_mod (module S)
+
+(* optional, if one wants to register alternative versions with a name *)
+module V = struct
+   let solve_part1 () =
+      S.solve ~display:true () (* call the main function with alternative parameters *)
+    
+   let solve_part2 () = ()
+  end
+let () = Solution.register_mod ~variant:"animate" (module V)
+```
 
 ## License
 
