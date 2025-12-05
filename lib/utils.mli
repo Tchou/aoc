@@ -371,12 +371,16 @@ module Interval : sig
   val of_int : int -> t
   val length : t -> int
   val make_length : int -> int -> t
+  val make : int -> int -> t
+  val make_inc : int -> int -> t
   val add : t -> int -> t
   val compare : t -> t -> int
 
   val cap : t -> t -> t option
   val cup : t -> t -> t list
   val diff : t -> t -> t list
+  val mem : int -> t -> bool 
+  val merge : t list -> t list -> t list
 
 end
 module Solution : module type of Solution
