@@ -9,25 +9,21 @@ struct
                 | s -> Scanf.sscanf s "%d-%d" (fun a b -> Some (Interval.make_inc a b)))
     in
     let ids = Input.list_scan "%d" Fun.id in
-    intervals, ids
-
-  let mem (i : int) ilist =
-    List.exists (Interval.mem i) ilist
+    intervals|>Interval.Set.of_list, ids
 
   let count_ids intervals ids =
-    Iter.(count_if list (fun i -> mem i intervals)) ids
+    Iter.(count_if list (fun i -> Interval.Set.mem i intervals)) ids
 
-  let count_intervals ilist _ =
-    Interval.merge [] ilist
+  let count_intervals (ilist : Interval.Set.t) _ =
+    (ilist :> Interval.t list)
     |> List.map (Interval.length)
-    |> Iter.(sum list (module Int))
+    |> Iter.(sum list int)
 
   let solve count () =
     let ints, ids = read_input () in
     let n = count ints ids in
     Solution.printf "%d" n
   let solve_part1 = solve count_ids
-
   let solve_part2 = solve count_intervals
 end
 

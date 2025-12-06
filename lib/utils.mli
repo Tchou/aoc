@@ -380,7 +380,16 @@ module Interval : sig
   val cup : t -> t -> t list
   val diff : t -> t -> t list
   val mem : int -> t -> bool 
-  val merge : t list -> t list -> t list
+  module Set : sig
+    type elt = t
+    type t = private elt list
+    val of_list : elt list -> t
+    val empty : t
+    val singleton : elt -> t
+    val add : elt -> t -> t
+    val cup : t -> t -> t
+    val mem : int -> t -> bool
+  end
 
 end
 module Solution : module type of Solution

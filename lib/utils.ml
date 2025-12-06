@@ -687,20 +687,6 @@ struct
       [{t1 with sup = max t2.sup t1.sup}]
     else
       [t1; t2]
-
-  let merge l1 l2 = 
-    let l1 = List.sort compare l1 in
-    let l2 = List.sort compare l2 in
-    let rec loop l1 l2 =
-      match l1, l2 with
-      | [], [] -> []
-      | (([_] as l), []) | ([], ([_] as l)) -> l
-      | (i1::i2::ll1, []) | ([], i1::i2::ll1) -> loop [i1] (i2::ll1)
-      | i1::ll1, i2::ll2 ->
-        if i1.sup < i2.inf then i1::loop ll1 l2
-        else if i2.sup  < i1.inf then i2::loop l1 ll2
-        else loop ({ inf = min i1.inf i2.inf; sup = max i1.sup i2.sup }::ll1) ll2
-    in loop l1 l2
   let diff t1 t2 =
     match
       (check { t1 with sup = min t1.sup t2.inf }),
@@ -711,6 +697,28 @@ struct
     | Some t1, Some t2 -> cup t1 t2
 
   let mem i {inf; sup } = i >= inf && i < sup
+
+  module Set =
+  struct 
+    type elt = t
+    type t = elt list 
+    let empty = []
+    let singleton i = [i]
+    let cup l1 l2 = 
+      let rec loop l1 l2 =
+        match l1, l2 with
+          ([], l)|(l, []) -> l
+        | i1::ll1, i2::ll2 ->
+          if i1.sup < i2.inf then i1::loop ll1 l2
+          else if i2.sup < i1.inf then i2::loop l1 ll2
+          else loop ({ inf = min i1.inf i2.inf; sup = max i1.sup i2.sup }::ll1) ll2
+      in loop l1 l2
+    let add i l = cup [i] l
+    let rec mem n = function
+        [] -> false
+      | i :: ll -> n >= i.inf && (n < i.sup || mem n ll)
+    let of_list = List.fold_left (fun acc i -> add i acc) []
+  end 
 end
 
 module Solution = Solution

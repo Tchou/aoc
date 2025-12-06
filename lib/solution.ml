@@ -41,9 +41,9 @@ let exec l =
     let s = String.(concat " " l) in
     let prompt = Format.sprintf "%s, answer: " s in
     let blank = String.make (String.length prompt) ' ' in
-    let t0 = Unix.gettimeofday () in
     let () = Format.pp_print_flush bfmt () in
     let () = Buffer.clear buffer in
+    let t0 = Unix.gettimeofday () in
     let () = f () in
     let t1 = Unix.gettimeofday () in
     let t = 1000. *. (t1 -. t0) in
@@ -59,7 +59,7 @@ let exec l =
     Buffer.clear buffer;
     Ansi.(printf "%a%s, time:   %a%fms%a\n%!" bfg yellow s bfg col t clear color)
 
-  | None -> raise (Error String.(concat " " ("Invalid solution:" :: l)))
+  | None -> raise (Error String.(concat " " ("Invalid solution name:" :: l)))
 
 let is_digit s = Option.is_some (int_of_string_opt s)
 let exec_dir prefix dir =
