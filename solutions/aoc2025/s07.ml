@@ -26,18 +26,13 @@ struct
     in
     new_set, !splitters
 
-  let pp_line step grid y set prev_set =
-    let ac_color, splitter, tu_d_, tu_br, t__br, tulb_, t_lb_, tulbr, t_lbr, tul_r, tu__r, tul__ = 
-      if step = 0 then 
-        Ansi.white, "^", ".", ".", ".", ".", ".", ".", ".", "^", "^", "^"
-      else if step = 1 then
-        Ansi.yellow, "^","╹", "┗","╺","┛","╸","┻","━","┻","┗","┛"
-      else if step = 2 then
-        Ansi.yellow, "^","╽", "┢","┎","┧","┒","╁","┰","┴","└","┘"
-      else
-        Ansi.green,  "▲","│", "├","┌","┤","┐","┼","┬","┴","└","┘"
-    in
+  let pp_line fmt (step, grid, y, set, prev_set, current) =
     let l = BytesGrid.get_line grid y in
+    let is_current (x, y) =
+      match current with
+      | None -> true
+      | Some pos' -> pos' = (x, y) || pos' = (x+1, y) || pos' = (x-1, y)
+    in 
     let has_active_spliter pos dir =
       let spos = pos +! dir in
       BytesGrid.(inside grid spos && 
@@ -46,62 +41,68 @@ struct
     in
     Bytes.iteri (fun x c -> 
         let pos = x, y in
-        if c = 'S' then
-          Ansi.(printf "%aS%a" bfg (if step = 3 then green else white)  clear color)
-        else if CoordSet.mem pos set then (* this is a beam *)
-          let s = match has_active_spliter pos west, has_active_spliter pos east with
-              false, false -> tu_d_
-            | false, true -> if CoordSet.mem (pos +! north) prev_set then tu_br else t__br
-            | true, false -> if CoordSet.mem (pos +! north) prev_set then tulb_ else t_lb_
-            | true, true -> if CoordSet.mem (pos +! north) prev_set then tulbr else t_lbr
-          in Ansi.(printf "%a%s%a" bfg ac_color s clear color)
-        else if c = '^' then
+        let ac_color, splitter, tu_d_, tu_br, t__br, tulb_, t_lb_, tulbr, t_lbr, tul_r, tu__r, tul__ = 
+          if step = 0 then 
+            Ansi.white, "^", ".", ".", ".", ".", ".", ".", ".", "^", "^", "^"
+          else if step = 1 && is_current pos then
+            Ansi.yellow, "^","╹", "┗","╺","┛","╸","┻","━","┻","┗","┛"
+          else if step = 2 && is_current pos then
+            Ansi.yellow, "^","╽", "┢","┎","┧","┒","╁","┰","┴","└","┘"
+          else
+            (if is_current pos && current <> None then Ansi.yellow else Ansi.green),  "▲","│", "├","┌","┤","┐","┼","┬","┴","└","┘"
+        in
+        if c = 'S' then (* the starting point *)
+          Ansi.(fprintf fmt "%aS%a" bfg (if step = 3 then green else yellow)  clear color)
+        else if c = '^' then (* a splitter *)
           if has_active_spliter (x, y) (0,0) then
             let s = 
               match CoordSet.mem ((x, y) +! west) set, CoordSet.mem ((x, y) +! east) set with
               | true, true -> tul_r
               | false, true -> tu__r
               | true, false -> tul__
-              | false, false -> assert false
+              | false, false -> tul_r
             in 
-            Ansi.(printf "%a%s%a" bfg ac_color s clear color)
+            Ansi.(fprintf fmt "%a%s%a" bfg ac_color s clear color)
           else 
-            Ansi.(printf "%a%s%a" bfg (if step = 3 then red else cyan) splitter clear color)
-        else
-          Ansi.(printf "%a%c%a"  bfg black c clear color)
-      ) l;
-    Ansi.printf "\n%!"
-
+            Ansi.(fprintf fmt "%a%s%a" bfg (if step = 3 || current <> None then red else yellow) splitter clear color)
+        else if CoordSet.mem pos set then (* this is a beam *)
+          let s = match has_active_spliter pos west, has_active_spliter pos east with
+              false, false -> tu_d_
+            | false, true -> if CoordSet.mem (pos +! north) prev_set then tu_br else t__br
+            | true, false -> if CoordSet.mem (pos +! north) prev_set then tulb_ else t_lb_
+            | true, true -> if CoordSet.mem (pos +! north) prev_set then tulbr else t_lbr
+          in
+          Ansi.(fprintf fmt "%a%s%a" bfg ac_color s clear color)
+        else if c = '.' then
+          if step = 0 then
+            Ansi.(fprintf fmt "%a.%a"  bfg black  clear color)
+          else
+            Ansi.(fprintf fmt "%a%!" move_cursor (y+1, x+2))
+        else assert false
+      ) l
   let pp_full grid =
+    Ansi.(printf "%a%a%a%!" move_cursor (1,1)
+            clear screen hide_cursor ());
     for y = 0 to BytesGrid.height grid - 1 do
-      pp_line 0 grid y CoordSet.empty CoordSet.empty;
-    done
+      Ansi.printf "%a\n%!"
+        pp_line (0, grid, y, CoordSet.empty, CoordSet.empty, None);
+    done;
+    Ansi.(printf "%a%!" move_cursor (1,1))
 
   let count_splits grid = 
     let start = BytesGrid.find ((=) 'S') grid in
     assert (snd start = 0);
-    let () = if A.animate then begin 
-        Ansi.(printf "%a%!" move_cursor (1,1));
-        Ansi.(printf "%a%!" clear screen);
-        pp_full grid;
-        Ansi.(printf "%a%!" move_cursor (1,1))
-      end
-    in
+    if A.animate then pp_full grid;
     let height = BytesGrid.height grid in
     let rec loop set i splitters prev_set =
       if i >= height || CoordSet.is_empty set then splitters
       else
-        let () = if A.animate then begin
-            (*Ansi.(printf "%a%!" clear line);*)
-            pp_line 1 grid i set prev_set;
-            Unix.sleepf 0.05;
-            Ansi.(printf "%a%!" move_cursor (i+1, 1));
-            pp_line 2 grid i set prev_set;
-            Unix.sleepf 0.05;
-            Ansi.(printf "%a%!" move_cursor (i+1, 1));
-            pp_line 3 grid i set  prev_set;
-            Unix.sleepf 0.05
-          end
+        let () = if A.animate then
+            for step = 1 to 3 do
+              Ansi.(printf "%a%a\n%!" move_cursor (i+1, 1)
+                      pp_line (step, grid, i, set, prev_set, None));
+              Unix.sleepf 0.02;
+            done
         in
         let new_set, splitters = step grid set i splitters in
         loop new_set (i+1) splitters set
@@ -115,31 +116,50 @@ struct
     let n = count_splits grid in
     Solution.printf "%d" n
 
+  let delay = 0.00
+
   (* rewrite as a recursive function + memo *)
   let count_timelines grid =     
     let start = BytesGrid.find ((=) 'S') grid in
+    let prev_set = ref CoordSet.empty in
     assert (snd start = 0);
+    if A.animate then pp_full grid;
     let last = BytesGrid.height grid - 1 in
     let memo = Hashtbl.create 16 in
+    let dirs = [| west; east |] in
     let rec loop ((_, h) as pos) = 
-      if h = last then 1
-      else
-        match Hashtbl.find_opt memo pos with
-          Some n -> n
-        | None -> 
-
-          let below = pos +! south in
-          if BytesGrid.(grid.!(pos)) <> '^' then
-            loop below 
+      match Hashtbl.find_opt memo pos with
+        Some n -> n
+      | None -> 
+        let nset = CoordSet.add pos !prev_set in
+        let res =
+          let () = if A.animate then
+              for step = 1 to 3 do
+                Ansi.(printf "%a%a" move_cursor (h+1, 1)
+                        pp_line (step, grid, h, nset, !prev_set, Some pos));
+              done
+          in
+          let () = prev_set := nset in
+          if h = last then 1
           else
-            let left = below +! west in
-            let n1 = if BytesGrid.inside grid left then loop left else 0 in 
-            let right = below +! east in
-            let n2 = if BytesGrid.inside grid right then loop right else 0 in 
-            let r = n1 + n2 in
-            Hashtbl.add memo pos r; r
+            let below = pos +! south in
+            if BytesGrid.(grid.!(pos)) <> '^' then
+              loop below
+            else
+              dirs |>
+              Array.fold_left (fun acc dir -> 
+                  let pos' = pos +! dir in
+                  if BytesGrid.inside grid pos' then loop pos' + acc else acc) 0
+        in
+        let () = if A.animate then
+            Ansi.(printf "%a%a\n%!" move_cursor (h+1, 1)
+                    pp_line (3, grid, h, nset, !prev_set, None));
+        in
+        Hashtbl.add memo pos res; res
     in
-    loop start
+    let n = loop start in
+    if A.animate then Ansi.(printf "%a%!" move_cursor (last+2, 1));
+    n
 
   let solve_part2 () =
     let grid = read_input () in 
