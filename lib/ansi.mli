@@ -13,6 +13,8 @@ val white : color
 val line : dev
 val color : dev
 val screen : dev
+val end_of_screen : dev
+val start_of_screen : dev
 val cursor : dev
 
 val bg : Format.formatter -> color -> unit
@@ -24,6 +26,7 @@ val clear : Format.formatter -> dev -> unit
 
 val show_cursor : Format.formatter -> unit -> unit
 val hide_cursor : Format.formatter -> unit -> unit
+val move_cursor : Format.formatter -> (int* int) -> unit
 
 val printf : ('a, Format.formatter, unit) format -> 'a
 val eprintf : ('a, Format.formatter, unit) format -> 'a
