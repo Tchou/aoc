@@ -6,13 +6,10 @@ struct
 
   module V3 = struct
     type t = { x : int; y : int ; z : int }
-
     let sq x = x * x
     let dist2 v1 v2 =
       sq (v1.x - v2.x) + sq (v1.y - v2.y) + sq (v1.z - v2.z)
-
     let compare v1 v2 = compare v1 v2
-    let cmp_dist (v1, v2) (v3, v4) =  compare (dist2 v1 v2) (dist2 v3 v4)
     let mk x y z = { x; y; z}
   end
   let read_input () =
@@ -50,29 +47,28 @@ struct
       t.mapping.(id2) <- id1
     let ids_by_count t =
       let a = Array.copy t.count_by_ids in
-      Array.sort (fun n1 n2 -> Int.compare n2 n1) a;
+      Array.stable_sort (fun n1 n2 -> n2 - n1) a;
       a
-
   end
   let prepare_curcuits l =
     let map = UF.mk l in
     let a = Array.of_list l in
     let len = Array.length a in
-    let pairs = Array.make ((len*(len-1)) / 2) (a.(0), a.(0)) in
+    let pairs = Array.make ((len*(len-1)) / 2) ((a.(0), a.(0)),0) in
     let k = ref 0 in
     for i = 0 to len - 1 do
+      let ai = Array.unsafe_get a i in
       for j = i + 1 to len - 1 do 
-        pairs.(!k) <- a.(i), a.(j);
+        pairs.(!k) <- (ai,a.(j)), V3.dist2 ai a.(j);
         incr k;
       done;
     done;
-    Array.sort V3.cmp_dist pairs;
+    Array.stable_sort (fun (_,d1) (_, d2) -> d1 - d2) pairs;
     map, pairs
-
   let merge_circuits l =
     let map, pairs = prepare_curcuits l in
     for i = 0 to 999 do
-      let v1, v2 = pairs.(i) in
+      let (v1, v2), _ = pairs.(i) in
       let id1 = UF.id map v1 in 
       let id2 = UF.id map v2 in
       if id1 <> id2 then UF.merge map id1 id2;
@@ -80,11 +76,10 @@ struct
     let a = UF.ids_by_count map in
     a.(0) * a.(1) * a.(2)
 
-
   let merge_until l =
     let map, pairs = prepare_curcuits l in
     let rec loop i =
-      let v1, v2 = pairs.(i) in
+      let (v1, v2),_ = pairs.(i) in
       let id1 = UF.id map v1 in 
       let id2 = UF.id map v2 in
       if id1 = id2 then loop (i+1) else
