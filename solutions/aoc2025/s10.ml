@@ -146,8 +146,8 @@ struct
         if remaining + n < !min_steps then
           let res =
             match buttons with
+            | (j, [b]) :: _ when bit_exists (fun k -> k <> j && current.(k) < current.(j)) b -> max_int
             | (j, _) :: rem_buttons when current.(j) = 0 -> loop current (prune rem_buttons j) n
-            | (j, ([b])) :: _ when bit_exists (fun k -> k <> j && current.(k) < current.(j)) b -> max_int
             | (j, (b::buttons_j)) :: rem_buttons ->
               let next = apply_joltage_button b current in
               let res1 = if not (has_neg next) then loop next buttons (n+1) else max_int in
