@@ -129,6 +129,7 @@ struct
       |> Array.mapi (fun i _ -> i, List.filter (fun b -> is_set b i) buttons )
       |> Array.to_list |> sort
     in
+    let prune l j = List.map (fun (k, lk) -> (k, List.filter (fun b -> not (is_set b j) ) lk)) l |> sort in
     let rec loop current buttons n =
       if buttons == [] then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
       else 
@@ -136,7 +137,7 @@ struct
         if remaining + n < !min_steps then
           let res =
             match buttons with
-            | (j, _) :: rem_buttons when current.(j) = 0 -> loop current rem_buttons n
+            | (j, _) :: rem_buttons when current.(j) = 0 -> loop current (prune rem_buttons j) n
             | (j, (b::buttons_j)) :: rem_buttons ->
               let next = apply_joltage_button b current in
               let res1 = if not (has_neg next) then loop next buttons (n+1) else max_int in
