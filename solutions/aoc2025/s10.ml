@@ -129,6 +129,13 @@ struct
     in
     loop w 0
 
+  let diff_zeroes prev next =
+    let zeroes = ref [] in
+    for i = 0 to Array.length prev - 1 do
+      if next.(i) = 0 && prev.(i) <> 0 then zeroes := i :: !zeroes;
+    done;
+    !zeroes
+
   let dfs machine =
     let min_steps = ref max_int in
     let buttons = machine.buttons |> Array.to_list in
@@ -140,22 +147,30 @@ struct
     in
     let prune l j = List.map (fun (k, lk) -> (k, List.filter (fun b -> not (is_set b j) ) lk)) l |> sort in
     let rec loop current buttons n =
-      if buttons == [] then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
+      let remaining = max_joltage current in
+      if remaining = 0 then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
       else 
-        let remaining = max_joltage current in
-        if remaining + n < !min_steps then
-          let res =
-            match buttons with
-            | (j, [b]) :: _ when bit_exists (fun k -> k <> j && current.(k) < current.(j)) b -> max_int
-            | (j, _) :: rem_buttons when current.(j) = 0 -> loop current (prune rem_buttons j) n
-            | (j, (b::buttons_j)) :: rem_buttons ->
-              let next = apply_joltage_button b current in
-              let res1 = if not (has_neg next) then loop next buttons (n+1) else max_int in
-              min res1 (loop current ((j,buttons_j)::rem_buttons) n)
-            | _ -> max_int
-          in
-          res
-        else max_int
+      if remaining + n < !min_steps then
+        let res =
+          match buttons with
+          | (j, [b]) :: _ when bit_exists (fun k -> k <> j && current.(k) < current.(j)) b -> max_int
+          | (j, _) :: rem_buttons when current.(j) = 0 -> loop current (prune rem_buttons j) n
+          | (j, (b::buttons_j)) :: rem_buttons ->
+            let next = apply_joltage_button b current in
+            let res1 = if has_neg next then max_int else
+                let new_buttons = match diff_zeroes current next with
+                    [] -> buttons
+                  | l -> List.filter_map (fun (k, lk) ->
+                      let llk = List.filter (fun b -> not (List.exists (fun z -> is_set b z) l)) lk in
+                      if llk = [] then None else Some (k, llk) 
+                    ) buttons |> sort
+                in loop next new_buttons (n+1) 
+            in
+            min res1 (loop current ((j,buttons_j)::rem_buttons) n)
+          | _ -> max_int
+        in
+        res
+      else max_int
     in
     loop machine.joltages buttons_by_jolt 0 |> ignore;
     !min_steps
