@@ -120,6 +120,15 @@ struct
     done;
     r
 
+  let bit_exists f w =
+    let rec loop w i = 
+      if w = 0 then false
+      else
+      if w land 1 = 1 then f i else
+        loop (w lsr 1) (i+1)
+    in
+    loop w 0
+
   let dfs machine =
     let min_steps = ref max_int in
     let buttons = machine.buttons |> Array.to_list in
@@ -138,6 +147,7 @@ struct
           let res =
             match buttons with
             | (j, _) :: rem_buttons when current.(j) = 0 -> loop current (prune rem_buttons j) n
+            | (j, ([b])) :: _ when bit_exists (fun k -> k <> j && current.(k) < current.(j)) b -> max_int
             | (j, (b::buttons_j)) :: rem_buttons ->
               let next = apply_joltage_button b current in
               let res1 = if not (has_neg next) then loop next buttons (n+1) else max_int in
