@@ -123,10 +123,11 @@ struct
   let dfs machine =
     let min_steps = ref max_int in
     let buttons = machine.buttons |> Array.to_list in
+    let sort = List.sort (fun (_, la) (_, lb) -> Int.compare (List.length la) (List.length lb) ) in
     let buttons_by_jolt = 
       machine.joltages 
       |> Array.mapi (fun i _ -> i, List.filter (fun b -> is_set b i) buttons )
-      |> Array.to_list 
+      |> Array.to_list |> sort
     in
     let rec loop current buttons n =
       if buttons == [] then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
