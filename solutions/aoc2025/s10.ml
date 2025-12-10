@@ -149,8 +149,10 @@ struct
     !min_steps
 
   let count_steps2 machines =
+    let total = List.length machines in
+    let i = ref 1 in
     machines 
-    |> List.fold_left (fun acc c -> Format.printf "%d\n%!" acc;acc + dfs c) 0
+    |> List.fold_left (fun acc c -> Format.printf "Current sum %d, computing %d/%d\n%!" acc !i total;incr i;acc + dfs c) 0
 
   let name = Name.mk "s10"
   let solve_part1 () = 
