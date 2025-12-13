@@ -14,7 +14,7 @@ struct
     let length = String.length s - 2 in
     let acc = ref 0 in
     for i = 1 to length do
-      if s.[i] = '#' then 
+      if s.[i] = '#' then
         acc := set_bit !acc (i-1);
     done;
     !acc, length
@@ -25,7 +25,7 @@ struct
         [] -> assert false
       | [ j ] -> (acc|> List.rev |> Array.of_list), j
       | b :: ll ->
-        loop ll 
+        loop ll
           ((String.sub b 1 (String.length b - 2)
             |> String.split_on_char ','
             |> List.fold_left (fun acc i -> set_bit acc (int_of_string i)) 0)::acc)
@@ -39,7 +39,7 @@ struct
     |> Array.of_list
 
   let read_line l =
-    let target, length = read_target (List.hd l) in 
+    let target, length = read_target (List.hd l) in
     let len_mask = (1 lsl length) - 1 in
     let buttons, j_str = read_buttons (List.tl l) in
     let joltages = read_joltages j_str in
@@ -62,7 +62,7 @@ struct
       if machine.target = current then steps
       else
         begin
-          Array.iter (fun b -> 
+          Array.iter (fun b ->
               let n = apply_button current machine.len_mask b in
               if not (visited %? n) then begin
                 visited.%{n} <- ();
@@ -74,7 +74,7 @@ struct
     loop ()
 
   let count_steps machines =
-    machines 
+    machines
     |> List.fold_left (fun acc c -> acc + find_target c) 0
 
   let is_set w i = (w lsr i) land 1 = 1
@@ -86,20 +86,20 @@ struct
         r.(i) <- r.(i) - 1;
     done;
     r
-  let max_joltage (j : int array) : int = 
-    let mx : int ref = ref j.(0) in 
-    for i = 1 to Array.length j - 1 do 
+  let max_joltage (j : int array) : int =
+    let mx : int ref = ref j.(0) in
+    for i = 1 to Array.length j - 1 do
       if j.(i) > !mx then mx:= j.(i)
-    done; 
+    done;
     !mx
   let has_neg j =  Array.exists (fun x -> x < 0) j
 
   let bits_set v =
     let rec loop v c =
-      if v = 0 then c 
+      if v = 0 then c
       else loop (v land (v-1)) (c+1)
     in loop v 0
-  let pp fmt a = 
+  let pp fmt a =
     Format.fprintf fmt "[";
     Array.iter (Format.fprintf fmt "%d ") a;
     Format.fprintf fmt "]"
@@ -121,7 +121,7 @@ struct
     r
 
   let bit_exists f w =
-    let rec loop w i = 
+    let rec loop w i =
       if w = 0 then false
       else
       if w land 1 = 1 then f i else
@@ -140,8 +140,8 @@ struct
     let min_steps = ref max_int in
     let buttons = machine.buttons |> Array.to_list in
     let sort = List.sort (fun (_, la) (_, lb) -> Int.compare (List.length la) (List.length lb) ) in
-    let buttons_by_jolt = 
-      machine.joltages 
+    let buttons_by_jolt =
+      machine.joltages
       |> Array.mapi (fun i _ -> i, List.filter (fun b -> is_set b i) buttons )
       |> Array.to_list |> sort
     in
@@ -149,22 +149,23 @@ struct
     let rec loop current buttons n =
       let remaining = max_joltage current in
       if remaining = 0 then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
-      else 
+      else
       if remaining + n < !min_steps then
         let res =
           match buttons with
-          | (j, [b]) :: _ when bit_exists (fun k -> k <> j && current.(k) < current.(j)) b -> max_int
           | (j, _) :: rem_buttons when current.(j) = 0 -> loop current (prune rem_buttons j) n
+          | (j, []) :: _ -> max_int
           | (j, (b::buttons_j)) :: rem_buttons ->
-            let next = apply_joltage_button b current in
+            let s = if buttons_j = [] then current.(j) else 1 in
+            let next = apply_joltage_button ~n:s b current in
             let res1 = if has_neg next then max_int else
                 let new_buttons = match diff_zeroes current next with
                     [] -> buttons
                   | l -> List.filter_map (fun (k, lk) ->
                       let llk = List.filter (fun b -> not (List.exists (fun z -> is_set b z) l)) lk in
-                      if llk = [] then None else Some (k, llk) 
+                      if llk = [] then None else Some (k, llk)
                     ) buttons |> sort
-                in loop next new_buttons (n+1) 
+                in loop next new_buttons (n+s)
             in
             min res1 (loop current ((j,buttons_j)::rem_buttons) n)
           | _ -> max_int
@@ -178,15 +179,15 @@ struct
   let count_steps2 machines =
     let total = List.length machines in
     let i = ref 1 in
-    machines 
+    machines
     |> List.fold_left (fun acc c -> Format.printf "Current sum %d, computing %d/%d\n%!" acc !i total;incr i;acc + dfs c) 0
 
   let name = Name.mk "s10"
-  let solve_part1 () = 
+  let solve_part1 () =
     let machines = read_input () in
     let n = count_steps machines in
     Solution.printf "%d" n
-  let solve_part2 () = 
+  let solve_part2 () =
     let machines = read_input () in
     let n = count_steps2 machines  in
     Solution.printf "%d" n
