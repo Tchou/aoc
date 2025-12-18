@@ -111,10 +111,10 @@ struct
     done;
     Format.fprintf fmt ")"
 
-  let apply_joltage_button ?(n=1) b jolts =
+  let apply_joltage_button n b jolts =
     try
       let last = Array.length jolts - 1 in
-      for i = 0 to last do 
+      for i = 0 to last do
         if is_set b i && jolts.(i) < n then raise_notrace Exit
       done;
       let mx = ref 0 in
@@ -125,33 +125,47 @@ struct
       done;
       Some (!mx, r)
     with Exit -> None
+  let sort l = List.sort (fun (_, la) (_, lb) -> List.compare_lengths la lb) l 
+  let prune l j =
+    let changed = ref false in
+    let rec loop = function
+      | [] -> []
+      | (k, lk) :: ll ->
+        (k, List.filter (fun b -> if is_set b j then (changed := true; false)else true) lk):: loop ll
+    in
+    let l' = loop l in
+    if !changed then sort l'
+    else l
+
   let dfs machine =
     let min_steps = ref max_int in
     let buttons = machine.buttons |> Array.to_list in
-    let sort = List.sort (fun (_, la) (_, lb) -> Int.compare (List.length la) (List.length lb) ) in
     let buttons_by_jolt =
       machine.joltages
       |> Array.mapi (fun i _ -> i, List.filter (fun b -> is_set b i) buttons )
       |> Array.to_list |> sort
     in
-    let prune l j = List.map (fun (k, lk) -> (k, List.filter (fun b -> not (is_set b j) ) lk)) l |> sort in
     let rec loop current buttons remaining n =
-      if remaining = 0 then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
-      else
       if remaining + n >= !min_steps then max_int
-      else match buttons with
-        | (j, _) :: rem_buttons when current.(j) = 0 -> loop current (prune rem_buttons j) remaining n
-        | (j, (b::buttons_j)) :: rem_buttons ->
-          let s = if buttons_j = [] then current.(j) else 1 in
-          let res1 = 
-            match apply_joltage_button ~n:s b current with
-              None -> max_int
-            | Some (n_remaining, next) -> loop next buttons n_remaining (n+s)
-          in
-          min res1 (loop current ((j,buttons_j)::rem_buttons) remaining n)
-        | _ -> max_int
+      else if remaining = 0 then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
+      else
+        match buttons with
+        | [] -> max_int
+        | (j, l) :: rem_buttons ->
+          if current.(j) = 0 then loop current (prune rem_buttons j) remaining n
+          else match l with
+              [] -> max_int
+            | b::buttons_j ->
+              let s = if buttons_j = [] then current.(j) else 1 in
+              let res1 =
+                match apply_joltage_button s b current with
+                  None -> max_int
+                | Some (n_remaining, next) -> loop next buttons n_remaining (n+s)
+              in
+              min res1 (loop current ((j,buttons_j)::rem_buttons) remaining n)
+
     in
-    let remaining, _ = apply_joltage_button 0 machine.joltages |> Option.get in
+    let remaining, _ = apply_joltage_button 1 0 machine.joltages |> Option.get in
     loop machine.joltages buttons_by_jolt remaining 0 |> ignore;
     !min_steps
 
