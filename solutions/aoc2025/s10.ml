@@ -120,11 +120,17 @@ struct
       let mx = ref 0 in
       let r = Array.copy jolts in
       for i = 0 to last do
-        if is_set b i then r.(i) <- r.(i) - n;
-        if r.(i) > !mx then mx := r.(i)
+        let v = 
+          if is_set b i then 
+            let v = r.(i) - n in r.(i) <- v;v 
+          else r.(i) 
+        in
+        if v > !mx then mx := v
       done;
       Some (!mx, r)
     with Exit -> None
+
+
   let sort l = List.sort (fun (_, la) (_, lb) -> List.compare_lengths la lb) l 
   let prune l j =
     let changed = ref false in
@@ -138,36 +144,34 @@ struct
     else l
 
   let dfs machine =
-    let min_steps = ref max_int in
     let buttons = machine.buttons |> Array.to_list in
     let buttons_by_jolt =
       machine.joltages
       |> Array.mapi (fun i _ -> i, List.filter (fun b -> is_set b i) buttons )
       |> Array.to_list |> sort
     in
-    let rec loop current buttons remaining n =
-      if remaining + n >= !min_steps then max_int
-      else if remaining = 0 then (Format.printf "FOUND => %a %d\n%!" pp current n;min_steps := n; n)
+    let rec loop current buttons remaining n min_steps =
+      if remaining + n >= min_steps then min_steps
       else
         match buttons with
-        | [] -> max_int
+        | [] -> Format.printf "FOUND => %a %d\n%!" pp current n; n
         | (j, l) :: rem_buttons ->
-          if current.(j) = 0 then loop current (prune rem_buttons j) remaining n
-          else match l with
-              [] -> max_int
-            | b::buttons_j ->
-              let s = if buttons_j = [] then current.(j) else 1 in
-              let res1 =
-                match apply_joltage_button s b current with
-                  None -> max_int
-                | Some (n_remaining, next) -> loop next buttons n_remaining (n+s)
-              in
-              min res1 (loop current ((j,buttons_j)::rem_buttons) remaining n)
+          match l with
+            _ when  current.(j) = 0 -> loop current (prune rem_buttons j) remaining n min_steps
+          | b::buttons_j ->
+            let s = if buttons_j = [] then current.(j) else 1 in
+            let min_steps =
+              match apply_joltage_button s b current with
+                None -> min_steps
+              | Some (n_remaining, next) -> loop next buttons n_remaining (n+s) min_steps
+            in
+            loop current ((j,buttons_j)::rem_buttons) remaining n min_steps
+          | _ -> min_steps
+
 
     in
     let remaining, _ = apply_joltage_button 1 0 machine.joltages |> Option.get in
-    loop machine.joltages buttons_by_jolt remaining 0 |> ignore;
-    !min_steps
+    loop machine.joltages buttons_by_jolt remaining 0 max_int
 
   let count_steps2 machines =
     let total = List.length machines in
