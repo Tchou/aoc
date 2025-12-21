@@ -77,28 +77,8 @@ struct
     machines
     |> List.fold_left (fun acc c -> acc + find_target c) 0
 
-  let is_set w i = (w lsr i) land 1 = 1
+  let[@inline] is_set w i = (w lsr i) land 1 = 1
 
-  let apply_joltage_button b jolts =
-    let r = Array.copy jolts in
-    for i = 0 to Array.length jolts - 1 do
-      if is_set b i then
-        r.(i) <- r.(i) - 1;
-    done;
-    r
-  let max_joltage (j : int array) : int =
-    let mx : int ref = ref j.(0) in
-    for i = 1 to Array.length j - 1 do
-      if j.(i) > !mx then mx:= j.(i)
-    done;
-    !mx
-  let has_neg j =  Array.exists (fun x -> x < 0) j
-
-  let bits_set v =
-    let rec loop v c =
-      if v = 0 then c
-      else loop (v land (v-1)) (c+1)
-    in loop v 0
   let pp fmt a =
     Format.fprintf fmt "[";
     Array.iter (Format.fprintf fmt "%d ") a;
@@ -112,34 +92,33 @@ struct
     Format.fprintf fmt ")"
 
   let failure = 10_000_000
-  let dummy = failure, [||]
   let apply_joltage_button n b jolts =
-    try
-      let last = Array.length jolts - 1 in
-      for i = 0 to last do
-        if is_set b i && jolts.(i) < n then raise_notrace Exit
-      done;
-      let mx = ref 0 in
-      let r = Array.copy jolts in
-      for i = 0 to last do
-        let v =
-          if is_set b i then
-            let v = r.(i) - n in r.(i) <- v;v
-          else r.(i)
-        in
-        if v > !mx then mx := v
-      done;
-      (!mx, r)
-    with Exit -> dummy
+    let rec loop i len mx =
+      if i < len then
+        let set = is_set b i in
+
+        if set && jolts.(i) < n then failure
+        else
+          let v = if set then jolts.(i) - n else jolts.(i) in
+          let mx = if v > mx then v else mx in
+          loop (i+1) len mx
+      else
+        (for i = 0 to len - 1 do
+           if is_set b i then jolts.(i) <- jolts.(i) - n;
+         done;
+         mx)
+    in
+    loop 0 (Array.length jolts) 0
 
 
-  let sort l = List.sort (fun (_, la) (_, lb) -> List.compare_lengths la lb) l
+  let sort =
+    let cmp (_, la) (_, lb) = List.compare_lengths la lb in
+    List.sort cmp
   let prune jolt l j =
-    let changed = ref false in
     let rec loop = function
       | [] -> []
       | (k, lk) :: ll ->
-        match List.filter (fun b -> if is_set b j then ( false) else true) lk with
+        match List.filter (fun b -> not (is_set b j)) lk with
           [] -> if jolt.(k) = 0 then loop ll
           else raise_notrace Exit
         | nlk -> (k, nlk) :: loop ll
@@ -147,7 +126,6 @@ struct
     try
       Some (sort (loop l))
     with Exit -> None
-
   let dfs machine =
     let buttons = machine.buttons |> Array.to_list in
     let buttons_by_jolt =
@@ -157,9 +135,8 @@ struct
     in
     let rec loop current buttons max_current n min_steps =
       if max_current + n >= min_steps then min_steps
-      else
-        match buttons with
-        | [] -> Format.printf "FOUND => %a %d\n%!" pp current n; n
+      else  match buttons with
+        | [] -> n
         | (j, l) :: rem_buttons ->
           let current_j = current.(j) in
           if current_j = 0 then
@@ -171,19 +148,21 @@ struct
             | b :: buttons_j ->
               let s = if buttons_j == [] then current_j else 1 in
               let min_steps =
-                let max_next, next = apply_joltage_button s b current in
-                loop next buttons max_next (n+s) min_steps
+                let max_next = apply_joltage_button s b current in
+                let res = loop current buttons max_next (n+s) min_steps in
+                if max_next < failure then for i = 0 to Array.length current - 1 do
+                    if is_set b i then current.(i) <- current.(i) + s;
+                  done;
+                res
               in
               loop current ((j,buttons_j)::rem_buttons) max_current n min_steps
     in
-    let max_joltage, _ = apply_joltage_button 1 0 machine.joltages in
+    let max_joltage= apply_joltage_button 1 0 machine.joltages in
     loop machine.joltages buttons_by_jolt max_joltage 0 failure
 
   let count_steps2 machines =
-    let total = List.length machines in
-    let i = ref 1 in
     machines
-    |> List.fold_left (fun acc c -> Format.printf "Current sum %d, computing %d/%d\n%!" acc !i total;incr i;acc + dfs c) 0
+    |> List.fold_left (fun acc c -> acc + dfs c) 0
 
   let name = Name.mk "s10"
   let solve_part1 () =
