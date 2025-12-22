@@ -1,276 +1,173 @@
 open Utils
-open Syntax
 
 module S =
 struct
   let name = Name.mk "s22"
+  let compare_pair (x1,y1) (x2, y2) = 
+    let c = Int.compare x1 x2 in if c <> 0 then c else Int.compare y1 y2 
+  module Cmap = Map.Make(struct type t = Grid.position
+      let compare = compare_pair
 
-  module Config =
-  struct
-    open Grid
-    type t = { width : int; height : int; data : StringGrid.t }
-    type info = { empty : int; movable : int; fixed : int }
-    let of_table w h t =
-      let e = ref 0 in
-      let m = ref 0 in
-      let f = ref 0 in
-      let g =
-        StringGrid.init h (fun y ->
-            String.init w (fun x ->
-                let used, _ = t.%{x, y} in
-                if used = 0 then (incr e;' ') else
-                if List.exists (fun (i, j) ->
-                    let _, total = t.%?{x+i, y+j} or (0,min_int) in
-                    if used <= total then
-                      (if used >= 100 then Printf.printf "%d, %d, %d, %d, %d, %d\n"
-                           x y i j used total;
-                       true)
-                    else false
-                  ) Grid.dir4 then (incr m;'.') else (incr f;'#')
-              ))
-      in
-      g, { empty = !e; movable = !m; fixed = !f }
-    let pp fmt = StringGrid.iter_lines (Format.fprintf fmt "%s\n")
-  end
+    end)
+
   let read_input () =
     Input.read_line () |> ignore;
     Input.read_line () |> ignore;
     let max_x = ref min_int in
     let max_y = ref min_int in
-    let t = ~%[] in 
-    let g = Input.fold_scan "/dev/grid/node-x%d-y%d %dT %dT %dT %d%%"
-        (fun () x y total used _avail _usep -> 
-           t.%{x, y} <- (used, total);
-           max_x := max !max_x x;
-           max_y := max !max_y y;
-        ) ()
-    in
-    Config.of_table (!max_x + 1) (!max_y + 1) t
+    let empty = ref (-1, -1) in
+    let t = ref Cmap.empty in 
+    Input.fold_scan "/dev/grid/node-x%d-y%d %dT %dT %dT %d%%"
+      (fun () x y total used _avail _usep -> 
+         t := Cmap.add (x, y) (used, total) !t;
+         if used = 0 then (assert (!empty = (-1,-1)); empty := (x, y));
+         max_x := max !max_x x;
+         max_y := max !max_y y;
+      ) ();
+    !t,!max_x + 1,!max_y + 1, !empty
+
+  let viable g =
+    let count = ref 0 in
+    g |> Cmap.iter (fun (x1, y1) (used1, total1) ->
+        if used1 <> 0 then
+          g |> Cmap.iter (fun (x2, y2) (used2, total2) ->
+              if used1 <= (total2-used2) && (x1 <> x2 || y1 <> y2)  then
+                incr count
+            )
+      );
+    !count
 
   let solve_part1 () =
-    let g, info = read_input () in
-    let n = Config.((info.movable - info.empty) * (info.movable-1)) in
-    Format.printf "%d, %d, %d\n%!" info.empty info.movable info.fixed; 
-    Format.printf "%a\n" Config.pp g;
-    Solution.printf "%d\n" n
-
-  let solve_part2 () = ()
-  (*  type data = { id : int; used : int }
-      type node = { data : data; avail : int }
+    let g, width, height, empty = read_input () in
+    let n = viable g in
+    Solution.printf "%d" n
 
 
-      module Config =
-      struct
-      type 'a h = { hash : int; data : 'a }
-      type line = node array h
-      type v = { hole : int * int; grid : line array h }
+  module Config : sig 
+    type v = {
+      empty : (int * int);
+      data : (int * int);
+      map : (int * int) Cmap.t;
+    }
+    include GRAPH with type v := v
+    val graph : t
+    module V : Hashtbl.HashedType with type t = v
+    val init : (int * int) -> (int * int) -> (int*int) Cmap.t -> v
+    val is_final : v -> bool
+    val h : v -> int
+    val pp : int -> int -> Format.formatter -> v -> unit
+  end = struct
+    type t = unit
+    let graph = ()
+    type v = 
+      {
+        empty : (int * int);
+        data : (int * int);
+        map : (int * int) Cmap.t;
+      }
+    module V = struct 
       type t = v
-      let iter_vertices _ _ = assert false
-
-      let equal_line l1 l2 =
-        l1 == l2 || begin
-          l1.hash == l2.hash &&
-          Array.for_all2 (=) l1.data l2.data
-        end
-      let equal t1 t2 =
-        t1 == t2 || begin
-          t1.hole = t2.hole && 
-          t1.grid.hash == t2.grid.hash &&
-          Array.for_all2 equal_line t1.grid.data t2.grid.data
-        end
-
-      let hash { hole = (x, y); grid } = x + (y lsl 4) + y + (grid.hash lsl 8 + grid.hash)
-
-      let get t (x, y) =
-        t.grid.data.(x).data.(y)
-
-      let set t (x, y) n =
-        let ngrid = Array.copy t.grid.data in
-        let nline = Array.copy ngrid.(x).data in
-        nline.(y) <- n;
-        let nhline = { hash = Hashtbl.hash nline; data = nline } in
-        ngrid.(x) <- nhline;
-        let hash = Array.fold_left (fun acc nh -> acc+(nh.hash lsl 4)+nh.hash) 0 ngrid in
-        let hole = if n.data.used = 0 then (x, y) else t.hole in
-        { hole; grid = { hash; data = ngrid } }
-
-      let dummy_data = { id = -1; used = -1 }
-      let dummy_node = { avail = -1; data = dummy_data }
-      let create w h =
-        let ngrid = Array.init w (fun _ -> { hash = -1; data = Array.make h dummy_node }) in
-        let hngrid = { hash = -1; data = ngrid } in
-        { hole = (-1, -1); grid = hngrid }
-
-      let swap_with_hole t other_pos =
-        let hole_node = get t t.hole in
-        let other_node = get t other_pos in
-        if hole_node.avail < other_node.data.used then None
-        else
-          let hole_node' = { avail = hole_node.avail + hole_node.data.used - other_node.data.used; 
-                             data = other_node.data } in
-          let other_node' = { avail = other_node.avail + other_node.data.used - hole_node.data.used;
-                              data = hole_node.data} in
-          Some (set (set t other_pos other_node') t.hole hole_node')
-
-      let width t = Array.length t.grid.data
-      let height t = Array.length t.grid.data.(0).data
-
-      let iter_next f t =
-        let w = width t in
-        let h = height t in
-        Grid.dir4 |> List.iter (fun d ->
-            let (x, y) as pos = Grid.(t.hole +! d) in
-            if x >= 0 && x < w && y >= 0 && y < h then
-              Option.iter f (swap_with_hole t pos)
-          )
-
-      let iter_succ (_g:t) conf f =
-        iter_next (fun v -> f (v, 1)) conf
-      end
-
-
-      let read_input () =
-      Input.read_line () |> ignore;
-      Input.read_line () |> ignore;
-      let hole = ref (-1, -1) in
-      let max_x = ref min_int in
-      let max_y = ref min_int in
-      let g = Input.fold_scan "/dev/grid/node-x%d-y%d %dT %dT %dT %d%%"
-          (fun acc x y _total used avail _usep -> 
-             let id = (x lsl 16) lor y in
-             max_x := max !max_x x;
-             max_y := max !max_y y;
-             ((x, y),{ data = { id; used }; avail }):: acc) []
-      in
-      let config = Config.create (!max_x + 1) (!max_y + 1) in
-      List.fold_left (fun acc (pos, node) -> Config.set acc pos node) config g
-
-      let is_viable (a,b) =
-      (a.data.used > 0) &&
-      (a.data.used <= b.avail)
-
-      let enum_nodes a =  
-      let w = Config.width a in
-      let h = Config.height a in
-      let rec loop_y i j () = 
-        if j < h then  Seq.Cons(Config.get a (i, j), loop_y i (j+1))
-        else loop_x (i+1) ()
-      and loop_x i () =
-        if i < w then loop_y i 0 ()
-        else
-          Seq.Nil
-      in
-      loop_x 0
-
-      let count_viable g =
-      g 
-      |> Iter.(pairs enum_nodes ~refl:false)
-      |> Iter.(count_if Fun.id is_viable)
-
-      let solve_part1 () =
-      let config = read_input () in
-      let n = count_viable config in
-      Solution.printf "%d" n
-
-      let rec hash_seq acc n s =
-      if n = 0 then acc else
-        match s () with
-          Seq.Nil -> acc
-        | Seq.Cons(x, ss) ->
-          hash_seq (acc + Hashtbl.hash x) (n-1) ss
-
-      module H = Hashtbl.Make (Config)
-
-
-      let mk_id x y = (x lsl 16) lor y
-      let pp fmt config =
-      let w = Config.width config in
-      let h = Config.height config in
-      let final_id = mk_id (w-1) 0 in
-      for y = 0 to h - 1 do
-        for x = 0 to w - 1 do
-          let node = Config.get config (x, y) in
-          if (x, y) = config.hole then Format.printf "_ "
-          else if (mk_id x y) = final_id then Format.printf "G "
-          else Format.printf ". "
+      let hash = Hashtbl.hash
+      let equal v1 v2 =
+        compare_pair v1.empty v2.empty = 0 &&
+        compare_pair v1.data v2.data = 0 &&
+        Cmap.equal (fun p1 p2 -> compare_pair p1 p2 = 0) v1.map v2.map
+    end
+    let init empty data map = { empty; data; map}
+    let is_final v = compare_pair v.data (0,0) = 0
+    let iter_vertices () (_f : v -> unit) = assert false
+    (* 
+      ...
+      ._.
+      ...
+    *)
+    let h v = 
+      let xe, ye = v.empty in
+      let xd, yd = v.data in
+      abs (xd-xe) + abs (yd-ye)
+    let iter_succ () v f =
+      let _, etotal = Cmap.find v.empty v.map in
+      Grid.dir4 |> List.iter (fun d ->
+          let new_empty = Grid.(v.empty +! d) in
+          match Cmap.find_opt new_empty v.map with
+            None -> ()
+          | Some (used, total) ->
+            if used <= etotal then (* can exchange with hole *)
+              let new_data = if new_empty = v.data then v.empty else v.data in
+              let new_v = {
+                empty = new_empty;
+                data = new_data;
+                map = Cmap.add new_empty (0, total) (Cmap.add v.empty (used, etotal) v.map)
+              } in
+              f (new_v, 1)
+        )
+    let pp width height fmt v =
+      let _, etotal = Cmap.find v.empty v.map in
+      let dused, _ = Cmap.find v.data v.map in
+      for y = 0 to height - 1 do
+        for x = 0 to width - 1 do
+          let pos = x, y in 
+          if pos = v.data then Format.printf "D"
+          else if pos = v.empty then Format.printf " "
+          else 
+            let used, total = Cmap.find (x, y) v.map in
+            (* Check for every cell, we can move it in the hole *)
+            if used <= etotal && dused <= total then Format.printf "." else Format.printf "#"
         done;
-        Format.printf "\n%!"
-      done;
-      Format.printf "--\n%!"
+        Format.printf "\n%!";
+      done
+  end
+  module HV = Hashtbl.Make(Config.V)
+  module Algo = GraphAlgo(Config)
 
-      let bfs start_config final =
-      let w = Config.width start_config in
-      let queue = Queue.create () in
-      let max_round = ref min_int in
-      let () = Queue.add (0,start_config) queue in
-      let visited = H.create 16 in
-      let () = H.add visited start_config () in
-      let rec loop () =
-        if Queue.is_empty queue then -1 else
-          let round, conf = Queue.pop queue in
-          let d = Config.get conf (0,0) in
-          if conf.hole = final then round
-          else
-            let () = if round > !max_round then begin
-                Format.printf "ROUND: %d\n%!" round;
-                max_round := round;
-              end in
-            let () = if false then Format.printf "ROUND: %d\n%a\n" round pp conf in
-            let () =
-              conf |> Config.iter_next (fun conf' ->
-                  if not (H.mem visited conf') then 
-                    let () = H.add visited conf' () in
-                    Queue.add (round+1, conf') queue
-                )
-            in loop ()
-      in
-      loop ()
+  let dist (x1, y1) (x2, y2) =
+    abs (x1 - x2) + abs (y1 - y2)
+  let shortest_path_opt map width height empty =
+    (* By plotting the grid, we see there is a wall between the 
+       initial empty space and the data, with a hole on the far left.
+       A shorter version is:
+       ..................D
+       ...................
+       .##################
+       ...................
+       ......... .........
+       ...................
 
-      let dfs start_config final =
-      let visited = H.create 16 in
-      let min_round = ref max_int in
-      let rec loop round config =
-        if config.Config.hole = final then begin
-          min_round := min round !min_round;
-          Format.printf "Found new solution of length %d/%d\n%!" round !min_round;      
-        end
-        else if round < !min_round then
-          config |> Config.iter_next (fun conf' ->
-              if not (H.mem visited conf') then begin
-                H.add visited conf' ();
-                loop (round+1) conf';
-                H.remove visited conf'
-              end
-            )
-      in
-      loop 0 start_config;
-      !min_round
+    We also remark that everything but the # is viable, that is we can move
+    the hole anywhere (except on #) and we can move D anywhere except on #
+    So the total distance is :
+    - the manathan distance to go from the intial empty cell to the hole in the wall
+       ..................D
+       ...................
+       _##################
+       .x.................
+       .xxxxxxxxx.........
+       ...................
 
-      let pp_pair fmt (x, y) = Format.fprintf fmt "(%d, %d)" x y
-      let find start final =
-      let is_final conf = 
-        let () = if false then Format.printf "HOLE AT: %a vs %a\n%!" pp_pair conf.Config.hole pp_pair final in
-        conf.Config.hole = final in
-      let module G = GraphAlgo(Config) in
-      let h config =
-        let x, y = config.Config.hole in
-        let x0, y0 = final in
-        abs ((x0 - x)) + abs (y0 - y)
-      in
-      let path = G.astar (module H) ~h start start is_final in
-      List.length path
+    - the manathan distance to bring the hole to D
+       .................xD
+       xxxxxxxxxxxxxxxxxx.
+       x##################
+       ...................
+       ...................
+       ...................
 
+    - the (width - 2) x 5 (it takes 5 moves to advance
+      D one square to the left and have the hole behind
+      it again).
+       ....D_  ....D.  ....D.  ....D.  ..._D. ...D_.
+       ......  ....._  ...._.  ..._..  ...... ...... 
+    *)
+    let hole = (0, 3) in (* looked at the map *)
+    let d1 = dist hole empty in
+    let d2 = dist hole (width-1, 0) in
+    let d3 = 5 * (width-2) in
+    d1 + d2 + d3
+  let solve_part2 () =
+    let map, width, height, empty = read_input () in
+    let n = shortest_path_opt map width height empty in
+    Solution.printf "%d" n
 
-
-      let solve_part2 () =
-      let config = read_input () in
-      let w = Config.width config in
-      let final1 = (w-2, 0) in
-      let final2 =  (w-1, 1) in
-      let n1 = find config final1 in
-      let n2 = find config final2 in
-      Solution.printf "%d, %d\n" n1 n2
-  *)
 end
 
 let () = Solution.register_mod (module S)

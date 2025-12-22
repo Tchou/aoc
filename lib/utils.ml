@@ -1,5 +1,7 @@
 let int_of_bool = function false -> 0 | true -> 1
 
+let fail msg = Format.kasprintf failwith msg
+
 module String =
 struct
   include Stdlib.String
@@ -193,7 +195,7 @@ module InputUntil = struct
     let input = get_input input in
     let [@tail_mod_cons] rec loop () =
       match input_line input with
-      | s -> begin match f s with 
+      | s -> begin match f s with
             None -> []
           | Some e -> e :: loop ()
         end
@@ -309,7 +311,7 @@ struct
     input_char input
 
   let list_lines ?input f = InputUntil.list_lines ?input (fun e -> Some (f e))
-  let list_scan ?input fmt f = 
+  let list_scan ?input fmt f =
     list_lines ?input (fun s -> Scanf.sscanf s fmt f)
 
   let list_fields ?input c f = InputUntil.list_fields ?input c (fun l -> Some (f l))
@@ -616,7 +618,7 @@ module GraphAlgo (Graph : GRAPH) = struct
     let (%?) = H.mem in
     let (.%{}) = H.find in
     let (.%{}<-) = H.replace in
-    let build_path prev u = 
+    let build_path prev u =
       let rec loop v acc =
         if not (prev %? v) then v::acc else
           loop (prev.%{v}) (v::acc)
@@ -699,12 +701,12 @@ struct
   let mem i {inf; sup } = i >= inf && i < sup
 
   module Set =
-  struct 
+  struct
     type elt = t
-    type t = elt list 
+    type t = elt list
     let empty = []
     let singleton i = [i]
-    let cup l1 l2 = 
+    let cup l1 l2 =
       let rec loop l1 l2 =
         match l1, l2 with
           ([], l)|(l, []) -> l
@@ -718,7 +720,7 @@ struct
         [] -> false
       | i :: ll -> n >= i.inf && (n < i.sup || mem n ll)
     let of_list = List.fold_left (fun acc i -> add i acc) []
-  end 
+  end
 end
 
 module Solution = Solution

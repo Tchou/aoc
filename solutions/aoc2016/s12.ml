@@ -4,11 +4,12 @@ struct
   let name = Name.mk "s12"
 
   type op = Int of int | Reg of int
-  type op_code = 
+  type op_code = ..
+  type op_code +=
       Cpy of op * int
     | Inc of int
     | Dec of int
-    | Jnz of op * int
+    | Jnz of op * op
 
 
   let eval_op regs = function Int i -> i | Reg i -> regs.(i)
@@ -22,8 +23,9 @@ struct
           Cpy (op, n) -> regs.(n) <- eval_op regs op; loop (pc+1)
         | Inc n -> regs.(n) <- regs.(n) + 1; loop (pc+1)
         | Dec n -> regs.(n) <- regs.(n) - 1; loop (pc+1)
-        | Jnz (op, n) -> 
-          if eval_op regs op <> 0 then loop (pc + n) else loop (pc + 1)
+        | Jnz (op1, op2) -> 
+          if eval_op regs op1 <> 0 then loop (pc + eval_op regs op2) else loop (pc + 1)
+        | _ -> fail "Unsupported operand in %s.%s" (fst name) (snd name)
     in
     loop 0;
     regs.(0)
@@ -41,14 +43,15 @@ struct
       Reg n -> n
     | _ -> assert false
 
+  let read_instr = function
+      [ "cpy"; o; n] -> Cpy (read_op o, read_reg n)
+    | [ "inc"; n] -> Inc (read_reg n)
+    | [ "dec"; n] -> Dec (read_reg n)
+    | [ "jnz"; o1; o2] -> Jnz(read_op o1, read_op o2)
+    | l -> fail "Parse_error: %s" (String.concat " " l)
+  
   let read_input () =
-    Input.list_fields ' ' (function 
-          [ "cpy"; o; n] -> Cpy (read_op o, read_reg n)
-        | [ "inc"; n] -> Inc (read_reg n)
-        | [ "dec"; n] -> Dec (read_reg n)
-        | [ "jnz"; o; n] -> Jnz(read_op o, int_of_string n)
-        | l -> failwith (String.concat " " ("Parse_error:"::l))
-      )
+    Input.list_fields ' ' read_instr
     |> Array.of_list
 
   let solve reg_c =

@@ -1,6 +1,8 @@
 val int_of_bool : bool -> int
 (** [int_of_bool b] is [1] if [b] is [true] and [0] if [b] is [false]*)
 
+val fail : ('a, Format.formatter, unit, 'b) format4 -> 'a
+
 module String :
 sig
   include module type of String
