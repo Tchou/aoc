@@ -19,7 +19,7 @@
  (name aoc)
  (synopsis "Advent of Code Solutions")
  (description "This bundles together solutions for the https://adventofcode.com programming event.")
- (depends ocaml dune)
+ (depends ocaml dune zarith yojson)
  (tags
   (topics "algorithm" "programming")))
 
