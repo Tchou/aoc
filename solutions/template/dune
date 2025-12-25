@@ -18,7 +18,7 @@ let () = Printf.sprintf {|
 (library
  (name %s)
  (library_flags -linkall)
- (libraries unix utils zarith))
+ (libraries unix utils zarith yojson))
 
 %s
 
