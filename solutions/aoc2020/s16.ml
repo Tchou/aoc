@@ -24,10 +24,7 @@ struct
     let other_tickets =
       Input.read_line () |> ignore;
       Input.read_line () |> ignore;
-      Input.fold_fields ',' (fun acc l ->
-          let l = l |> List.map int_of_string
-          in l ::acc) []
-      |> List.rev
+      Input.list_fields ',' (List.map int_of_string)
     in
     intervals, my_ticket, other_tickets
 
@@ -40,13 +37,15 @@ struct
   let solve_part1 () =
     let intervals, _, tickets = read_input () in
     let n =
+      let open Iter2 in
       tickets
-      |> List.map (fun l ->
+      |> list
+      |> map (fun l ->
           l
-          |> List.filter (Fun.negate (contains intervals))
-          |> Iter.(sum list int)
-        )
-      |> Iter.(sum list int)
+          |> list
+          |> filter (Fun.negate (contains intervals))
+          |> sum int)
+      |> sum int
     in
     Solution.printf "%d" n
 

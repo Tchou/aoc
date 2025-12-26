@@ -6,8 +6,7 @@ struct
   let name = Name.mk "s10"
 
   let load_input () =
-    Input.fold_scan "%d" (fun acc d -> d :: acc) []
-    |> List.rev
+    Input.list_scan "%d" Fun.id
 
   let count_diff l =
     let l = 0::List.sort compare l in
@@ -29,7 +28,7 @@ struct
 
 
   let count_arrangements l =
-    let max_v = Iter.(max list l) in
+    let max_v = Iter2.(list l |> max_) in
     let l = List.sort compare (0::max_v+3::l) in
     let cache = ~%[] in
     let rec loop l =

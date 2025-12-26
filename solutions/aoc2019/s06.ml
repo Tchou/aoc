@@ -31,9 +31,10 @@ struct
   let count_orbits map =
     let rec loop n node =
       let children = map.%?{node} or [] in
-      n + (children
-           |> List.map (loop (n+1))
-           |> Iter.(sum list int))
+      n + Iter2.(children
+                 |> list 
+                 |> map (loop (n+1))
+                 |> sum int)
     in
     loop 0 "COM"
 

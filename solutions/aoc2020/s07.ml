@@ -35,8 +35,10 @@ struct
 
   let count_shiny_gold tree =
     let cache = ~%[] in
+    let open Iter2 in
     tree
-    |> Iter.(count_if keys (has_shiny_gold cache tree))
+    |> keys
+    |> count_if (has_shiny_gold cache tree)
 
   let solve_part1 () =
     load_input ()
@@ -45,9 +47,10 @@ struct
 
 
   let rec count_bags k tree =
-    1 + (tree.%{k}
-         |> List.map (fun (n, k') -> n* count_bags k' tree)
-         |> Iter.(sum list int))
+    1 + Iter2.(tree.%{k}
+               |> list
+               |> map (fun (n, k') -> n * count_bags k' tree)
+               |> sum int)
   let solve_part2 () =
     load_input ()
     |> count_bags "shiny gold"

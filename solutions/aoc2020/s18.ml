@@ -11,7 +11,7 @@ struct
     | RP
 
   let read_input () =
-    Input.fold_lines (fun acc line ->
+    Input.list_lines (fun line ->
         let expr =
           line
           |> String.fold_left (fun acc c ->
@@ -24,9 +24,7 @@ struct
               | _ -> acc
             ) []
         in
-        (List.rev expr)::acc ) []
-    |> List.rev
-
+        (List.rev expr))
 
   let prio1 _ = 10
   let prio2 = function
@@ -79,9 +77,12 @@ struct
 
   let solve prio =
     let exprs = read_input () in
-    let n = exprs
-            |> List.map (eval prio)
-            |> Iter.(sum list int)
+    let n = 
+      let open Iter2 in
+      exprs
+      |> list
+      |> map (eval prio)
+      |> sum int
     in
     Solution.printf "%d" n
 

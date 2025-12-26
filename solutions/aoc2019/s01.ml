@@ -4,8 +4,7 @@ struct
   let name = Name.mk "s01"
 
   let read_input () =
-    Input.fold_lines (fun acc s -> (int_of_string s)::acc) []
-    |> List.rev
+    Input.list_scan "%d" Fun.id
 
   let fuel m = m / 3 - 2
 
@@ -20,10 +19,11 @@ struct
   let solve calc =
     let modules = read_input () in
     let n =
-      modules
-      |> List.to_seq
-      |> Seq.map calc
-      |> Iter.(sum seq int) in
+      Iter2.(modules
+             |> list
+             |> map calc
+             |> sum int) 
+    in
     Solution.printf "%d" n
 
   let solve_part1 () = solve fuel

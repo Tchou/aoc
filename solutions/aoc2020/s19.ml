@@ -24,9 +24,8 @@ struct
               (true, rules.%{n} <- rule))
       ) ()
     in
-    let words = Input.fold_lines (fun acc l -> l :: acc) []
-                |> List.rev
-    in rules, words
+    let words = Input.list_lines Fun.id in
+    rules, words
 
   let pp_rules fmt rules =
     Hashtbl.iter (fun n r ->
@@ -123,8 +122,6 @@ struct
      and we reorder by longest repetition.
      This seems to work well enough.
   *)
-  let l = Seq.init
-
   let mk_seq n v =
     Seq.init n (fun i -> Array.(make (i+1) v|> to_list))
 
@@ -145,24 +142,32 @@ struct
   let alt_rule0 sizes max_len =
     let rule8 = alt_rule8 sizes max_len |> Seq.memoize in
     let rule11 = alt_rule11 sizes max_len |> Seq.memoize in
+    let open Iter2 in
     let all_combs =
-      Iter.(product seq seq rule8 rule11)
-      |> Seq.map (fun (a,b) -> a@b)
+      product (seq rule8) (seq rule11)
+      |> map (fun (a,b) -> a@b)
     in
     let len_seq s =
+      let open Iter2 in
       s
-      |> List.map (fun r -> sizes.%{r})
-      |> Iter.(sum list int)
+      |> list
+      |> map (fun r -> sizes.%{r})
+      |> sum int
     in
-    let rule0 = all_combs |> Seq.filter (fun s -> len_seq s <= max_len ) in
-    rule0 |> List.of_seq |> List.sort (fun l1 l2 -> compare (List.length l2) (List.length l1))
+    let rule0 = all_combs |> filter (fun s -> len_seq s <= max_len ) in
+    rule0 
+    |> sort ~compare:(fun l1 l2 -> List.compare_lengths l2 l1)
+    |> to_list
 
   let solve part2 =
     let rules, words = read_input () in
+    let open Iter2 in
     let max_len =
       words
-      |> List.map String.length
-      |> Iter.(max list) in
+      |> list
+      |> map String.length
+      |> max_
+    in
     let sizes = rule_sizes rules in
     let () = if part2 then begin
         rules.%{0} <- `rule (alt_rule0 sizes max_len);
@@ -170,9 +175,10 @@ struct
     in
     let n =
       words
-      |> List.map (match_rule rules sizes)
-      |> List.map int_of_bool
-      |> Iter.(sum list int)
+      |> list
+      |> map (match_rule rules sizes)
+      |> map int_of_bool
+      |> sum int
     in
     Solution.printf "%d" n
 

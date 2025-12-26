@@ -16,36 +16,46 @@ struct
   let tab = Bytes.make (Char.code 'z' - Char.code 'a' + 1) '\x00'
   let count_answers l =
     Bytes.fill tab 0 (Bytes.length tab) '\x00';
-    List.iter (fun s ->
+    let open Iter2 in
+    l |> list |> iter (fun s ->
         String.iter (fun c ->
-            tab.$[Char.code c - Char.code 'a']<- '\x01') s) l;
-    Bytes.to_seq tab
-    |> Seq.map Char.code
-    |> Iter.(sum seq int)
+            tab.$[Char.code c - Char.code 'a']<- '\x01') s);
+    tab 
+    |> bytes
+    |> map Char.code
+    |> sum int
 
   let solve_part1 () =
     let l = read_input () in
+    let open Iter2 in
     l
-    |> List.map count_answers
-    |> Iter.(sum list int)
+    |> list
+    |> map count_answers
+    |> sum int
     |> Solution.printf "%d"
 
   let count_distinct_answers l =
     Bytes.fill tab 0 (Bytes.length tab) '\x00';
     let n = List.length l in
-    List.iter (fun s ->
+    let open Iter2 in
+    l 
+    |> list
+    |> iter (fun s ->
         String.iter (fun c ->
             let idx = Char.code c - Char.code 'a' in
-            tab.$[idx] <- Char.unsafe_chr ((Char.code tab.$[idx]) + 1)) s) l;
-    Bytes.to_seq tab
-    |> Seq.map Char.code
-    |> Iter.(count_if seq ((=) n))
+            tab.$[idx] <- Char.unsafe_chr ((Char.code tab.$[idx]) + 1)) s);
+    tab
+    |> bytes
+    |> map Char.code
+    |> count_if  ((=) n)
 
-  let solve count =
+  let solve fcount =
     let l = read_input () in
+    let open Iter2 in
     l
-    |> List.map count
-    |> Iter.(sum list (module Int))
+    |> list
+    |> map fcount
+    |> sum int
     |> Solution.printf "%d"
 
   let solve_part1 () = solve count_answers

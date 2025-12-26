@@ -77,10 +77,11 @@ struct
           ) star_pos
       ) num_list;
     let sum =
+      let open Iter2 in
       stars
-      |> Hashtbl.to_seq_values
-      |> Seq.map (function [g1;g2] ->g1*g2 | _ -> 0)
-      |> Iter.(sum seq int)
+      |> values
+      |> map (function [g1;g2] ->g1 * g2 | _ -> 0)
+      |> sum int
     in
     Solution.printf "%d" sum
 end

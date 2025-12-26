@@ -175,9 +175,11 @@ struct
       sx * sy * sz
   end
   let count l =
+    let open Iter2 in
     l
-    |> List.map Cube.size
-    |> Iter.(sum list int)
+    |> list
+    |> map Cube.size
+    |> sum int
   let bounded_int int ibound =
     match Interval.cap int ibound with
       Some i when i = int -> true

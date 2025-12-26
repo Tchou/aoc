@@ -334,4 +334,4 @@ let cycle it =
       while true do it @. g done
     }
 
-let empty = Persistent{f = fun _ -> ()}
+let empty = Persistent{f = fun _ -> () }

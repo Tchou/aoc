@@ -113,7 +113,8 @@ struct
         tab.(i) <- (max inf ainf, min sup asup)) ints;
     tab
     |> Array.map (fun (i,j) -> j-i)
-    |> Iter.(prod array (module Int))
+    |> Iter2.array
+    |> Iter2.(prod int)
 
   let pp ppf l =
     let fields = List.map (fun (a,b) -> (b,a)) fields in
@@ -135,7 +136,8 @@ struct
     let i = ref 0 in
     eval_constr rule_table
     |> List.map merge_intervals
-    |> Iter.(sum list int)
+    |> Iter2.list 
+    |> Iter2.(sum int)
     |> Solution.printf "%d"
 
 end

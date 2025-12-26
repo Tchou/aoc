@@ -6,8 +6,12 @@ struct
   let rec map lst n =
     match lst with
       [] -> n
-    | (d, s, l)::_ when n >= s && n < s + l -> n + (d - s)
-    | _ :: ll ->  map ll n
+    | (d, s, l)::_ when n >= s && n < s + l ->
+      Format.printf "Seed %d goes to %d because of %d %d %d\n%!"
+        n ( (n-s) + d) d s l;
+      n + (d - s)
+    | _ :: ll -> 
+      map ll n
 
   let load_input map =
     let seeds =
@@ -16,7 +20,7 @@ struct
       | _ :: l -> List.map int_of_string l
     in
     let _ = Input.read_line () in (* empty line *)
-    let maps,_ =
+    let maps,accl =
       Input.fold_lines (fun (accf, accl) ->  function
             "" -> ((map (List.rev accl))::accf), []
           | s when s.[0] < '0' || s.[0] > '9' -> (accf, accl)
@@ -24,11 +28,11 @@ struct
             Scanf.sscanf s "%d %d %d" (fun a b c -> accf, (a,b,c)::accl)
         ) ([],[])
     in
-    seeds,List.rev maps
+    seeds,List.rev ((map (List.rev accl))::maps)
 
   let solve_part1 () =
     let seeds, maps = load_input map in
-    Compare.min_list (List.fold_right (@@) maps) seeds
+    Compare.min_list (List.fold_right (@@) (List.rev maps)) seeds
     |> Solution.printf "%d"
 
   (*
@@ -80,12 +84,6 @@ struct
   let solve_part2 () =
     let seeds, maps = load_input Fun.id in
     let seeds = make_seeds seeds [] in
-    let () =
-      seeds
-      |> Iter.(snd list)
-      |> Iter.(sum seq int)
-      |> Solution.printf "%d"
-    in
     let res = List.fold_left apply_map seeds maps in
     Compare.min_list fst res
     |> Solution.printf "%d"
