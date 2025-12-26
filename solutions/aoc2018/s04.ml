@@ -34,9 +34,11 @@ struct
   let max_asleep map =
     Hashtbl.fold (fun id events (aid, an) ->
         let n =
-          events
-          |> List.map (fun (_, ((_, m1), (_, m2))) -> (m2 - m1)) 
-          |> Iter.(sum list int)
+          Iter2.(
+            events
+            |> list
+            |> map (fun (_, ((_, m1), (_, m2))) -> m2 - m1) 
+            |> sum int)
         in
         if n > an then (id, n) else (aid, an)
       ) map (-1,-1)

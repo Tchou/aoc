@@ -16,9 +16,9 @@ struct
     dist + ((min t_run (duration mod t)) * speed)
 
   let max_dist duration l =
-    l 
-    |> List.map (compute_dist duration)
-    |> Iter.(max list)
+    Iter2. (list l
+            |> map (compute_dist duration)
+            |> max_)
   let solve_part1 () =
     let reindeers = read_input () in
     let n = max_dist 2503 reindeers in
@@ -51,10 +51,9 @@ struct
       max_dist := 0;
       max_in_round := [];
     done;
-    tbl 
-    |> Hashtbl.to_seq_values
-    |> Seq.map (fun (_, _, p) -> p)
-    |> Iter.(max Fun.id)
+    Iter2. (values tbl
+            |> map (fun (_, _, p) -> p) 
+            |> max_)
 
   let solve_part2 () =
     let reindeers = read_input () in

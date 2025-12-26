@@ -7,15 +7,17 @@ struct
   let read_input () = Input.list_fields ' ' Fun.id
 
   let count_valid tr l =
-    l
-    |> Iter.(count_if list (fun l -> 
-        let memo = ~%[] in
-        List.for_all (fun s -> 
-            let s = tr s in
-            let b = memo %? s in
-            memo.%{s} <- ();
-            not b) l
-      ))
+    Iter2.(
+      l
+      |> list
+      |> count_if (fun l -> 
+          let memo = ~%[] in
+          List.for_all (fun s -> 
+              let s = tr s in
+              let b = memo %? s in
+              memo.%{s} <- ();
+              not b) l
+        ))
   let solve tr =
     let l = read_input () in
     let n = count_valid tr l in

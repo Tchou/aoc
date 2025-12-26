@@ -84,13 +84,14 @@ struct
 
   let fastest_path depth target =
     let grid = ~%[] in
-    let map =
+    let paths =
       GrAlgo.dijkstra (depth, target, grid) ((0,0),Torch) [(target, Torch)]
     in
-    map
-    |> Hashtbl.to_seq_values
-    |> Seq.map fst
-    |> Iter.(min seq)
+    Iter2.(
+      paths
+      |> values
+      |> map fst
+      |> min_)
   let solve_part2 () =
     let depth, target = read_input () in
     let n = fastest_path depth target in

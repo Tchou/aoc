@@ -31,12 +31,15 @@ struct
     let data = prepare1 num_lines in
     let data = IntGrid.of_matrix data in
     let data = IntGrid.rotate_right data in
-    l
-    |> List.mapi (fun i op ->
-        let args = IntGrid.get_line data i in
-        Iter.((if op = "+" then sum else prod)
-                array int args))
-    |> Iter.(sum list int)
+    Iter2.(
+      l
+      |> ilist
+      |> map (fun (i, op) ->
+          IntGrid.get_line data i 
+          |> array
+          |> (if op = "+" then sum else prod)
+            int)
+      |> sum int)
 
   let solve compute () =
     let data, l = read_input () in
@@ -59,9 +62,9 @@ struct
       ) data;
     let data =  !subtotal::!total in
     List.fold_left2 (fun acc ints op ->
-        Iter.((if op = "+" then sum else prod)
-                list int ints
-             ) + acc) 0 data l
+        Iter2.((if op = "+" then sum else prod)
+                 int (list ints)
+              ) + acc) 0 data l
   let solve_part1 = solve compute1
   let solve_part2 = solve compute2
 end

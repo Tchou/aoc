@@ -17,7 +17,7 @@ struct
     let x, y, z = sort3 x y z in
     x + y > z
 
-  let count_triangles = Iter.(count_if list is_triangle)
+  let count_triangles l = Iter2.(l |> list |> count_if is_triangle)
 
 
   let rec transform l acc =

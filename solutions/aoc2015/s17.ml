@@ -7,7 +7,6 @@ struct
   let read_input () =
     Input.list_scan "%d" Fun.id
 
-
   let enumerate capacity containers =
     let count = ~%[] in 
     let rec loop cap cl used =

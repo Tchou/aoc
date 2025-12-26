@@ -12,13 +12,13 @@ struct
     intervals|>Interval.Set.of_list, ids
 
   let count_ids intervals ids =
-    Iter.(count_if list (fun i -> Interval.Set.mem i intervals)) ids
+    Iter2.(ids |> list |> count_if (fun i -> Interval.Set.mem i intervals))
 
-  let count_intervals (ilist : Interval.Set.t) _ =
-    (ilist :> Interval.t list)
-    |> List.map (Interval.length)
-    |> Iter.(sum list int)
-
+  let count_intervals (int_list : Interval.Set.t) _ =
+    Iter2.((int_list :> Interval.t list)
+           |> list
+           |> map Interval.length
+           |> sum int)
   let solve count () =
     let ints, ids = read_input () in
     let n = count ints ids in

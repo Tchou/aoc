@@ -30,10 +30,10 @@ struct
     in
     loop 0 0 0
   let sum_of_max size l =
-    l
-    |> List.map (find_digits size)
-    |> Iter.(sum list (module Int))
-
+    Iter2.(l
+           |> list 
+           |> map (find_digits size)
+           |> sum int)
   let solve size () =
     let l = read_input () in
     let n = sum_of_max size l in

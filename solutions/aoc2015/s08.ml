@@ -38,12 +38,14 @@ struct
   let read_input () =
     Input.list_lines String.trim
 
-  let sum_repr f l = 
-    l |> List.map (fun s ->
-        let n = String.length s in
-        let m = f s in
-        (max m n) - (min m n)) 
-    |> Iter.(sum list int )
+  let sum_repr f l =
+    Iter2.(
+      list l
+      |> fold (fun acc s ->
+          let n = String.length s in
+          let m = f s in
+          acc + (max m n) - (min m n)) 
+        0)
   let solve f () =
     let l = read_input () in
     let n = sum_repr f l in

@@ -8,11 +8,13 @@ struct
 
   let most_frequent compare pos l =
     let h = ~%[] in
-    List.iter (fun s ->
+    Iter2.(l 
+    |> list
+    |> iter (fun s ->
         let c = s.[pos] in
         h.%{c} <- 1 + (h.%?{c} or 0)
-      ) l;
-    Iter.(max Hashtbl.to_seq ~compare) h
+      );
+    h |> items |> max_ ~compare) 
     |> fst
 
   let compare_max a b = compare (snd a) (snd b)

@@ -159,9 +159,11 @@ struct
     !total_killed
 
   let score groups =
-    groups
-    |> List.map (fun g -> g.units)
-    |> Iter.(sum list int)
+    Iter2.(
+      groups
+      |> list
+      |>map (fun g -> g.units)
+      |> sum int)
 
   let fight n1 n2 groups =
     let rec loop () =
@@ -189,8 +191,11 @@ struct
   let find_smallest_boost n1 n2 groups =
     let orig_groups = List.map (fun g -> {g with id = g.id}) groups in
     let max_power =
-      2 * (List.map (fun g -> g.units * g.hp) groups
-           |> Iter.(max list))
+      2 * Iter2.(
+          groups 
+          |> list
+          |> map (fun g -> g.units * g.hp)
+          |> max_)
     in
     let rec loop low hi count =
       if low < hi - 1 then begin
@@ -204,9 +209,12 @@ struct
         in
         let winner, _ = fight n1 n2 groups in
         if winner = n1 then
-          let count' = List.filter_map (fun g -> if g.kind = n1
-                                         then Some g.units else None) groups
-                       |> Iter.(sum list int)
+          let count' = Iter2.(
+              groups
+              |> list
+              |> filter_map (fun g -> if g.kind = n1
+                              then Some g.units else None) 
+              |> sum int)
           in
           loop low mid count'
         else loop mid hi count

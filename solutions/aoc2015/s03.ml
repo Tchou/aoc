@@ -9,23 +9,23 @@ struct
 
   let count_houses  ?(pred=(fun _ -> true)) t dirs =
     let i = ref 0 in
-    String.fold_left (fun pos c ->
-        let res = 
-          if pred !i then begin 
-            let d = match c with
-                '^' -> Grid.north
-              |'>' -> Grid.east
-              |'<' -> Grid.west
-              |'v' -> Grid.south
-              | _ -> assert false
-            in
-            let pos' = Grid.(pos +! d) in
-            t.%{pos'} <- 1 + (t.%?{pos'} or 0);
-            pos'
-          end else pos in 
-        incr i;
-        res
-      ) (0,0) dirs |> ignore;
+    Iter2.(istring dirs
+           |> fold (fun pos (i,c) ->
+               let res = 
+                 if pred i then begin 
+                   let d = match c with
+                       '^' -> Grid.north
+                     |'>' -> Grid.east
+                     |'<' -> Grid.west
+                     |'v' -> Grid.south
+                     | _ -> assert false
+                   in
+                   let pos' = Grid.(pos +! d) in
+                   t.%{pos'} <- 1 + (t.%?{pos'} or 0);
+                   pos'
+                 end else pos in 
+               res
+             ) (0,0)) |> ignore;
     Hashtbl.length t
 
   let solve_part1 () =

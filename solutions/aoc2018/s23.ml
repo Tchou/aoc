@@ -8,13 +8,13 @@ struct
     let l = Input.fold_scan "pos=<%d,%d,%d>, r=%d"
         (fun acc x y z r -> {x;y;z;r}::acc) []
     in
-    l, Iter.(max ~compare:(fun b1 b2 -> Int.compare b1.r b2.r) list l)
+    l, Iter2.(l |> list |> max_ ~compare:(fun b1 b2 -> Int.compare b1.r b2.r))
 
   let dist b1 b2 =
     abs (b1.x - b2.x) + abs (b1.y - b2.y) + abs (b1.z - b2.z)
 
   let count_in_radius l bot =
-    Iter.(count_if list (fun b -> dist b bot <= bot.r) l)
+    Iter2.(l |> list |> count_if (fun b -> dist b bot <= bot.r))
 
   let solve_part1 () =
     let bots, mbot = read_input () in
@@ -28,8 +28,8 @@ struct
     dist bot1 bot2 <= bot1.r + bot2.r
 
   let middle l =
-    let mi = Iter.(min list l) in
-    let ma = Iter.(max list l) in
+    let mi = Iter2.(list l |> min_) in
+    let ma = Iter2.(list l |> max_) in
     mi + (ma - mi) / 2
 
   let origin = { x = 0; y = 0;z = 0; r = 0}
@@ -40,10 +40,10 @@ struct
       let z = List.map (fun {z;_} -> z) bots |> middle in
       let b0 = {x; y; z; r = 0 } in
       let ml = List.map (dist b0) bots in
-      { b0 with r = Iter.max List.to_seq ml }
+      { b0 with r = Iter2.(ml |> list |> max_) }
     in
     let count_in_range box =
-      Iter.(count_if list (in_range box) bots)
+      Iter2.(bots |> list |> count_if (in_range box))
     in
     let compare box1 box2 =
       let n1 = count_in_range box1 in
@@ -61,12 +61,12 @@ struct
       let box = PQ.remove_min queue in
       if box.r = 0 then dist box origin else begin
         let r = (box.r + 1) / 3 in
-        let range = [-1;0;1] in
-        Iter.(pairs list ) range
-        |> Iter.(product list seq) range
-        |> Seq.iter (fun (i, (j,k)) ->
-            PQ.add queue
-              { x = box.x + i * r; y = box.y + j * r; z = box.z + k * r; r});
+        Iter2.(
+          let-> i = range int ~start:~-1 2 in
+          let-> j = range int ~start:~-1 2 in
+          let-> k = range int ~start:~-1 2 in
+          PQ.add queue
+            { x = box.x + i * r; y = box.y + j * r; z = box.z + k * r; r});
         loop ()
       end
     in

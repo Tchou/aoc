@@ -4,8 +4,8 @@ module S =
 struct
   let name = Name.mk "s24"
 
-  let sum = Iter.(sum list int)
-  let prod = Iter.(prod list int)
+  let sum l = Iter2.(l |> list |> sum int)
+  let prod l = Iter2.(l |> list |> prod int)
 
   let can_distribute num_split target numbers =
     let rec loop used unused target round l =
@@ -47,10 +47,14 @@ struct
     let total_length = List.length numbers in
     let target = if total mod k <> 0 then fail "Impossible repartition" else total / k in
     let splits = distribute_for k target numbers in
-    let _,_,res,_ = Iter.(min list ~compare:(fun (_,l1,p1,_) (_,l2,p2,_) ->
-        let c = Int.compare l1 l2 in
-        if c <> 0 then c else Int.compare p1 p2
-      ) splits)
+    let _,_,res,_ = Iter2.(
+        splits 
+        |> list 
+        |> min_ ~compare:(fun (_,l1,p1,_) (_,l2,p2,_) ->
+            let c = Int.compare l1 l2 in
+            if c <> 0 then c else Int.compare p1 p2
+          )
+      )
     in
     res
   let read_input () =

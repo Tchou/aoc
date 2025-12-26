@@ -6,18 +6,18 @@ struct
   let read_input () =
     Input.read_line ()
 
-  let count = String.fold_left (fun acc c -> if c = '(' then acc+1 else acc-1) 0
+  let count s = 
+    Iter2.(string s
+           |> fold (fun acc c -> if c = '('  then acc+1 else acc-1) 0)
 
   let find_basement_step s =
     let floor = ref 0 in
-    let exception Found of int in
-    try
-      s
-      |> String.iteri (fun i c -> if c = '(' then incr floor else decr floor;
-                        if !floor = -1 then raise_notrace (Found (i+1)));
-      0
-    with Found n -> n
-
+    Iter2.(istring s
+           |> find (fun (i, c) -> 
+               if c = '(' then incr floor else decr floor;
+               !floor = -1
+             ))
+    |> fst |> succ
   let solve_part1 () =
     let s = read_input () in
     let n = count s in 

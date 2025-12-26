@@ -22,7 +22,7 @@ struct
           let () = vmax := max !vmax v in
           regs.%{r1} <- v
         end) instrs;
-    Iter.(max values regs), !vmax
+    Iter2.(regs |> values |> max_ ), !vmax
 
   let solve f =
     let instrs = read_input () in

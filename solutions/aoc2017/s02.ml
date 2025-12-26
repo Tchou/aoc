@@ -10,20 +10,28 @@ struct
       ) 
 
   let sum_diff_in_max l =
-    List.fold_left (fun acc s ->
-        acc + Iter.((max list s) - (min list s)))
-      0 l
+    Iter2.(
+      l 
+      |> list
+      |> map (fun s -> (s |> list |> max_) - (s |> list |> min_))
+      |> sum int
+    )
 
+  let pr_id i = Format.printf "%d\n%!" i; i
   let sum_divide l =
-    List.fold_left (fun acc s ->
-        acc +
-        (Iter.(pairs ~refl:false ~sym:false list s)
-         |> Seq.find_map (fun (a, b) ->
-             let a = max a b
-             and b = min a b in
-             if a mod b = 0 then
-               Some (a/b) else None)
-         |> Option.get)) 0 l
+    Iter2.(l
+           |> list
+           |> map (fun s ->
+               s |> list |> pairs ~refl:false ~sym:false 
+               |> find_map (fun (a, b) -> 
+                   let a = max a b 
+                   and b = min a b in
+                   if a mod b = 0 then Some (a/b)
+                   else None)
+               |> Option.get
+             )
+           |> sum int
+          )
   let solve f =
     let l = read_input () in
     let n = f l in

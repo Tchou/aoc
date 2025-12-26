@@ -12,7 +12,8 @@ struct
                  s 
                  |> String.split_on_char ' '
                  |> List.map int_of_string
-                 |> Iter.(sum list int)
+                 |> Iter2.list
+                 |> Iter2.(sum int)
                in
                acc + int_of_bool (approx * 9 <= w * h)
              )

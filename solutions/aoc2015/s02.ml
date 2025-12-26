@@ -21,7 +21,7 @@ struct
 
   let solve f () =
     let l = read_input () in
-    let n = l |> List.fold_left (fun acc d -> acc + f d) 0 in
+    let n = Iter2. (list l |> fold (fun acc d -> acc + f d) 0) in
     Solution.printf "%d" n
   let solve_part1 = solve paper
   let solve_part2 = solve ribbon

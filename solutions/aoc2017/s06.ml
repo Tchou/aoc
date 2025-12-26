@@ -29,7 +29,7 @@ struct
         end;
         if not present then memo.%{Array.copy bank} <- ();
         begin
-          let i, n = Iter.(max iarray ~compare:cmp bank) in
+          let i, n = Iter2.(bank |> iarray |> max_ ~compare:cmp) in
           let d = n / len in
           let r = n mod len in
           bank.(i) <- 0;

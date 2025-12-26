@@ -67,16 +67,19 @@ struct
          (id, Rect.make x y w h))
 
   let count_inter l =
-    l
-    |> Comb.pairs ~sym:false ~refl:false
-    |> Seq.fold_left (fun acc ((id1, r1), (id2,r2)) ->
-        match Rect.cap r1 r2 with
-          None -> acc
-        | Some r -> Rect.add r acc
-      ) []
-    |> List.map (fun Rect.{width;height} ->
-        Interval.length width * Interval.length height)
-    |> Iter.(sum list int)
+    Iter2.(
+      l
+      |> list
+      |> pairs ~sym:false ~refl:false
+      |> fold (fun acc ((id1, r1), (id2,r2)) ->
+          match Rect.cap r1 r2 with
+            None -> acc
+          | Some r -> Rect.add r acc
+        ) []
+      |> list
+      |> map (fun Rect.{width;height} ->
+          Interval.length width * Interval.length height)
+      |> sum int)
   let solve_part1 () =
     let l = read_input () in
     let n = count_inter l in

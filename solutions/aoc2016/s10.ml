@@ -83,8 +83,8 @@ struct
     in
     try loop () with 
       Not_found ->
-        let l = outputs.%{0} @ outputs.%{1} @ outputs.%{2} in
-        Iter.(prod list (module Int) l)
+      let l = outputs.%{0} @ outputs.%{1} @ outputs.%{2} in
+      Iter2.(l |> list |> prod int)
     | Found id -> id
 
   let solve_part1 () =

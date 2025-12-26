@@ -53,9 +53,10 @@ struct
     !c
 
   let count_reps test rl  =
-    rl 
-    |> List.map (repeats_in_range test)
-    |> Iter.(sum list (module Int))
+    Iter2.(rl
+           |> list
+           |> map (repeats_in_range test)
+           |> sum int)
 
   let solve test =
     let rl = read_input () in

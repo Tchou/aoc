@@ -10,23 +10,27 @@ struct
 
   let compute_crc s =
     let h = ~%[] in
-    String.iter (function 'a'..'z' as c ->
-        h.%{c} <- 1 + (h.%?{c} or 0)
-        | _ -> ()
-      ) s;
-    h |> Hashtbl.to_seq |> List.of_seq
-    |> List.sort (fun (c1, n1) (c2, n2) -> 
-        let c = Int.compare n2 n1 in
-        if c = 0 then Char.compare c1 c2
-        else c)
-    |> List.map fst
-    |> List.take 5
-    |> String.implode
+    Iter2.(
+      string s
+      |> iter (function 'a'..'z' as c ->
+          h.%{c} <- 1 + (h.%?{c} or 0)
+          | _ -> ()
+        );
+      items h
+      |> sort ~compare:(fun (c1, n1) (c2, n2) -> 
+          let c = Int.compare n2 n1 in
+          if c = 0 then Char.compare c1 c2
+          else c)
+      |> map fst
+      |> take 5
+      |> to_string
+    )
   let sum_valid_ids l =
-    l 
-    |> List.filter (fun (s, _, c) -> compute_crc s = c)
-    |> List.map (fun (_, x, _) -> x)
-    |> Iter.(sum list (module Int) )
+    Iter2.(
+      list l 
+      |> fold (fun acc (s, x, c) -> 
+          if compute_crc s = c then acc + x else acc) 0
+    )
 
   let solve_part1 () =
     let l = read_input () in

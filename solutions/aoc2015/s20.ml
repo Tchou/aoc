@@ -23,13 +23,11 @@ struct
   let read_input () = Input.read_line () |> int_of_string
   let solve factor part2 () = 
     let target = read_input () / factor in
-    let exception Found of int in
-    try
-      for i = 1 to target do
-        let n = sum_divisors part2 i in
-        if n >= target then raise (Found i)
-      done
-    with Found n -> Solution.printf "%d" n
+    Iter2.(range int ~start:1 target
+           |> find (fun i ->
+               let n = sum_divisors part2 i in
+               n >= target
+             )) |> Solution.printf "%d"
 
   let solve_part1 = solve 10 true
   let solve_part2 = solve 11 false

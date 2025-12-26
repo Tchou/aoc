@@ -47,14 +47,16 @@ struct
   let man_dist (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
   let compute_location_graph grid locs = 
     let graph = ~%[] in
-    locs |> List.iteri (fun i (c1, p1) -> 
-        locs |> List.iteri (fun j (c2, p2) -> 
-            if j > i then
-              let path = GA.astar (module HPos) grid ~h:(man_dist p2) p1 (fun p -> p = p2) in
-              let dist = List.length path - 1 in
-              graph.%{c1} <- (c2, dist) :: (graph.%?{c1} or []);
-              graph.%{c2} <- (c1, dist) :: (graph.%?{c2} or []);
-          ));
+    Iter2.(
+      locs
+      |> list
+      |> pairs ~sym:false ~refl:false 
+      |> iter (fun ((c1, p1), (c2, p2)) ->
+          let path = GA.astar (module HPos) grid ~h:(man_dist p2) p1 (fun p -> p = p2) in
+          let dist = List.length path - 1 in
+          graph.%{c1} <- (c2, dist) :: (graph.%?{c1} or []);
+          graph.%{c2} <- (c1, dist) :: (graph.%?{c2} or []);
+        ));
     graph
 
   let enumerate_paths ?(part2=false) f graph locations =
@@ -86,7 +88,7 @@ struct
     let graph = compute_location_graph grid locs in
     enumerate_paths ~part2 (fun p -> 
         if false then Format.printf "%a\n%!" pp_path p;
-        min_len := min !min_len Iter.(sum (snd list) int p)
+        min_len := min !min_len Iter2.(p |> list |> map snd |> sum int)
       ) graph locs;
     Solution.printf "%d" !min_len
 

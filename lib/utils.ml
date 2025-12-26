@@ -881,3 +881,4 @@ struct
 end
 
 module Iter = Iter
+module Iter2 = Iter2
