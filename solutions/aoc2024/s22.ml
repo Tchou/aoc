@@ -4,8 +4,7 @@ struct
   let name = Name.mk "s22"
 
   let read_input () =
-    Input.fold_scan "%d" (fun acc d -> d :: acc) []
-    |> List.rev
+    Input.list_scan "%d" Fun.id
 
   let mask = 16777216 - 1 (* 1 lsl 24 - 1 *)
   let step64 n =
@@ -25,8 +24,7 @@ struct
 
   let rec iterate k n = if k = 0 then n else iterate (k-1) (next n)
   let score l =
-    List.map (iterate 2000) l
-    |> Iter.(sum list (module Int))
+    Iter2.(l |> list |> map (iterate 2000) |> sum int)
   let solve_part1 () =
     let l = read_input () in
     let n = score l in

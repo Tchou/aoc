@@ -37,9 +37,11 @@ struct
 
   let run r l =
     let cache = ~%[] in
-    l
-    |> List.map (blink cache r)
-    |> Iter.(sum list int)
+    let open Iter2 in
+    l 
+    |> list
+    |> map (blink cache r)
+    |> sum int
   let solve n =
     let l = read_input () in
     let n = run n l in

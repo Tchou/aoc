@@ -4,10 +4,11 @@ struct
   let name = Name.mk "s09"
   let read_input () = Input.read_line ()
   let total_length l =
+    let open Iter2 in 
     l
-    |> String.to_seq
-    |> Seq.map (fun c -> Char.code c - Char.code '0')
-    |> Iter.(sum seq int)
+    |> string
+    |> map (fun c -> Char.code c - Char.code '0')
+    |> sum int
   let rle s =
     let blocks = ref [] in
     let idx = ref 0 in

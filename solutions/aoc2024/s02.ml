@@ -4,9 +4,7 @@ struct
   let name = Name.mk "s02"
 
   let read_input () =
-    Input.fold_fields ' ' (fun acc line ->
-        (List.map int_of_string line)::acc) []
-    |> List.rev
+    Input.list_fields ' ' (List.map int_of_string)
 
   let same_sign s1 s2 =
     (s1 < 0 && s2 < 0) || (s1 > 0 && s2 > 0)
@@ -37,9 +35,10 @@ struct
   let solve f =
     let l = read_input () in
     let n =
-      l
-      |> List.map f
-      |> Iter.(count_if list Fun.id)
+      Iter2.( 
+        l |> list
+        |> map f
+        |> count_if Fun.id)
     in
     Solution.printf "%d" n
 

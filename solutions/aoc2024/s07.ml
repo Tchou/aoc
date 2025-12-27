@@ -4,9 +4,9 @@ struct
   let name = Name.mk "s07"
 
   let read_input () =
-    Input.fold_scan "%d: %[0-9 ]" (fun acc n s ->
-        (n, s |> String.split_on_char ' ' |> List.map int_of_string)::acc
-      ) []
+    Input.list_scan "%d: %[0-9 ]" (fun n s ->
+        (n, s |> String.split_on_char ' ' |> List.map int_of_string)
+      )
 
   let pow10 n acc = (* faster than log + float/int conversions for small numbers*)
     let rec loop n acc =
@@ -32,10 +32,12 @@ struct
     | v ::  ll -> loop ll v
 
   let total_calibration_result part2 l =
+    let open Iter2 in 
     l
-    |> List.map (fun (total, l) ->
+    |> list
+    |> map (fun (total, l) ->
         if can_be_combined part2 total l then total else 0)
-    |> Iter.(sum list int)
+    |> sum int
   let solve ops =
     let lst = read_input () in
     let n = total_calibration_result ops lst in

@@ -16,7 +16,7 @@ struct
               ) ls;
     let  _ = Input.read_line () in
 
-    map, Input.fold_lines (fun acc s -> s :: acc) [] |> List.rev
+    map, Input.list_lines Fun.id
 
   let explore f map txt =
     let len = String.length txt in
@@ -34,12 +34,14 @@ struct
         with Not_found -> ()
     in loop 0 []
 
-  let count_valid map l =
+  let count_valid map_ l =
+    let open Iter2 in
     l
-    |> Iter.(count_if list
-               (fun txt ->
-                  try explore (fun _ -> raise Exit) map txt;false
-                  with Exit -> true))
+    |> list
+    |> count_if 
+      (fun txt ->
+         try explore (fun _ -> raise Exit) map_ txt;false
+         with Exit -> true)
 
   let explore_all cache map txt =
     let len = String.length txt in
@@ -63,11 +65,12 @@ struct
           in cache.%{key} <- r; r
     in loop 0
 
-  let count_all_comb_valid map l =
+  let count_all_comb_valid map_ l =
     let cache = ~%[] in
-    l
-    |> List.map (explore_all cache map)
-    |> Iter.(sum list int)
+    Iter2.(l 
+           |> list
+           |> map (explore_all cache map_)
+           |> sum int)
   let solve count =
     let map, l = read_input () in
     let n = count map l in

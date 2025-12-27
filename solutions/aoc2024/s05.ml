@@ -10,9 +10,7 @@ struct
         else
           Scanf.sscanf l "%d|%d" (fun a b ->true, order.%{a,b}<-())) ();
     let updates =
-      Input.fold_fields ',' (fun acc l ->
-          (List.map int_of_string l)::acc) []
-      |> List.rev
+      Input.list_fields ',' (List.map int_of_string)
     in
     order, updates
 
@@ -26,7 +24,7 @@ struct
     in
     loop update
 
-  let sort order update =
+  let sort_ord order update =
     match is_sorted order update with
       Some _ -> None
     | None ->
@@ -37,12 +35,13 @@ struct
       Some (List.sort compare update)
 
   let sum order sort updates =
-    updates
-    |> List.map (fun l ->
-        match sort order l with
-          Some l -> List.nth l (List.length l /2)
-        | None -> 0)
-    |> Iter.(sum list int)
+    Iter2.(updates
+           |> list
+           |> map (fun l ->
+               match sort_ord order l with
+                 Some l -> List.nth l (List.length l /2)
+               | None -> 0)
+           |> sum int)
 
   let solve sort =
     let order, updates = read_input () in
@@ -50,7 +49,7 @@ struct
     Solution.printf "%d" n
 
   let solve_part1 () = solve is_sorted
-  let solve_part2 () = solve sort
+  let solve_part2 () = solve sort_ord
 end
 
 let () = Solution.register_mod (module S)
