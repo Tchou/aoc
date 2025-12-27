@@ -7,7 +7,7 @@ struct
   let read_input () = Input.list_fields ' ' Fun.id
 
   let count_valid tr l =
-    Iter2.(
+    Iter.(
       l
       |> list
       |> count_if (fun l -> 

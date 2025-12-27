@@ -28,7 +28,7 @@ struct
 
 
   let count_arrangements l =
-    let max_v = Iter2.(list l |> max_) in
+    let max_v = Iter.(list l |> max_) in
     let l = List.sort compare (0::max_v+3::l) in
     let cache = ~%[] in
     let rec loop l =

@@ -24,7 +24,7 @@ struct
 
   let rec iterate k n = if k = 0 then n else iterate (k-1) (next n)
   let score l =
-    Iter2.(l |> list |> map (iterate 2000) |> sum int)
+    Iter.(l |> list |> map (iterate 2000) |> sum int)
   let solve_part1 () =
     let l = read_input () in
     let n = score l in

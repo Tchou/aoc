@@ -28,7 +28,7 @@ struct
   let has_tls (lp, ln) =
     List.exists has_abba lp && not (List.exists has_abba ln) 
 
-  let count_tls l = Iter2.(l |> list |> count_if has_tls)
+  let count_tls l = Iter.(l |> list |> count_if has_tls)
 
   let solve_part1 () =
     let l = read_input () in
@@ -54,9 +54,9 @@ struct
     List.iter (collect_aba hn) ln;
     if Hashtbl.length hn = 0 then false else begin
       List.iter (collect_aba hp) lp;
-      Iter2.(hp |> keys |> exists (fun s -> hn %? (invert_aba s)))
+      Iter.(hp |> keys |> exists (fun s -> hn %? (invert_aba s)))
     end
-  let count_ssl l = Iter2.(l |> list |> count_if has_ssl)
+  let count_ssl l = Iter.(l |> list |> count_if has_ssl)
 
   let solve_part2 () =
     let l = read_input () in

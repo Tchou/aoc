@@ -175,7 +175,7 @@ struct
       sx * sy * sz
   end
   let count l =
-    let open Iter2 in
+    let open Iter in
     l
     |> list
     |> map Cube.size

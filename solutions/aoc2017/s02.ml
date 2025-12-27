@@ -10,7 +10,7 @@ struct
       ) 
 
   let sum_diff_in_max l =
-    Iter2.(
+    Iter.(
       l 
       |> list
       |> map (fun s -> (s |> list |> max_) - (s |> list |> min_))
@@ -19,7 +19,7 @@ struct
 
   let pr_id i = Format.printf "%d\n%!" i; i
   let sum_divide l =
-    Iter2.(l
+    Iter.(l
            |> list
            |> map (fun s ->
                s |> list |> pairs ~refl:false ~sym:false 

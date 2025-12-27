@@ -65,7 +65,7 @@ struct
       Z.compare m1 m2
     in
     let l = List.map (fun (i, p) -> i, move Z.(of_int k) p) l in
-    Iter2.(l |> list |> min_ ~compare:cmp)
+    Iter.(l |> list |> min_ ~compare:cmp)
 
 
   let closest l = closest 1_000_000_000 l |> fst
@@ -154,7 +154,7 @@ struct
         List.iter (fun (i,j) -> h.%{i} <- (); h.%{j} <- ()) ll;
         loop lss
     in
-    loop Iter2.(h_time |> items |> sort ~compare:Compare.fst |> to_list)
+    loop Iter.(h_time |> items |> sort ~compare:Compare.fst |> to_list)
 
   let solve_part2 () =
     let l = read_input () in

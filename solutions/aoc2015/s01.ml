@@ -7,12 +7,12 @@ struct
     Input.read_line ()
 
   let count s = 
-    Iter2.(string s
+    Iter.(string s
            |> fold (fun acc c -> if c = '('  then acc+1 else acc-1) 0)
 
   let find_basement_step s =
     let floor = ref 0 in
-    Iter2.(istring s
+    Iter.(istring s
            |> find (fun (i, c) -> 
                if c = '(' then incr floor else decr floor;
                !floor = -1

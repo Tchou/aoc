@@ -16,7 +16,7 @@ struct
   let tab = Bytes.make (Char.code 'z' - Char.code 'a' + 1) '\x00'
   let count_answers l =
     Bytes.fill tab 0 (Bytes.length tab) '\x00';
-    let open Iter2 in
+    let open Iter in
     l |> list |> iter (fun s ->
         String.iter (fun c ->
             tab.$[Char.code c - Char.code 'a']<- '\x01') s);
@@ -27,7 +27,7 @@ struct
 
   let solve_part1 () =
     let l = read_input () in
-    let open Iter2 in
+    let open Iter in
     l
     |> list
     |> map count_answers
@@ -37,7 +37,7 @@ struct
   let count_distinct_answers l =
     Bytes.fill tab 0 (Bytes.length tab) '\x00';
     let n = List.length l in
-    let open Iter2 in
+    let open Iter in
     l 
     |> list
     |> iter (fun s ->
@@ -51,7 +51,7 @@ struct
 
   let solve fcount =
     let l = read_input () in
-    let open Iter2 in
+    let open Iter in
     l
     |> list
     |> map fcount

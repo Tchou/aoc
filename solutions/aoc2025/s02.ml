@@ -53,7 +53,7 @@ struct
     !c
 
   let count_reps test rl  =
-    Iter2.(rl
+    Iter.(rl
            |> list
            |> map (repeats_in_range test)
            |> sum int)

@@ -9,7 +9,7 @@ struct
 
   let count_houses  ?(pred=(fun _ -> true)) t dirs =
     let i = ref 0 in
-    Iter2.(istring dirs
+    Iter.(istring dirs
            |> fold (fun pos (i,c) ->
                let res = 
                  if pred i then begin 

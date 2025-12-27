@@ -880,5 +880,4 @@ struct
 
 end
 
-module Iter = Iter2
-module Iter2 = Iter2
+module Iter = Iter

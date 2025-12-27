@@ -35,7 +35,7 @@ struct
   let solve f =
     let l = read_input () in
     let n =
-      Iter2.( 
+      Iter.( 
         l |> list
         |> map f
         |> count_if Fun.id)

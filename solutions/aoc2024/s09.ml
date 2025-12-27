@@ -4,7 +4,7 @@ struct
   let name = Name.mk "s09"
   let read_input () = Input.read_line ()
   let total_length l =
-    let open Iter2 in 
+    let open Iter in 
     l
     |> string
     |> map (fun c -> Char.code c - Char.code '0')

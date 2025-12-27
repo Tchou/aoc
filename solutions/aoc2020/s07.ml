@@ -35,7 +35,7 @@ struct
 
   let count_shiny_gold tree =
     let cache = ~%[] in
-    let open Iter2 in
+    let open Iter in
     tree
     |> keys
     |> count_if (has_shiny_gold cache tree)
@@ -47,7 +47,7 @@ struct
 
 
   let rec count_bags k tree =
-    1 + Iter2.(tree.%{k}
+    1 + Iter.(tree.%{k}
                |> list
                |> map (fun (n, k') -> n * count_bags k' tree)
                |> sum int)

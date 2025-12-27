@@ -68,7 +68,7 @@ struct
     let new_floor = ~%[] in
     let todo_white_tiles = ~%[] in
     let count_black_around mark_white coord =
-      let open Iter2 in
+      let open Iter in
       HCES.all_dirs
       |> list
       |> count_if (fun d ->
@@ -94,7 +94,7 @@ struct
     new_floor
 
   let count_black_tiles floor =
-    let open Iter2 in
+    let open Iter in
     floor
     |> values
     |> count_if Fun.id

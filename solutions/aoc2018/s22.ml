@@ -87,7 +87,7 @@ struct
     let paths =
       GrAlgo.dijkstra (depth, target, grid) ((0,0),Torch) [(target, Torch)]
     in
-    Iter2.(
+    Iter.(
       paths
       |> values
       |> map fst

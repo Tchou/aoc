@@ -37,7 +37,7 @@ struct
 
   let run r l =
     let cache = ~%[] in
-    let open Iter2 in
+    let open Iter in
     l 
     |> list
     |> map (blink cache r)

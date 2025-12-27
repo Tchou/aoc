@@ -39,7 +39,7 @@ struct
     Input.list_lines String.trim
 
   let sum_repr f l =
-    Iter2.(
+    Iter.(
       list l
       |> fold (fun acc s ->
           let n = String.length s in

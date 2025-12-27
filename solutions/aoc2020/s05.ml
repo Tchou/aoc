@@ -11,13 +11,13 @@ struct
     Input.fold_lines (fun acc s ->(f s)::acc) []
 
   let solve_part1 () =
-    Iter2.(load_input parse_binary
+    Iter.(load_input parse_binary
            |> list |> max_)
     |> Solution.printf "%d"
   let solve_part2 () =
     let arr = Array.make 1024 false in
     Input.fold_lines (fun () s -> arr.(parse_binary s) <- true) ();
-    Iter2.(
+    Iter.(
       range int ~start:1 (Array.length arr - 2)
       |> find (fun i ->
           arr.(i-1) && arr.(i+1) && not arr.(i)

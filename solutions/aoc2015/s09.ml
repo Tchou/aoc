@@ -26,7 +26,7 @@ struct
 
   let cost f init graph =
     let c = ref init in
-    enumerate_paths (fun p -> c := f !c Iter2.(p |> list |> map snd |> sum int)) graph;
+    enumerate_paths (fun p -> c := f !c Iter.(p |> list |> map snd |> sum int)) graph;
     !c
   let solve f init () =
     let graph = read_input () in

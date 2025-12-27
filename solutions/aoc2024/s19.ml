@@ -35,7 +35,7 @@ struct
     in loop 0 []
 
   let count_valid map_ l =
-    let open Iter2 in
+    let open Iter in
     l
     |> list
     |> count_if 
@@ -67,7 +67,7 @@ struct
 
   let count_all_comb_valid map_ l =
     let cache = ~%[] in
-    Iter2.(l 
+    Iter.(l 
            |> list
            |> map (explore_all cache map_)
            |> sum int)

@@ -37,7 +37,7 @@ struct
   let solve_part1 () =
     let intervals, _, tickets = read_input () in
     let n =
-      let open Iter2 in
+      let open Iter in
       tickets
       |> list
       |> map (fun l ->

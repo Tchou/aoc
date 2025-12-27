@@ -12,10 +12,10 @@ struct
     intervals|>Interval.Set.of_list, ids
 
   let count_ids intervals ids =
-    Iter2.(ids |> list |> count_if (fun i -> Interval.Set.mem i intervals))
+    Iter.(ids |> list |> count_if (fun i -> Interval.Set.mem i intervals))
 
   let count_intervals (int_list : Interval.Set.t) _ =
-    Iter2.((int_list :> Interval.t list)
+    Iter.((int_list :> Interval.t list)
            |> list
            |> map Interval.length
            |> sum int)

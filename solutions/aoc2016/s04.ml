@@ -10,7 +10,7 @@ struct
 
   let compute_crc s =
     let h = ~%[] in
-    Iter2.(
+    Iter.(
       string s
       |> iter (function 'a'..'z' as c ->
           h.%{c} <- 1 + (h.%?{c} or 0)
@@ -26,7 +26,7 @@ struct
       |> to_string
     )
   let sum_valid_ids l =
-    Iter2.(
+    Iter.(
       list l 
       |> fold (fun acc (s, x, c) -> 
           if compute_crc s = c then acc + x else acc) 0

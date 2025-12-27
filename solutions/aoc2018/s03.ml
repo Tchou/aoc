@@ -67,7 +67,7 @@ struct
          (id, Rect.make x y w h))
 
   let count_inter l =
-    Iter2.(
+    Iter.(
       l
       |> list
       |> pairs ~sym:false ~refl:false

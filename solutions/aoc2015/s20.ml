@@ -23,7 +23,7 @@ struct
   let read_input () = Input.read_line () |> int_of_string
   let solve factor part2 () = 
     let target = read_input () / factor in
-    Iter2.(range int ~start:1 target
+    Iter.(range int ~start:1 target
            |> find (fun i ->
                let n = sum_divisors part2 i in
                n >= target

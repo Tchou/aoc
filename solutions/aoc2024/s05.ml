@@ -35,7 +35,7 @@ struct
       Some (List.sort compare update)
 
   let sum order sort updates =
-    Iter2.(updates
+    Iter.(updates
            |> list
            |> map (fun l ->
                match sort_ord order l with

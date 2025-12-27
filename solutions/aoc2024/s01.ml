@@ -27,8 +27,8 @@ struct
         l2 |> List.iter (fun i2 ->
             count.%{i2}<- 1+ (count.%?{i2} or 0));
         l1 |> List.map(fun i -> i * (count.%?{i} or 0))
-        |> Iter2.list 
-        |> Iter2.(sum int)
+        |> Iter.list 
+        |> Iter.(sum int)
       )
 end
 

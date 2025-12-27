@@ -8,7 +8,7 @@ struct
 
   let most_frequent compare pos l =
     let h = ~%[] in
-    Iter2.(l 
+    Iter.(l 
     |> list
     |> iter (fun s ->
         let c = s.[pos] in

@@ -47,7 +47,7 @@ struct
   let man_dist (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
   let compute_location_graph grid locs = 
     let graph = ~%[] in
-    Iter2.(
+    Iter.(
       locs
       |> list
       |> pairs ~sym:false ~refl:false 
@@ -88,7 +88,7 @@ struct
     let graph = compute_location_graph grid locs in
     enumerate_paths ~part2 (fun p -> 
         if false then Format.printf "%a\n%!" pp_path p;
-        min_len := min !min_len Iter2.(p |> list |> map snd |> sum int)
+        min_len := min !min_len Iter.(p |> list |> map snd |> sum int)
       ) graph locs;
     Solution.printf "%d" !min_len
 

@@ -19,7 +19,7 @@ struct
   let solve calc =
     let modules = read_input () in
     let n =
-      Iter2.(modules
+      Iter.(modules
              |> list
              |> map calc
              |> sum int) 

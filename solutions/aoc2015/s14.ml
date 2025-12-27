@@ -16,7 +16,7 @@ struct
     dist + ((min t_run (duration mod t)) * speed)
 
   let max_dist duration l =
-    Iter2. (list l
+    Iter. (list l
             |> map (compute_dist duration)
             |> max_)
   let solve_part1 () =
@@ -51,7 +51,7 @@ struct
       max_dist := 0;
       max_in_round := [];
     done;
-    Iter2. (values tbl
+    Iter. (values tbl
             |> map (fun (_, _, p) -> p) 
             |> max_)
 

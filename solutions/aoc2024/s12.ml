@@ -19,7 +19,7 @@ struct
     not (G.inside grid p) || grid.G.!(p) <> a
 
   let perimeter grid l a =
-    let open Iter2 in
+    let open Iter in
     l
     |> list
     |> map (fun p ->
@@ -58,7 +58,7 @@ struct
       not (is_on_side grid p2 a) &&
       ((G.inside grid p3) && grid.G.!(p3) <> a)
     in
-    let open Iter2 in
+    let open Iter in
     let count_corners p test corners =
       corners |> list |> count_if (test p)
     in
@@ -97,7 +97,7 @@ struct
     map
 
   let count_plots perim grid map_ =
-    let open Iter2 in
+    let open Iter in
     map_
     |> items
     |> map (fun (a, ll) ->

@@ -78,7 +78,7 @@ struct
   let solve prio =
     let exprs = read_input () in
     let n = 
-      let open Iter2 in
+      let open Iter in
       exprs
       |> list
       |> map (eval prio)

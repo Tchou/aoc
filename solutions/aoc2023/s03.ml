@@ -77,7 +77,7 @@ struct
           ) star_pos
       ) num_list;
     let sum =
-      let open Iter2 in
+      let open Iter in
       stars
       |> values
       |> map (function [g1;g2] ->g1 * g2 | _ -> 0)

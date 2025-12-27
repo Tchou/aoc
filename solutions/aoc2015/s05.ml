@@ -53,7 +53,7 @@ struct
     loop 0 (String.length s - 2) false false
 
   let count_valid is_valid l =
-    Iter2.(list l |> count_if is_valid)
+    Iter.(list l |> count_if is_valid)
 
   let solve f () =
     let l = read_input () in

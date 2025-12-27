@@ -32,7 +32,7 @@ struct
     let len = 1 + fst (List.hd card_list) in
     let card_list = List.rev card_list in
     let cards = Array.make len 1 in
-    Iter2.(
+    Iter.(
       card_list
       |> list
       |> map (fun (id, (win, my))->

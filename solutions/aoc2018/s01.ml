@@ -7,7 +7,7 @@ struct
   let read_input () =
     Input.list_scan "%d" Fun.id
 
-  let sum l = Iter2.(l |> list |> sum int)
+  let sum l = Iter.(l |> list |> sum int)
   let solve_part1 () =
     let l = read_input () in
     let n = sum l in

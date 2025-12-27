@@ -31,7 +31,7 @@ struct
     let data = prepare1 num_lines in
     let data = IntGrid.of_matrix data in
     let data = IntGrid.rotate_right data in
-    Iter2.(
+    Iter.(
       l
       |> ilist
       |> map (fun (i, op) ->
@@ -62,7 +62,7 @@ struct
       ) data;
     let data =  !subtotal::!total in
     List.fold_left2 (fun acc ints op ->
-        Iter2.((if op = "+" then sum else prod)
+        Iter.((if op = "+" then sum else prod)
                  int (list ints)
               ) + acc) 0 data l
   let solve_part1 = solve compute1

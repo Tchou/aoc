@@ -142,13 +142,13 @@ struct
   let alt_rule0 sizes max_len =
     let rule8 = alt_rule8 sizes max_len |> Seq.memoize in
     let rule11 = alt_rule11 sizes max_len |> Seq.memoize in
-    let open Iter2 in
+    let open Iter in
     let all_combs =
       product (seq rule8) (seq rule11)
       |> map (fun (a,b) -> a@b)
     in
     let len_seq s =
-      let open Iter2 in
+      let open Iter in
       s
       |> list
       |> map (fun r -> sizes.%{r})
@@ -161,7 +161,7 @@ struct
 
   let solve part2 =
     let rules, words = read_input () in
-    let open Iter2 in
+    let open Iter in
     let max_len =
       words
       |> list

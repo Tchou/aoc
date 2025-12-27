@@ -30,7 +30,7 @@ struct
     in
     loop 0 0 0
   let sum_of_max size l =
-    Iter2.(l
+    Iter.(l
            |> list 
            |> map (find_digits size)
            |> sum int)
